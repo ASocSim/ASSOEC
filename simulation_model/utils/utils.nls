@@ -1,0 +1,157 @@
+;; This file contains some random utility functions that don't have a direct impact on the model, but that might be useful in many places, such as debug functions and extra mathematical functions
+
+to-report weighted-mean [values weights]
+  report (sum (map [ [v w] -> v * w] values weights)) / sum weights
+end
+
+to-report bounded-linear-map [min-val max-val min-map max-map val]
+  if val < min-val [report min-map]
+  if val > max-val [report max-map]
+  report (val - min-val) / (max-val - min-val) * (max-map - min-map) + min-map
+end
+  
+
+; Clamps a number in between 0 and 1
+to-report clamp [low high number]
+  if number < low [
+    report low
+  ]
+  if number > high [
+    report high
+  ]
+  report number
+end
+
+; Clamps a number between 0 and 1, but doesn't let it reach either value
+; Based on a Gompertz function
+to-report clamp-soft [number]
+  report exp(-5 * exp(-4 * number))
+end
+
+
+to export-profiling
+  profiler:stop
+  let _fname "report.log"
+  carefully [file-delete _fname] []
+  file-open _fname
+  file-print profiler:report
+  file-close
+end
+
+to ask-user-for-export-file
+    set import-scenario-name user-new-file
+end
+
+to ask-user-for-import-file
+  set import-scenario-name user-file
+end
+
+to save-world-state
+  ; Need to check for = false to not throw errors on normal string output
+  if import-scenario-name = false or import-scenario-name = "" [
+    print "No file selected for import"
+    stop
+  ]
+  ;if not file-exists? import-scenario-name [ show "sometimes the file needs to be created by hand first"]
+  export-world import-scenario-name
+end
+
+to load-scenario-from-file
+  if import-scenario-name = false or import-scenario-name = "" [
+    print "No file selected"
+    stop
+  ]
+  import-world import-scenario-name
+end
+
+to-report starts-with? [string start]
+   report  length string > length start and substring string 0 length start = start
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Counter "datastructure" ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Creates a simple object counter for counting how often each object appears in a list. Should work on any object that supports =
+to-report new-counter
+  report []
+end
+
+; Counts occurances in a given list, and returns the resulting counter
+to-report count-in-list [l]
+  let counter new-counter
+  foreach l [ elem ->
+    set counter add-to-counter counter elem
+  ]
+  report counter
+end
+
+; Sort a counter based on the elements in the counter
+to-report counter-sort-on-element [counter]
+  report sort-by [ [x y] -> item 0 x < item 0 y] counter
+end
+
+; Add the object `obj` to a given `counter` and return the new counter. 
+to-report add-to-counter [counter obj]
+  let index 0
+  foreach counter [count-pair -> 
+    if obj = (cp-object count-pair) [
+      report replace-item index counter (cp-increase count-pair)
+    ]
+    set index index + 1
+  ]
+  report (lput (new-count-pair obj) counter)
+end
+
+; Report the count for a given object. -1 if the object is not counted
+to-report counter-get-count [counter obj]
+  foreach counter [count-pair ->
+    if obj = (cp-object count-pair) [
+      report cp-count count-pair
+    ]
+  ]
+  report -1
+end
+
+; Get the object with the highest count. Ties are broken in order of insertion
+to-report counter-max-value [counter]
+  report item 0 (reduce [ [x y] -> ifelse-value cp-count x >= cp-count y [x] [y] ] counter)
+end
+
+; Get the object with the lowest count. Ties are broken in order of insertion
+to-report counter-min-value [counter]
+  report item 0 (reduce [ [x y] -> ifelse-value cp-count x < cp-count y [x] [y] ] counter)
+end
+
+; Create a new count-pair for a given object. Count-pairs are used inside of counters.
+to-report new-count-pair [obj]
+  report (list obj 1)
+end
+
+; Get the object from a count-pair
+to-report cp-object [pair]
+  report item 0 pair
+end
+
+; Get the count from a given count-pair
+to-report cp-count [pair]
+  report item 1 pair
+end
+
+; Increase the count for the given count-pair, and return the new count-pair
+to-report cp-increase [pair]
+  report (list (cp-object pair) (cp-count pair + 1))
+end
+
+to export-to-graphviz-util [neighbour-function]
+  ask turtles [ ask run-result neighbour-function [print (word [who] of myself "->" who)]]
+end
+
+
+
+
+
+
+
+
+

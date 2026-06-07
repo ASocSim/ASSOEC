@@ -1,0 +1,17 @@
+__includes ["world-dynamics/time-dynamics.nls"]
+
+
+
+
+to-report is-global-condition-met? [cond]
+  if cond = "7-days-before-end-of-global-quarantine" [
+    if start-tick-of-global-quarantine = "never" [report false]
+    report 
+    ticks > end-tick-of-global-quarantine - 7 * #ticks-per-day]
+  if cond = "always"[report true]
+  if cond = "never"[report false]
+  if cond = "at-end-of-global-quarantine"[
+    if start-tick-of-global-quarantine = "never" [report false]
+    report ticks > end-tick-of-global-quarantine]
+  error (sentence "not implemented" cond)
+end

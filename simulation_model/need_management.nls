@@ -1,0 +1,707 @@
+__includes ["need_definition.nls"]
+;might need to be updated later on, as need satisfaction depends on the consequences of your action rather than on your intent
+;e.g. visiting a shop should not satisfy one's safety needs if this shop is empty
+
+; *** IMPORTANT: Description of variables and mechanisms underlying the need satisfaction level dynamics ***
+;SUE = Satisfaction Undiscounted Expected (i.e. before undertaking activity)
+;SDE = Satisfaction Discounted Expected (i.e. before undertaking activity)
+;SDA = Satisfaction Discounted Actual (i.e. after having performed the activity)
+;SUA = Satisfaction Undiscounted Actual (i.e. after having performed the activity)
+
+;PROCESS DESCRIPTION:
+;For every need a SUE is computed which is dependent upon the action that the agent is considering //
+;More precisely, during a given tick, an agent is afforded a set of actions based on its current location & activity //
+;From this set of actions, the agent picks the action that grants it the highest total satisfaction //
+;An action's total-satisfaction is computed as the sum of the satisfaction gains of that action for all of the agent's needs.
+
+;In short, performing an action has an effect on the satisfaction levels of an agent's needs //
+;Each action [A] presents an expected satisfaction [Sue(A)] for each individual need //
+;This Sue(A) is then multiplied by [i] the urgency of a need (uNeed = 1 - NeedNSL) and the importance-weight ascribed to the need (wNeed) //
+;This means that needs with a high urgency and a high importance will have a relatively large influence on the action that is selected by an agent during a given tick.
+
+;The agent starts off by computing a 'raw' expected satisfaction gain from a particular action; this is called the SUE //
+;The agent then multiplies this SUE by the 'urgency' of that particular need; this is called the SDE //
+;Once the agent has performed the action, it reflects on the ACTUAL satisfaction gained from executing that action; this is called the SUA //
+;The final ACTUAL satisfaction gained from an action is referred to as the SDA and is either [i] SDA = SDE or [ii] SDA = SUA //
+;Where [i] represents a situation where the agent's ESTIMATION (i.e. expectation) of the satisfaction gained from an activity perfectly matches the ACTUAL satisfaction gained from that activity //
+;And [ii] represents a situation where the agent's ESTIMATION (i.e. expectation) of the satisfaction gained from an activity does NOT match the ACTUAL satisfaction gained from that activity.
+
+;SUE-[Need]: The expected undiscounted satisfaction gain for a need of performing an action 
+;urgency-[Need]: Is the urgency of satisfying a need (i.e. the status of its water tank), which is equal to (1 - [Need]-satisfaction-level)
+;SDE-[Need]: the expected discounted satisfaction gain for a need of performing an action. This is equal to the SUE-[Need] * urgency-[Need]
+;SUA-[Need]: The actual undiscounted satisfaction gain for a need after having performed an action
+;SDA-[Need]: The actual discounted satisfaction gain for a need after having performed an action
+
+to update-needs-for-playing [current-activity-descriptor]
+  decay-satisfaction-level
+  if not is-activity-successful? [stop]
+
+  set belonging-satisfaction-level clamp 0 1 (belonging-satisfaction-level + SDA-belonging current-activity-descriptor)
+ 
+  set compliance-satisfaction-level clamp 0 1 (compliance-satisfaction-level + SDE-compliance current-activity-descriptor)
+
+  set risk-avoidance-satisfaction-level  clamp 0 1 (risk-avoidance-satisfaction-level + SDA-risk-avoidance current-activity-descriptor)
+
+  set leisure-satisfaction-level clamp 0 1 (leisure-satisfaction-level + SDE-leisure current-activity-descriptor)
+  
+  set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
+  
+  set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
+  
+  if age != "young" [
+    set luxury-satisfaction-level clamp 0 1 (luxury-satisfaction-level + SDA-luxury current-activity-descriptor)
+  ]
+
+  set conformity-satisfaction-level clamp 0 1 (conformity-satisfaction-level + SDA-conformity current-activity-descriptor)
+end
+
+
+;;this procedure is a simple representation of need decay
+;important features:
+;--need decay should decrease over time when not taken care of
+;--special situations can lead to special decay (e.g. breaking an army-enforced lock in should hurt badly the satisfaction of safety needs)
+;[the previous point might call for the introduction of the person's context later on]
+to decay-satisfaction-level
+  let belonging-decay 0.01
+  if any? my-relatives and days-since-seen-relatives > 0 [set belonging-decay belonging-decay * 1.5]
+  if days-since-seen-friends > 0 [set belonging-decay belonging-decay * 1.5]
+
+  set belonging-satisfaction-level belonging-satisfaction-level - belonging-decay
+  if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
+
+  let compliance-decay 0.8
+  let risk-avoidance-decay 0.95
+  let conformity-decay 0.8
+  if should-I-stay-home? [
+    set compliance-decay compliance-decay - (1 - compliance-decay) ; Double the decay
+    set risk-avoidance-decay risk-avoidance-decay - (1 - risk-avoidance-decay)
+    set conformity-decay conformity-decay - (1 - conformity-decay)
+  ]
+  set compliance-satisfaction-level compliance-satisfaction-level * compliance-decay
+  if compliance-satisfaction-level < 0 [set compliance-satisfaction-level 0]
+  
+  set risk-avoidance-satisfaction-level risk-avoidance-satisfaction-level * risk-avoidance-decay
+  if risk-avoidance-satisfaction-level < 0 [set risk-avoidance-satisfaction-level 0]
+  
+  set conformity-satisfaction-level conformity-satisfaction-level * conformity-decay
+  if conformity-satisfaction-level < 0 [set conformity-satisfaction-level 0]
+
+  set leisure-satisfaction-level leisure-satisfaction-level * 0.99
+  if leisure-satisfaction-level < 0 [set leisure-satisfaction-level 0]
+  
+  set sleep-satisfaction-level sleep-satisfaction-level * 0.8 
+  if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
+
+  if age != young-age [
+  set luxury-satisfaction-level luxury-satisfaction-level * 0.99
+  if luxury-satisfaction-level < 0 [set luxury-satisfaction-level 0]
+  ]
+end
+
+;Future work:
+;update these numbers based on how many people are actually met when moving
+;include networks and joint meetings
+to-report SUE-belonging [ad]
+  let gp location-of ad
+  let motive motive-of ad
+
+  if gp != my-work and not member? ([gathering-type] of gp) (list home-gathering-type private-leisure-gathering-type public-leisure-gathering-type university-gathering-type school-gathering-type non-essential-shop-gathering-type)
+  [ report 0 ]
+  let number [expected-number-of-other-participants] of gp
+  let base 0
+  let network-bonus 1
+  let social-distancing-cut 1
+  if social-distancing-of ad [
+    set social-distancing-cut (1 - social-distance-profile)
+  ]
+  ;show (sentence "expected shift satisfaction community:"
+  ;   [gathering-type] of first activity-descriptor last activity-descriptor number)
+  ifelse number = 0
+  [set base 0]
+  [ifelse number < 5
+    [set base 0.1]
+    [ifelse number < 20
+      [set base 0.2]
+      [set base 0.4]
+    ]
+  ]
+  
+  if is-family-present-in-current-gathering-point? and days-since-seen-relatives > 0 [
+    set network-bonus network-bonus + min (list 0.5 (days-since-seen-relatives / 28))
+  ]
+
+  ;;people expect to meet their friends at the leisure spaces
+  ;;or kids at schools
+  ;;or students at the uni
+  ;;this counts as a psychological heuristic that saves from having to cross sets of agents (which is bad for computational complexity reasons)
+  ;;
+  ;;moreover it was checking whether the other type of agent is at the current point
+  ;;which was a bit weird as agents keep moving and in theory don't really know what is the gathering point of others (and whether they plan to go there or are currently there)
+  ;;another solution might be to create a form of a likelihood factor: agents increase/decrease this factor when they meet/do not meet a friend
+  let friends-present [is-leisure-point?] of location-of ad or 
+  ([is-school?] of location-of ad and is-young?) or
+  ([is-university?] of location-of ad and is-student?)
+  ;any? my-friends with [current-activity = [current-activity] of myself]
+  if friends-present and days-since-seen-friends > 0 [
+    set network-bonus network-bonus + min (list 0.5 (days-since-seen-friends / 28))
+  ]
+
+  report base * network-bonus * social-distancing-cut
+end
+
+to-report SUA-belonging [ad]
+  let gp location-of ad
+  let motive motive-of ad
+
+  ; Only your home, and public and private leisure places satisfy belonging needs
+  if gp != my-work and not member? ([gathering-type] of gp) (list home-gathering-type private-leisure-gathering-type public-leisure-gathering-type university-gathering-type school-gathering-type non-essential-shop-gathering-type)
+  [ report 0 ]
+  let number count people with [current-activity = gp]
+  let base 0
+  let network-bonus 1
+  let social-distancing-cut 1
+  if social-distancing-of ad [
+    set social-distancing-cut (1 - social-distance-profile)
+  ]
+  ;show (sentence "expected shift satisfaction community:"
+  ;   [gathering-type] of first activity-descriptor last activity-descriptor number)
+  ifelse number = 0
+  [set base 0]
+  [ifelse number < 5
+    [set base 0.1]
+    [ifelse number < 20
+      [set base 0.2]
+      [set base 0.4]
+    ]
+  ]
+  let family-present any? (([gatherers] of gp) with [member? self [my-relatives] of myself])
+  if family-present and days-since-seen-relatives > 0 [
+    set network-bonus network-bonus + min (list 0.5 (days-since-seen-relatives / 28))
+  ]
+  let friends-present any? (([gatherers] of gp) with [member? self [my-friends] of myself])
+  if friends-present and days-since-seen-friends > 0 [
+    set network-bonus network-bonus + min (list 0.5 (days-since-seen-friends / 28))
+  ]
+  report base * network-bonus * social-distancing-cut
+end
+
+to-report risk-avoidance-increase [ad others]
+  let gp location-of ad
+  let motive motive-of ad
+  let result 0.2
+
+  ifelse is-believing-to-be-infected? or has-internally-visible-symptoms? [
+    if any-free-bed-in-hospital? and is-get-healed-to-hospital-descriptor? ad [
+      set result 0.3
+    ]
+    if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad [
+      set result 0.4
+    ]
+    set result -0.1
+  ] [
+    if gp != my-home [
+      ifelse others = 0 [set result 0.2 ]
+      [ ifelse others < 10 [set result 0.1 ]
+        [ ifelse others < 20 [set result 0.05 ]
+          [ ifelse others < 40 [set result 0]
+            [set result -0.1]
+      ]]]
+      if might-I-be-contagious? [
+        set result result - 0.1
+      ]
+    ]
+  ]
+
+  ifelse social-distancing-of ad
+    [ set result result + 0.1 ]
+    [ set result result - 0.1 ]
+
+  report result
+end
+
+to-report SUE-risk-avoidance [ad]
+  let gp location-of ad
+  report risk-avoidance-increase ad [expected-number-of-other-participants] of gp
+end
+
+to-report SUA-risk-avoidance [ad]
+  let gp location-of ad
+  report risk-avoidance-increase ad count people with [current-activity = gp]
+end
+
+
+
+to-report SUE-compliance [ad]
+  let gp location-of ad
+  let motive motive-of ad
+
+  let bonus-compliance-to-obligation 0
+  if should-I-stay-home? [
+  ;  show "lockdown bonus"
+    ifelse gp = my-home [
+      set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.2
+    ] [
+      set bonus-compliance-to-obligation bonus-compliance-to-obligation - 0.05
+    ]
+  ]
+
+  if is-social-distancing-measure-active? and I-know-of-social-distancing? [
+    ifelse social-distancing-of ad
+    [ set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.1 ]
+    [ set bonus-compliance-to-obligation bonus-compliance-to-obligation - 0.1 ]
+  ]
+  
+  if is-I-have-contractual-obligations?
+  [
+    if motive = work-motive
+    [
+      let is-compliant-to-work-at-home should-I-stay-home? or (is-working-from-home-recommended? and is-technically-feasible-to-work-from-home?)
+      ;;
+      if (gp = my-home and is-compliant-to-work-at-home)
+      [set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.2]
+      if (gp = my-work and not is-compliant-to-work-at-home)
+      [set bonus-compliance-to-obligation  bonus-compliance-to-obligation + 0.2]
+      if (gp != my-work and gp != my-home)
+      [error "working but not from home nor workplace"]
+    ]
+    
+    ;;blame workers skipping work
+    if motive != work-motive [
+      set bonus-compliance-to-obligation bonus-compliance-to-obligation - 0.2
+    ]
+  ]
+
+  ; Make kids go to school
+  ifelse (motive = "mandatory") and not should-I-stay-home? [
+    set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.1
+  ] [
+    if age = "youth" [
+      set bonus-compliance-to-obligation bonus-compliance-to-obligation - 0.1
+    ]
+  ]
+
+  ; Make students go to university
+  if (motive = "learning") and not should-I-stay-home? [
+    set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.1
+  ]
+
+  if (should-I-stay-home? and gp != my-home) [
+    set bonus-compliance-to-obligation bonus-compliance-to-obligation - 0.2
+  ]
+
+  ; A passive bonus for compliance in case there is no lockdown
+  if not is-hard-lockdown-active? [
+    set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.15
+  ]
+
+  if is-currently-being-treated-at-hospital? and [is-hospital?] of gp [
+    set bonus-compliance-to-obligation bonus-compliance-to-obligation + 0.3
+  ]
+
+  report bonus-compliance-to-obligation
+end
+
+; The agents expect to get food for seven days at a time
+to-report SUE-food-safety [ad]
+  let motive motive-of ad
+  if motive = "essential shopping" [
+    let available-food-days [available-food-rations] of my-home
+    if available-food-days >= 14 [
+      report 0
+    ]
+    report max (list 0.5 (1 - (14 - available-food-days) / 14))
+  ]
+  report 0
+end
+
+to-report SUE-leisure [ad]
+  let gp location-of ad
+  let motive motive-of ad
+
+  if motive = "relaxing" [
+    report 0.6
+  ]
+  if gp = my-home and motive = "rest" [
+    report 0.1
+  ]
+  report 0
+end
+
+to-report SUE-sleep [ad]
+ let gp location-of ad
+  let motive motive-of ad 
+  
+  if motive = "rest" [
+    if slice-of-the-day = "night" [
+      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
+    ]
+    report ifelse-value has-internally-visible-symptoms? [ 0.025 ] [ 0.05 ]
+  ]
+  if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad [
+    if slice-of-the-day = "night" [
+      report 0.7
+    ]
+    report 0.15
+  ]
+  report 0
+  
+end
+
+
+to-report SUE-luxury [ad]
+  if age != "young" [
+    let gp location-of ad
+    let motive motive-of ad
+    
+    if motive = "shopping" [
+      report amount-of-rations-I-buy-when-going-to-shops * 0.06
+    ]
+    report 0
+  ]
+  report 0
+end
+
+to-report SUA-luxury [ad]
+  let result amount-of-last-luxury-items-bought * 0.06
+  set amount-of-last-luxury-items-bought 0
+  report result
+end
+
+to-report SUE-autonomy [ad]
+  let gp location-of ad
+  let motive motive-of ad
+  let social-distancing social-distancing-of ad
+  let base 0
+  let sd-modifier 1
+  
+  if social-distancing [
+    set sd-modifier (1 - social-distance-profile)
+  ]
+
+  if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
+    if age = "young" [
+      ifelse [gathering-type] of gp = "school"
+      [ report  0.2 * sd-modifier ]
+      [ report -0.1 * (2 - sd-modifier) ]
+    ]
+    if age = "student" [
+      ifelse [gathering-type] of gp = "university"
+      [ report  0.2 * sd-modifier ]
+      [ report -0.1 * (2 - sd-modifier) ]
+    ]
+    if age = "worker" [
+      ifelse motive = work-motive [
+        ifelse gp != my-home
+        [ report 0.3 * sd-modifier ]
+        [ report 0.05 * sd-modifier ]
+      ]
+      [ report -0.1 * (2 - sd-modifier) ]
+    ]
+  ]
+  if slice-of-the-day = "night" and [gathering-type] of gp = "home" and motive = "rest"
+  [report 0.2 * sd-modifier ]
+  if is-hard-lockdown-active? and [gathering-type] of gp != "home"
+  [report 0.1 * sd-modifier ]
+  report 0
+end
+
+to-report SUE-financial-survival [ad]
+  if age != "young" [
+    let gp location-of ad
+    let motive motive-of ad
+    let eating-costs price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops
+    
+    if is-I-have-contractual-obligations? [
+      if gp = my-work and is-working-motive? motive [
+        report min (list (my-expected-income / eating-costs) 1)
+      ]
+      report max (list ((- my-expected-income) / eating-costs) 0)
+    ]
+    if motive = "essential shopping" [
+      let money-left-over my-amount-of-capital - eating-costs
+      ; If we spend all our money, financial-survival will drop to 0
+      if money-left-over < 0 [
+        report (- financial-survival-satisfaction-level)
+      ]
+      report (- min (list (money-left-over / eating-costs) 1))
+    ]
+    if motive = "shopping" [
+      let money-left-over my-amount-of-capital - amount-of-rations-I-buy-when-going-to-shops * price-of-rations-in-non-essential-shops
+      ; If we spend all our money, financial-survival will drop to 0
+      if money-left-over < 0 [
+        report (- financial-survival-satisfaction-level)
+      ]
+      report (- min (list (money-left-over / eating-costs) 1))
+    ]
+    report 0
+  ]
+  report 0
+end
+
+to-report SUE-financial-stability [ad]
+  if age != "young" [
+  let gp location-of ad
+  let motive motive-of ad
+  let eating-costs price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops
+
+  if is-I-have-contractual-obligations? and gp = my-work [
+    if my-target-amount-of-capital > 0
+    [report clamp 0 1 (my-expected-income / my-target-amount-of-capital)]
+    report 1
+  ]
+  if my-target-amount-of-capital <= 0 [
+    report -1
+  ]
+  if motive = "essential shopping" [
+    report (- (eating-costs / my-target-amount-of-capital))
+  ]
+  if motive = "shopping" [
+    report (- (amount-of-rations-I-buy-when-going-to-shops * price-of-rations-in-non-essential-shops / my-target-amount-of-capital))
+  ]
+    report 0
+  ]
+  report 0
+end
+
+to-report SUE-health [ad]
+  let base 1
+  let sd-bonus 0.8
+  if social-distancing-of ad [
+    set sd-bonus 1
+  ]
+  if is-believing-to-be-infected? or has-internally-visible-symptoms?
+  [
+    ifelse is-observing-critical-symptoms? [
+      ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
+      [set base .8]
+      [set base 0]
+    ] [
+      ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
+      [set base .3]
+      [ ifelse is-rest-at-home-descriptor? ad
+        [ set base 0.3 ]
+        [ set base -0.1 ]
+      ]
+    ]
+  ]
+  ;;can be updated if agents start to be deprived from sleep, not needed at the moment
+  report base * sd-bonus
+end
+
+to-report conformity-increase [ad network-action]
+  let gp location-of ad
+  let motive motive-of ad
+  let sd social-distancing-of ad
+  let result 0
+  
+  if should-I-stay-home? [
+    ifelse did-my-network-quarantine? = (gp = my-home or (gp = my-hospital and work-motive != motive)) [
+      ; If my quarantine decision is the same as my networks
+      set result result + 0.2
+     ] [
+      ; If my network and I made different decisions
+      set result result - 0.2
+    ]
+  ]
+  
+  ifelse [gathering-type] of gp = location-of network-action and motive = motive-of network-action [
+    set result result + 0.4
+  ] [
+    if [gathering-type] of gp = location-of network-action [
+      set result result + 0.15
+    ]
+    if motive = motive-of network-action [
+      set result result + 0.15
+    ]
+  ]
+  
+  ifelse sd = did-my-network-socially-distance? [
+    set result result + 0.1
+  ] [
+    set result result - 0.1
+  ]
+
+  if result > 1 [ set result 1 ]
+  report result
+end
+
+to-report SUE-conformity [ad]
+  if not any? my-network [report 1]
+  let relevant-memory ifelse-value is-working-day-for-me? [what-my-network-did-week-day] [what-my-network-did-weekend]
+  if length relevant-memory >= 4 [
+    report conformity-increase ad (first relevant-memory)
+  ]
+  report 1
+end
+
+to-report SUA-conformity [ad]
+  if not any? my-network [report 1]
+  let relevant-memory ifelse-value is-working-day-for-me? [what-my-network-did-week-day] [what-my-network-did-weekend]
+  report conformity-increase ad (last relevant-memory)
+end
+
+to-report global-prevalence-of [ad]
+  ;*** this procedure should be expanded with new needs as they are added ***
+  reset-timer
+  let total-satisfaction 0
+  ;if cultural model is activated then:
+  ;calculate the total-satisfaction an agent expects to gain from performing an activity as the weighted sum of all its needs
+  set total-satisfaction sum (list
+    ;Survival needs
+    (SDE-food-safety ad * importance-weight-food-safety) 
+    (SDE-financial-survival ad * importance-weight-financial-survival)
+    (SDE-sleep ad * importance-weight-sleep) 
+    (SDE-health ad * importance-weight-health) 
+    (SDE-conformity ad * importance-weight-conformity)
+    ;Safety needs
+    (SDE-compliance ad * importance-weight-compliance) 
+    (SDE-risk-avoidance ad * importance-weight-risk-avoidance) 
+    (SDE-financial-stability ad * importance-weight-financial-stability) 
+    ;Belonging needs
+    (SDE-belonging ad * importance-weight-belonging-subneed)
+    ;Esteem needs
+    (SDE-autonomy ad * importance-weight-autonomy) 
+    (SDE-luxury ad * importance-weight-luxury) 
+    (SDE-leisure ad * importance-weight-leisure)) 
+  
+  if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
+  report total-satisfaction
+  
+end
+
+to debug-global-prevalence-of [ad]
+  if log? [
+    debug-print (sentence [gathering-type] of (location-of ad) " " motive-of ad " " social-distancing-of ad) 
+      ;Survival needs
+    debug-print (word "  Food Safety:" (SDE-food-safety ad * importance-weight-food-safety))
+    debug-print (word "  Financial-survival:" (SDE-financial-survival ad * importance-weight-financial-survival))
+    debug-print (word "  Sleep:" (SDE-sleep ad * importance-weight-sleep))
+    debug-print (word "  Health:" (SDE-health ad * importance-weight-health))
+    debug-print (word "  Conformity:" (SDE-conformity ad * importance-weight-conformity))
+      ;Safety needs
+    debug-print (word "  Compliance:" (SDE-compliance ad * importance-weight-compliance))
+    debug-print (word "  Risk Avoidance:" (SDE-risk-avoidance ad * importance-weight-risk-avoidance))
+    debug-print (word "  Financial Stability:" (SDE-financial-stability ad * importance-weight-financial-stability))
+      ;Belonging needs
+    debug-print (word "  Belonging:" (SDE-belonging ad * importance-weight-belonging-subneed))
+      ;Esteem needs
+    debug-print (word "  Autonomy:" (SDE-autonomy ad * importance-weight-autonomy))
+    debug-print (word "  Luxury:" (SDE-luxury ad * importance-weight-luxury))
+    debug-print (word "  Leisure:" (SDE-leisure ad * importance-weight-leisure))
+    
+    debug-print (word " Global:" global-prevalence-of ad)
+  ]
+end
+
+to debug-my-preferred-available-activity-descriptor
+  if log? [
+    foreach my-available-activity-descriptors debug-global-prevalence-of
+  ]
+end
+
+;;; SDE and SDA SURVIVAL NEEDS
+
+to-report SDE-health [ad]
+  let expected-increase SUE-health ad
+  let discounted-increase expected-increase * (1 - health-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-food-safety [ad]
+  let expected-increase SUE-food-safety ad
+  let discounted-increase expected-increase * (1 - food-safety-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-financial-survival [ad]
+  let expected-increase SUE-financial-survival ad
+  let discounted-increase expected-increase * (1 - financial-survival-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-sleep [ad]
+  let expected-increase SUE-sleep ad
+  let discounted-increase expected-increase * (1 - sleep-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-conformity [ad]
+  let expected-increase SUE-conformity ad
+  let discounted-increase expected-increase * (1 - conformity-satisfaction-level)
+  report discounted-increase
+end
+
+to-report  SDA-conformity [ad]
+  let expected-increase SUA-conformity ad
+  let discounted-increase expected-increase * (1 - conformity-satisfaction-level)
+  report discounted-increase
+end
+
+;;; SDE and SDA SAFETY NEEDS
+
+to-report SDE-financial-stability [ad]
+  let expected-increase SUE-financial-stability ad
+  let discounted-increase expected-increase * (1 - financial-stability-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-compliance [ad]
+  let expected-increase SUE-compliance ad
+  let discounted-increase expected-increase * (1 - compliance-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-risk-avoidance [ad]
+  let expected-increase SUE-risk-avoidance ad
+  let discounted-increase expected-increase * (1 - risk-avoidance-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDA-risk-avoidance [ad]
+  let expected-increase SUA-risk-avoidance ad
+  let discounted-increase expected-increase * (1 - risk-avoidance-satisfaction-level)
+  report discounted-increase
+end
+
+;;; SDE and SDA BELONGING NEEDS
+
+to-report SDE-belonging [ad]
+  let expected-increase SUE-belonging ad
+  let discounted-increase expected-increase * (1 - belonging-satisfaction-level)
+  report discounted-increase
+end
+
+to-report  SDA-belonging [ad]
+  let expected-increase SUA-belonging ad
+  let discounted-increase expected-increase * (1 - belonging-satisfaction-level)
+  report discounted-increase
+end
+
+;;; SDE and SDA SELF-ESTEEM NEEDS
+
+to-report SDE-leisure [ad]
+  let expected-increase SUE-leisure ad
+  let discounted-increase expected-increase * (1 - leisure-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-luxury [ad]
+  let expected-increase SUE-luxury ad
+  let discounted-increase expected-increase * (1 - luxury-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDA-luxury [ad]
+  let actual-increase SUA-luxury ad
+  let discounted-increase actual-increase * (1 - luxury-satisfaction-level)
+  report discounted-increase
+end
+
+to-report SDE-autonomy [ad]
+  let expected-increase SUE-autonomy ad
+  let discounted-increase expected-increase
+  if expected-increase > 0 [ set discounted-increase expected-increase * (1 - autonomy-satisfaction-level) ]
+  report discounted-increase
+end
+
+

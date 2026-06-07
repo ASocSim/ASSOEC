@@ -1,0 +1,292 @@
+__includes ["contagion/oxford_contagion_factor.nls"]
+  ;;this contagion model should be revised by making contacts explicit and making contagion as a side-effect of contacts
+
+
+to spread-contagion
+  ;spread-by-travelling
+  spread-by-activity-proximity
+  ;Delay distribution (days) before seeking care; multiplier on community transmission duration; ~20-40% of symptomatic patients not presenting promptly
+  ;spread-by-care ;split in hospital(ppe, facilities), homestead(density, caretaking habits, gender dynamics), isolation wards
+  
+  ;spread-by-activity ;mines? wells? markets? church? traditional healer? 
+  ;Increase transmission probability per contact with deceased; model funeral cluster events; resistance rate parameter ~40-70% in high-tension zones
+  spread-by-funeral-rites ;(safe burials vs unsafe burials, depends on group affiliation and high-tension zones)
+  ;
+  ;traditional-healing ;rural only
+  
+  
+  
+end
+
+; to spread-by-travelling
+;   let travellers people with [is-moving-outside-for-reaching-current-activity?]
+  
+;   let contagious travellers with [is-contagious?]
+;   ask people [if is-away? [apply-risk-of-contamination-when-away]]
+  
+;   ask travellers [
+;     apply-risk-of-contamination-when-travelling travellers contagious
+;   ]
+  
+;   foreach list-of-buses [
+;     x -> spread-within-a-set-of-people x "bus"
+;   ]
+  
+;   foreach list-of-shared-cars [
+;     x -> spread-within-a-set-of-people x "cars"
+;   ]
+  
+;   let people-waiting-for-bus people with [stayed-out-queuing-for-bus?]
+;   spread-within-a-set-of-people
+;   people-waiting-for-bus
+;   "queue-waiting-for-bus"
+; end
+
+
+
+to spread-by-funeral-rites
+ write "funeral rites not implemented yet"
+end
+
+
+
+
+
+
+to spread-by-activity-proximity
+  ask gathering-points with [not (self = away-gathering-point) and any? current-gatherers]
+  [
+
+    spread-within-a-set-of-people current-gatherers self
+  ]
+end
+
+
+to spread-within-a-set-of-people [ts context]
+  if count ts < 2 [stop]
+  
+  if log? and log-contamination? [
+    let context-str context
+    if is-gathering-point? context [ set context-str (word "gathering-point(" [who] of context "," [gathering-type] of context ")")]
+      print (sentence "contacts(" ticks "," ts ","  context-str "," [age] of ts ")")
+      
+      
+      log-file-print (word "contacts(" ticks "," ts ","  context-str "," [age] of ts ")")
+    ]
+    
+    let #contacts-now (count ts * ((count ts) - 1))
+    set #contacts-last-tick #contacts-last-tick + #contacts-now
+    
+ 
+  process-contacts-within-group-event ts context
+  
+  ;;quite ugly solution. Contact points should be stored in different structures & processes
+  update-contacts-of-a-set-of-people-in-contact-tracing-app-public-measure ts
+  
+  let susceptible-people ts with [is-susceptible?]
+  let contagious-people-in-the-set  ts with [is-contagious?] 
+  ask contagious-people-in-the-set [
+    ask susceptible-people [
+      apply-risk-of-contamination myself context]
+  ]
+end
+
+to process-contacts-within-group-event [ts context]
+  increment-contacts-due-to-group-gathering-global-metrics ts context
+end
+
+
+to-report contextual-contagion-modificators
+  report age-infection-risk-mitigation-factor * social-distancing-risk-mitigation-factor
+end
+
+to-report social-distancing-risk-mitigation-factor
+  ifelse is-I-apply-social-distancing? [report social-distancing-density-factor]
+  [report 1]
+end
+
+
+;; this process is a bit shitty as it does some mathematical merging of probability
+to apply-risk-of-contamination-when-travelling [travellers contagious]
+  let #travellers count travellers
+  let ratio-contagion sum [risks-of-contamination self  myself "walking outside"] of contagious
+  if not any? contagious [stop]
+  if density-walking-outside = 0 [stop]
+  if not is-moving-outside-for-reaching-current-activity? [stop]  
+   
+  let ratio-contagious ratio-contagion / count people;;this should be related to space
+  
+  ;;these are "intuitive maths", to be confirmed if relevant
+  ;;the squared root represents the risk of two people picking the same item when each pick n items on a n*n space (x*x -> n * 1)
+  ;;it could be cubic if the people we would consider a 3D space (or time)
+  let number-encounters sqrt #travellers
+  
+  let probability-avoiding-all-contagious (1 - ratio-contagious) ^ number-encounters
+  let probability-getting-sick 1 - probability-avoiding-all-contagious
+  
+ ; show (sentence count travellers with [is-contagious?] "/" ratio-contagious "#contacts" number-encounters "avoid all:" probability-avoiding-all-contagious "sick?" probability-getting-sick)
+  
+  ;;could be fastened with a bit of math, like 1-(1-p)^k
+  let was-sick? is-infected?
+  apply-risk-of-contamination one-of contagious  "travelling outside"
+  if not was-sick? and is-infected? [set #who-became-sick-while-travelling-locally #who-became-sick-while-travelling-locally + 1]
+end
+
+to-report age-infection-risk-mitigation-factor
+  report ifelse-value is-young? [factor-reduction-probability-transmission-young] [1]
+end
+
+to apply-risk-of-contamination-when-away
+  if random-float 1 < probability-infection-when-abroad * contextual-contagion-modificators and infection-status = healthy-infection-status
+  [
+    increment-contagion-metrics-from "away" self nobody
+    contaminate nobody "away"
+  ]
+end
+
+to apply-risk-of-contamination [infector context]  
+  if infector = nobody [error "assertion error"]
+  let contagion-risks risks-of-contamination infector self context
+  
+  ; show (sentence ticks contagion-risks lambda-when-contagion)
+  if  random-float 1 < contagion-risks and infection-status = healthy-infection-status
+  [
+    increment-contagion-metrics-from context self infector
+    contaminate infector context
+  ]
+end
+
+to-report risks-of-contamination [infector susceptible context]
+  if contagion-model = "oxford" [report (oxford-contagion-factor-between infector susceptible context) * social-distancing-risk-mitigation-factor]
+  
+  error (sentence "not implemented for" contagion-model)
+end
+
+
+
+
+
+
+
+
+
+
+
+;;HERE IS THE JUICY STUFF FOR EBOLA disease CHANGES
+
+to-report relative-infection-rate-of-infection-status [is]
+  ;anyone not infectious here
+  if is = just-contaminated-infection-status or
+;  is = immune-infection-status or
+  is = healthy-infection-status or
+  is = safely-buried-infection-status
+  [report 0]
+  
+  ; lower infectious chance for deceased pat? not 0, 0 only with safe burials
+  if is = asymptomatic-to-rec-infection-status [report 0] ; remove later, there are few asymptomatic ebola cases
+  
+  ;phase 1 and 2 and deceased
+  if is = pre-symptomatic-to-mild-infection-status
+;  or is = symptomatic-mild-infection-status
+  or is = mild-to-rec-infection-status [report 0.48]
+  
+  if is = infectious-stage-one-infection-status
+  or is = infectious-stage-two-infection-status
+  or is = symptomatic-to-hospitalized-infection-status
+  or is = symptomatic-to-non-hospitalized-infection-status
+  or is = non-hospitalized-to-dead-infectious-infection-status
+  or is = hospitalized-to-dead-infectious-infection-status
+  or is = hospitalized-to-recovery-if-treated-profile
+  [report 1]
+  
+;remove these
+  if is = pre-symptomatic-to-severe-infection-status or
+  is = symptomatic-severe-infection-status or
+  is = severe-to-hospital-infection-status or
+  is = severe-to-rec-infection-status or
+  is =  hospital-to-death-infection-status or
+  is = hospital-to-rec-infection-status
+  [report 1]
+  
+  error (sentence "not implemented" infection-status)
+end
+
+
+
+
+
+
+
+
+
+
+
+to-report density-factor-of [context]
+  if is-gathering-point? context [
+    report [proximity-factor] of context
+  ]
+  if context = "walking outside" or context = "travelling outside"[report density-walking-outside]
+  if context = "bus"[report density-factor-public-transports]
+  if context = "shared car" or context = "cars" [report density-factor-shared-cars]
+  if context = "queue-waiting-for-bus" [report density-factor-queuing]
+  error (sentence "undefined for" context)
+end
+;  
+;infected-critical-infection-status  
+;hospital-to-rec-infection-status dead-infection-status
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+to contaminate [infector context]
+  if log? and log-contamination? [let infector-str "nobody"if infector != nobody [set infector-str [who] of infector] log-file-print (word "infection(" ticks "," who "," infector-str "," context ")")]
+  
+  if infector != nobody [
+    if [is-asymptomatic?] of infector [set #infected-by-asymptomatic-people #infected-by-asymptomatic-people + 1]
+    if any? first-infected-people with [self = infector] [set #infected-by-first-infected-people  #infected-by-first-infected-people + 1]
+    if [not is-contagious?] of infector [error "assertion error"]
+    ask infector [set number-of-people-I-infected number-of-people-I-infected + 1]
+  ]
+  
+  add-to-contagion-tree infector self context
+  set-contaminated-disease-status
+end
+
+to-report is-contagious?
+  
+  report not (infection-status = healthy-infection-status) and not (infection-status = "immune") and not (infection-status = dead-infection-status)
+end
+
+to-report is-alive?
+  report not (infection-status = "dead")
+end
+
+to-report abc
+  report r0
+end
+
+to-report r0
+  report #infected-by-first-infected-people / #first-infected-people
+end
+
+to export-contagion-graph-to-graphviz
+  export-to-graphviz-util [ [] -> ifelse-value (not table:has-key? contamination-network-table who) [(turtle-set)] [(turtle-set map [x -> turtle first x] table:get contamination-network-table who)]]
+end
+
+to-report infection-rate-of [context]
+  report density-factor-of context
+end

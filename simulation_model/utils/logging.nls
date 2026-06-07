@@ -1,0 +1,31 @@
+to log-file-show [object]
+  if log? [
+    file-open "debug.log"
+    file-show object
+    file-close
+  ]
+end
+
+to log-file-print [object]
+  if log? [ 
+    file-open "debug.log"
+    file-print object
+    file-close
+  ]
+end
+
+to debug-show [object]
+  if log? [
+    show object
+  ]
+end
+
+to debug-print [object]
+  if log? [
+    print object
+  ]
+end
+
+to clear-logfile
+  if file-exists? "debug.log" [file-delete "debug.log"]
+end

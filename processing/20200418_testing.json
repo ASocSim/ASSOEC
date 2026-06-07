@@ -1,0 +1,59 @@
+ {
+    "name": "Experiment Example",
+    "author": "Loïs Vanhée",
+    
+    "variables": 
+	{
+			"input-variables":[
+			{
+				"name": "ticks",
+				"range": "[0 1 300]"
+			},
+			{
+				"name": "#random-seed",
+				"range": "[0 1 20]"
+			},
+			{
+				"name": "#households",
+				"range": "{400}"
+			},
+			{
+				"name": "preset-scenario",
+				"range":"{default-scenario scenario-3-random-test-20 scenario-3-app-test-60 scenario-3-app-test-80 scenario-3-app-test-100}"
+			}],
+			
+			"output-variables":[
+			{"name": "ratio-infected"},
+			{"name": "epistemic-accuracy"},
+			{"name": "#tests-performed"}
+			]
+	},
+	
+	"executor": 
+	{
+		"type" : "netlogo",
+		"file": "C:/Users/loisv/git/COVID-sim3/simulation_model/covid-sim.nlogo",
+		"setup": "set-values setup set preset-profiles \"mediterranea\" load-population-profile-based-on-current-preset-profile ",
+		"go": "go",
+		"multi-experiment":"parallel-executors",
+		"experiment-executor":"netlogo-executor",
+		"_comment":"as ticks is an input variable, the executer will apply multiple ticks in a row"
+	},
+	
+	"output":
+	{
+		"goal":"draw",
+		"type":"jfreechart",
+		"sort-by":"ticks",
+
+		"plot":[
+		{"x":"ticks","y":"ratio-infected","lines":"preset-scenario"},
+		{"x":"ticks","y":"epistemic-accuracy","lines":"preset-scenario"},
+		{"x":"ticks","y":"#tests-performed","lines":"preset-scenario"}
+		],
+		"folder":"C:/Users/loisv/git/COVID-sim3/processing/"
+	}
+	
+    
+    
+} 

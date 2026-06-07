@@ -1,0 +1,634 @@
+__includes ["scenarios.nls" "setup/household-configuration.nls"]
+
+globals[#min-workers-in-adults-homes
+  #min-students-in-adults-homes
+  #min-retirees-in-retired-couple-homes
+  #min-workers-in-family-homes
+  #min-students-in-family-homes
+  #min-young-in-family-homes
+  #min-workers-in-multi-generational-homes
+  #min-students-in-multi-generational-homes
+  #min-young-in-multi-generational-homes
+  #min-retirees-in-multi-generational-homes
+  distribution-control-variable
+]
+to setup
+  clear-all
+  reset-ticks
+  
+  if clear-log-on-setup? [clear-logfile]
+  if log? [print "debug mode active; this dramatically slows down computation speed"]
+  check-parameters
+  set-default-shape people "circle"
+  if log? or static-seed?[  random-seed #random-seed ]
+  set slice-of-the-day "morning"
+  set day-of-the-week "monday"
+  set current-day 0
+  set #dead-people 0
+  set list-of-dead-and-safely-buried-people []
+  set was-social-distancing-enforced? false
+  set when-has-2%-infected-threshold-first-been-met? "never"
+  set when-has-5%-infected-threshold-first-been-met? "never"
+  set start-tick-of-global-quarantine "never"
+
+  setup-activities
+  create-all-households
+  setup-gathering-point-capacities
+  setup-person-values-and-needs
+  setup-social-networks
+  setup-app-users
+ ; setup-economic-model
+
+
+  if with-infected? [
+    set first-infected-people n-of (min list 3 count people) people
+    ask first-infected-people [contaminate nobody ("setup")]
+    set #first-infected-people count first-infected-people
+  ]
+  setup-phasing-out
+
+  update-display
+
+  ask links[hide-link]
+
+  set is-lockdown-active? false
+  set list-of-buses (list)
+  set list-of-shared-cars (list)
+  
+  if log-setup? [foreach sort gathering-points [[x]-> log-file-print [(word "description_gathering_poing(" who "," gathering-type ")")] of x]]
+
+  setup-agent-inspector
+  
+  ;;must be in the end
+  setup-global-metrics
+end
+
+to setup-global-metrics
+  
+  set number-of-people-per-age-having-ever-reached-severe-table table:make
+  table:put number-of-people-per-age-having-ever-reached-severe-table young-age 0
+  table:put number-of-people-per-age-having-ever-reached-severe-table student-age 0
+  table:put number-of-people-per-age-having-ever-reached-severe-table worker-age 0
+  table:put number-of-people-per-age-having-ever-reached-severe-table retired-age 0
+  
+  set #youngs-at-start count youngs
+  set #students-at-start count students
+  set #workers-at-start count workers
+  set #retireds-at-start count retireds  
+  
+  set age-group-to-age-group-#contacts-table table:make
+  set age-group-to-age-group-#infections-last-tick-table table:make
+  set age-group-to-age-group-cumulated-#contacts-table table:make
+  set #infected-people-per-ticks (list)
+  set  #hospitalized-per-tick (list)
+  reset-metrics
+  
+end
+
+to setup-app-users
+  ask people [
+    set is-user-of-tracking-app? false
+    set has-mobile-phone? false
+    if age = young-age and random-float 1 < ratio-young-with-phones [set has-mobile-phone? true]
+    if age = student-age or age = worker-age [set has-mobile-phone? true]
+    if age = retired-age and random-float 1 < ratio-retired-with-phones [set has-mobile-phone? true]
+  ]
+  let #people-using-the-app count people * ratio-of-people-using-the-tracking-app
+  let #people-selected-for-their-anxiety-level #people-using-the-app * ratio-of-anxiety-avoidance-tracing-app-users
+  let #people-randomly-selected #people-using-the-app - #people-selected-for-their-anxiety-level 
+  
+  ask max-n-of #people-selected-for-their-anxiety-level people with [has-mobile-phone?] [
+    importance-weight-risk-avoidance +
+    importance-weight-compliance] [
+    setup-as-an-app-user
+  ]
+  
+  ask n-of #people-randomly-selected people with [has-mobile-phone? and not is-user-of-tracking-app?]
+  [
+    setup-as-an-app-user
+  ]
+  set people-having-reported-last-round-to-tracking-app-that-they-have-been-tested-positive (list)
+  set people-having-ever-been-recorded-as-positive-in-the-app (turtle-set)
+end
+
+to setup-as-an-app-user
+  set is-user-of-tracking-app? true
+  set list-of-people-met-per-day-as-recorded-by-the-tracking-app n-values #ticks-recorded-tracking [(turtle-set)]
+end
+
+to check-parameters
+  if probability-self-recovery-symptoms + probability-recorvery-if-treated + probability-unavoidable-death > 1
+  [
+    error "probability-self-recovery-symptoms + probability-recorvery-if-treated + probability-unavoidable-death > 1"
+  ]
+
+  if probability-self-recovery-symptoms-old + probability-recorvery-if-treated-old + probability-unavoidable-death-old > 1
+  [
+    error "probability-self-recovery-symptoms-old + probability-recorvery-if-treated-old + probability-unavoidable-death-old > 1"
+  ]
+end
+
+
+to create-all-households
+  load-population-profile-based-on-current-preset-profile
+  let #adults-homes floor (#households * ratio-adults-homes)
+  let #retired-couple-homes floor (#households * ratio-retired-couple-homes)
+  let #family-homes floor (#households * ratio-family-homes)
+  let #multi-generational-homes #households - (#adults-homes + #retired-couple-homes + #family-homes)
+
+  let #created-households 0
+
+  repeat #adults-homes [create-household "adult" #created-households  #households set #created-households  #created-households + 1]
+  repeat #family-homes [create-household "family" #created-households  #households set #created-households  #created-households + 1]
+  repeat #retired-couple-homes[create-household "retired-couple" #created-households #households set  #created-households  #created-households + 1]
+  repeat #multi-generational-homes [create-household "multigenerational" #created-households  #households set  #created-households  #created-households + 1]
+
+  ask homes [ set available-food-rations count gatherers * (random days-of-rations-bought + days-of-rations-bought) ]
+end
+
+to create-household [t #created-households #households-to-create]
+  let current-home nobody
+  create-gathering-points 1 [set current-home self
+    set homes (turtle-set homes self)
+    set gathering-type "home"
+    set shape "house"
+    set color green
+    set xcor 9 * max-pxcor / 10
+    set ycor max-pycor * #created-households / #households-to-create
+  ]
+
+  if t = "adult"
+  [
+    let l-age "undefined"
+    ifelse random-float 1 < 0.5
+    [set l-age student-age]
+    [set l-age worker-age]
+    setup-person current-home l-age
+    setup-person current-home l-age
+    stop
+  ]
+
+  if t = "family"
+  [
+    setup-person current-home worker-age
+    setup-person current-home worker-age
+    setup-person current-home young-age
+    setup-person current-home young-age
+    stop
+  ]
+
+   if t = "retired-couple"
+  [
+    setup-person current-home retired-age
+    setup-person current-home retired-age
+    stop
+  ]
+
+   if t = "multigenerational"
+  [
+    setup-person current-home retired-age
+    setup-person current-home retired-age
+    setup-person current-home worker-age
+    setup-person current-home worker-age
+    setup-person current-home young-age
+    setup-person current-home young-age
+    stop
+  ]
+
+  error (sentence "not implemented" t)
+end
+
+to-report my-starting-amount-of-capital
+  if age = worker-age [report starting-amount-of-capital-workers]
+  if age = retired-age[report starting-amount-of-capital-retired]
+  if age = student-age[report starting-amount-of-capital-students]
+  if age = young-age[report 0]
+end
+
+to setup-person [current-home l-age]
+  create-people 1 [
+    set age l-age
+    set time-when-infected "never"
+
+    set has-been-tested-infected? false
+    set my-amount-of-capital my-starting-amount-of-capital
+    set current-activity current-home
+    set my-home current-home
+
+    set my-target-amount-of-capital my-amount-of-capital
+    set has-been-tested-immune? false
+
+    create-gathering-link-to current-home [set features (list "rest" "visit family")]
+    set is-moving-outside-for-reaching-current-activity? false
+    ;setup-person-home
+
+    set is-currently-allocated-a-bed-in-hospital? false
+
+    setup-relation-to-gathering-points
+    
+
+    set can-I-perform-solo-transportation? random-float 1  <  owning-solo-transportation-probability
+
+    set current-person-I-depend-on nobody
+    set color default-color
+    set size 0.5
+    set infection-state healthy-infection-status
+    set epistemic-infection-status "healthy"
+    set last-day-observed-symptoms nobody ;should raise an error if used before being initialized
+    set has-done-shopping false
+    set stayed-out-queuing-for-bus? false
+    set is-activity-successful? true
+
+    set I-know-of-social-distancing? ifelse-value Aware-of-social-distancing-at-start-of-simulation? [true] [false]
+    set I-know-of-working-from-home? ifelse-value Aware-of-working-at-home-at-start-of-simulation? [true] [false]
+    set what-my-network-did-week-day []
+    set what-my-network-did-weekend []
+    set did-my-network-socially-distance? false
+    
+    set #days-I-should-remain-in-self-quarantining 0
+    set  events-to-process (list)
+  ]
+end
+
+
+
+to setup-relation-to-gathering-points
+
+  create-gathering-link-to one-of hospitals
+  [
+    set features (list "get-tested" "get-treatment")
+  ]
+
+  create-gathering-link-to one-of private-leisure-points
+  [  set features (list "relaxing")]
+  create-gathering-link-to one-of public-leisure-points
+  [ set features (list "relaxing")]
+
+  setup-relation-to-gathering-points1
+end
+
+to setup-relation-to-gathering-points1
+
+  set my-essential-shops n-of (min list 2 (ceiling (#essential-shops-gp * 0.2))) essential-shops
+   create-gathering-links-to my-essential-shops
+  [ set features (list "essential shopping" "shopping")]
+  create-gathering-links-to n-of (min list 4 (ceiling (#non-essential-shops-gp * 0.4))) non-essential-shops
+  [ set features (list "relaxing" "shopping")]
+
+  if is-young? [
+    create-gathering-link-to one-of schools [ set features (list "mandatory")]]
+
+  if is-student? [ create-gathering-link-to one-of universities [ set features (list "learning")]]
+
+  setup-worker-relation-to-gathering-point
+end
+
+to  setup-worker-relation-to-gathering-point
+  if is-worker? [
+    let hired false
+    let target one-of workplaces
+    
+    ask gathering-points with [is-workplace? or is-hospital? or is-school? or is-university? or is-essential-shop? or is-non-essential-shop?]
+    [
+      if not any? hired-workers [ set target self set hired true stop ]
+    ]
+    
+    if not hired
+    [
+      let rand random-float 1
+      if rand < probability-hospital-personel [
+        set target one-of hospitals
+      ]
+      if rand >= probability-hospital-personel and rand < probability-hospital-personel + probability-school-personel
+      [
+        set target one-of schools
+      ]
+      
+      if rand >= probability-hospital-personel + probability-school-personel and rand < probability-hospital-personel + probability-school-personel + probability-university-personel
+      [
+        set target one-of universities
+      ]
+      
+      if rand >= probability-hospital-personel + probability-school-personel + probability-university-personel and
+      rand < probability-hospital-personel + probability-school-personel + probability-university-personel + probability-shopkeeper
+      [
+        set target one-of shops
+      ]
+    ]
+    
+    set my-work target
+    ask target [set hired-workers (turtle-set hired-workers myself)]
+  ]
+end
+
+
+
+to setup-activities
+  set  hospitals (turtle-set)
+  set workplaces (turtle-set)
+  set schools (turtle-set)
+  set homes (turtle-set)
+  set essential-shops (turtle-set)
+  set non-essential-shops (turtle-set)
+  set universities (turtle-set)
+  set public-leisure-points (turtle-set)
+  set private-leisure-points (turtle-set)
+
+  create-gathering-points #schools-gp [
+    set schools (turtle-set schools self)
+    set hired-workers (turtle-set)
+    set gathering-type "school" set shape "triangle" set color orange set xcor max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "school"] / (#schools-gp + 1)]
+
+  create-gathering-points #universities-gp [
+    set universities (turtle-set universities self)
+    set hired-workers (turtle-set)
+    set gathering-type "university" set shape "triangle 2" set color magenta + 2 set xcor 2 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "university"] / (#universities-gp + 1)]
+
+  create-gathering-points #workplaces-gp [
+    set workplaces (turtle-set workplaces self)
+    set hired-workers (turtle-set)
+    set gathering-type "workplace" set shape "pentagon" set color sky + 3 set xcor 3 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace"] / (#workplaces-gp + 1)]
+
+  create-gathering-points #essential-shops-gp [
+    set essential-shops (turtle-set essential-shops self)
+    set hired-workers (turtle-set)
+    set gathering-type "essential-shop" set shape "cow" set color yellow set xcor 4 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "essential-shop"] / (#essential-shops-gp + 1)]
+  create-gathering-points #non-essential-shops-gp [
+    set non-essential-shops (turtle-set non-essential-shops self)
+    set hired-workers (turtle-set)
+    set gathering-type "non-essential-shop" set shape "face happy" set color violet + 2 set xcor 5 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "non-essential-shop"] / (#non-essential-shops-gp + 1)]
+  create-gathering-points #hospital-gp [
+    set  hospitals (turtle-set  hospitals self)
+    set hired-workers (turtle-set)
+    set gathering-type "hospital" set shape "x" set heading 45 set color red set size 2 set xcor 6 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "hospital"] / (#hospital-gp + 1)]
+  create-gathering-points #public-leisure-gp [
+    set public-leisure-points (turtle-set public-leisure-points self)
+    set hired-workers (turtle-set)
+    set gathering-type "public-leisure" set shape "square 2" set color lime  set xcor 7 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "public-leisure"] / (#public-leisure-gp + 1)]
+
+  create-gathering-points #private-leisure-gp [
+    set private-leisure-points (turtle-set private-leisure-points self)
+    set hired-workers (turtle-set)
+    set gathering-type "private-leisure" set shape "square" set color red + 3 set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "private-leisure"] / (#private-leisure-gp + 1)]
+
+  
+  ask gathering-points [set hired-workers (turtle-set)] 
+  
+  setup-activity-animate-positions
+; setup-economy
+  
+  if migration?
+  [
+    create-gathering-points 1
+    [
+      set gathering-type "away"
+      set away-gathering-point self
+      set shape "airplane"
+    ]
+  ]
+  
+  ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
+end
+
+; to setup-economy
+;   ask gathering-points with [gathering-type = "school"] [set amount-of-capital my-default-available-liquidities]
+;   ask gathering-points with [gathering-type = "university"] [set amount-of-capital my-default-available-liquidities]
+;   ask gathering-points with [gathering-type = "workplace"] [set amount-of-capital my-default-available-liquidities set stock-of-goods my-max-stock-of-goods]
+;   ask gathering-points with [gathering-type = "essential-shop"] [set amount-of-capital my-default-available-liquidities set stock-of-goods max-stock-of-goods-in-a-shop]
+;   ask gathering-points with [gathering-type = "non-essential-shop"] [set amount-of-capital my-default-available-liquidities set stock-of-goods max-stock-of-goods-in-a-shop]
+;   ask gathering-points with [gathering-type = "hospital"] [set amount-of-capital my-default-available-liquidities]
+; end
+
+to setup-gathering-point-capacities
+  ask gathering-points [
+    set capacity disabled-capacity
+  ]
+  ask private-leisure-points [
+    set capacity count gatherers
+  ]
+  ask non-essential-shops [
+    set capacity count gatherers
+  ]
+end
+
+to setup-activity-animate-positions
+  if animate? [
+    let endless-loop 0
+    let to-place gathering-points
+    let placed turtle-set nobody
+    while [any? to-place] [
+      let focal one-of to-place
+      let p-pxcor random-pxcor
+      let p-pycor random-pycor
+      ifelse count to-place > 10 [
+        let placing up-to-n-of 4 to-place with [gathering-type = [gathering-type] of focal]
+
+        while [any? placed with [abs (p-pxcor - pxcor) <= 2  and abs (p-pycor - pycor) <= 2] or p-pxcor >= (max-pxcor - 1) or p-pxcor <= (min-pxcor + 1) or p-pycor >= (max-pycor - 1) or p-pycor <= (min-pycor + 1)] [
+          set endless-loop endless-loop + 1
+          if endless-loop > 10000 [error "cannot find a spot!"]
+          set p-pxcor random-pxcor
+          set p-pycor random-pycor
+        ]
+        (foreach (up-to-n-of (count placing) (sort (([neighbors] of (patch p-pxcor p-pycor)) with [not member? self [neighbors4] of patch p-pxcor p-pycor]))) (sort placing) [ [ p g ] -> ask g [ move-to p ] ])
+        set placed (turtle-set placed placing)
+      ] [
+        while [any? placed with [abs (p-pxcor - pxcor) <= 1 and abs (p-pycor - pycor) <= 1] or p-pxcor = max-pxcor or p-pxcor = min-pxcor or p-pycor = max-pycor or p-pycor = min-pycor] [
+          set p-pxcor random-pxcor
+          set p-pycor random-pycor
+        ]
+        ask focal [
+          setxy p-pxcor p-pycor
+        ]
+        set placed (turtle-set placed focal)
+      ]
+      set to-place to-place with [not member? self placed]
+      
+    ]
+    ;      ask gathering-points [
+    ;        let possible-xcor random-pxcor
+    ;        let possible-ycor random-pycor
+    ;        while [any? gathering-points-on patch possible-xcor possible-ycor] [
+    ;          set possible-xcor random-pxcor
+    ;          set possible-ycor random-pycor
+    ;        ]
+    ;        setxy possible-xcor possible-ycor
+    ;      ]
+  ]
+
+
+end
+
+; to setup-economic-model
+;   set government-reserve-of-capital government-initial-reserve-of-capital
+;   setup-macro-economic-sectors
+; end
+
+; to setup-macro-economic-sectors
+;   create-central-banks 1 [hide-turtle set reserve-of-capital 1000000 set total-credit 0]
+  
+;   create-macro-sectors 1 [hide-turtle set sector-type "agriculture-essential" set amount-of-capital 160 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "agriculture-luxury" set amount-of-capital 170 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "manufacturing-essential" set amount-of-capital 211 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "manufacturing-luxury" set amount-of-capital 256 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "services-essential" set amount-of-capital 360 set debt-with-central-bank 0] ;finances
+;   create-macro-sectors 1 [hide-turtle set sector-type "services-luxury" set amount-of-capital 330 set debt-with-central-bank 0] ;hospitality
+;   create-macro-sectors 1 [hide-turtle set sector-type "education-research" set amount-of-capital 88 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "households" set amount-of-capital 395 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "government" set amount-of-capital 235 set debt-with-central-bank 0]
+;   create-macro-sectors 1 [hide-turtle set sector-type "international" set amount-of-capital 1000000 set debt-with-central-bank 0]
+  
+;   ask macro-sectors
+;   [
+;     ifelse is-agriculture-essential?
+;     [
+      
+;       create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 25 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;     ]
+;     [
+;       ifelse is-agriculture-luxury?
+;       [
+;         create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+        
+;         create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 25 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;       ]
+;       [
+;         ifelse is-manufacturing-essential?
+;         [
+;           create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 1 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 0 set drain default-drain set amount-of-capital-in-the-reserve 0]
+          
+;           create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 70 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;         ]
+;         [
+;           ifelse is-manufacturing-luxury?
+;           [
+;             create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 1 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 0 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+            
+;             create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 35 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 70 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;           ]
+;           [
+;             ifelse is-services-essential?
+;             [
+;               create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+              
+;               create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 110 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 80 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;             ]
+;             [
+;               ifelse is-services-luxury?
+;               [
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+                
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 100 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 25 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 80 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;               ]
+;               [
+;                 ifelse is-education-research?
+;                 [
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 1 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 1 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 1 set drain default-drain set amount-of-capital-in-the-reserve 0]
+                  
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 0 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                 ]
+;                 [
+;                   ifelse is-households-sector?
+;                   [
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 30 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 60 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 80 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+                    
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 45 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                   ]
+;                   [
+;                     ifelse is-government-sector?
+;                     [
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 15 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 10 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 40 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 50 set drain default-drain set amount-of-capital-in-the-reserve 0]
+                      
+;                       create-macro-sector-link-to one-of other macro-sectors with [is-international-sector?] [set priority 9 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                     ]
+;                     [
+;                       ifelse is-international-sector?
+;                       [
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-essential?] [set priority 1 set default-drain 120 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-agriculture-luxury?] [set priority 6 set default-drain 120 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-essential?] [set priority 2 set default-drain 100 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-manufacturing-luxury?] [set priority 6 set default-drain 100 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-services-essential?] [set priority 3 set default-drain 80 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-services-luxury?] [set priority 8 set default-drain 80 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-education-research?] [set priority 5 set default-drain 5 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-households-sector?] [set priority 4 set default-drain 20 set drain default-drain set amount-of-capital-in-the-reserve 0]
+;                         create-macro-sector-link-to one-of other macro-sectors with [is-government-sector?] [set priority 7 set default-drain 15 set drain default-drain set amount-of-capital-in-the-reserve 0]
+                        
+;                       ]
+;                       [
+;                         error "Macro-sector not defined"
+;                       ]
+;                     ]
+;                   ]
+;                 ]
+;               ]
+;             ]
+;           ]
+;         ]
+;       ]
+;     ]
+;   ]
+; end

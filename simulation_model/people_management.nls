@@ -1,0 +1,242 @@
+__includes ["people_decision.nls"  "epistemic_model.nls" "social_networks.nls" "people/classes.nls" "people/ages.nls"]
+
+people-own [
+  age
+  ;gender
+  ;work (mine-worker? and provenance)
+  ;WE NEED TO KNOW MORE ABOUT THE PEOPLE
+  
+  ;;disease model
+  time-when-infected
+  epistemic-infection-status
+  
+  ;;
+  is-activity-successful?
+  current-activity
+  is-moving-outside-for-reaching-current-activity?
+  current-motivation
+  last-day-observed-symptoms
+  has-done-shopping
+  purpose-of-the-current-gathering
+  my-home
+  my-work
+  my-essential-shops
+  
+  ;;transportation model
+  my-means-of-transportation-I-currently-use
+  can-I-perform-solo-transportation?
+  stayed-out-queuing-for-bus?
+  #people-in-my-transport
+  
+  is-currently-allocated-a-bed-in-hospital?
+  ;set-default-shape turtles "circle"
+  
+  list-of-people-met-per-day-as-recorded-by-the-tracking-app
+  is-user-of-tracking-app?
+  has-mobile-phone?
+  
+  has-been-tested-infected?
+  last-test-tick
+
+  ;;infection model
+  infection-state
+
+  current-person-I-depend-on
+
+  has-been-tested-immune?
+  
+  am-I-experiencing-fake-symptoms?
+  
+  ; Optional measures information
+  I-know-of-social-distancing?
+  I-know-of-working-from-home?
+  ; Memory of the network's actions
+  ; The memory is a list with a max lenght of 28 (for all the ticks in a week). New events get added to the end, so the first event should always be what most people in your network did one week ago
+  what-my-network-did-week-day
+  what-my-network-did-weekend
+  did-my-network-socially-distance?
+  did-my-network-quarantine?
+  
+  ;"needs" are a central driver in decision-making (e.g. eating, belonging to groups, physical security).
+  ;"needs" are a relevant concept for accounting for the reasons that can push an agent for violating guidelines, in spite of generally complying to them
+  ;"needs" can be seen as criteria that agents tend to satisfy.
+  ;As a criteria, each need can be related to a level of satisfaction
+  ;Each need is related to a prevalence, i.e. how much this need is "active" or is "bothering agent decision".
+  ;The less a need is currently satisfied, the more prevalent it becomes (comparatively to other times when the same need has been satisfied); i.e. prevalence is monotonous wrt need satisfaction
+  ;Each need is related to a specific prevalence measure: certain needs can become suddently very critical while the criticality of others is more smooth
+  ;Likewise, a relative ordering exists within needs/prevalence (e.g. a person both hungry and lonely is likely to eat alone whereas a mildly-fed lonely person is more likely to share).
+
+  ;Agents tend to act towards satisfying the most pressing needs first;
+  ;satisfying needs tends to require active engagement and satisfied needs tend to be less cognitively important for the agent
+
+  ;Various needs have a relative *prevalence* for the agent (e.g. eating is less relatively important than breathing), which then affect how much the agent will aim to satisfy this need when acting
+  ;Agents assign different priorities for their needs, this priority order is culturally-sensitive and can thus shape collective responses
+
+  ;For follow-up coders:
+  ;More needs can and should be added as one sees fit
+  ;Here, I rely on very simplified [0,1] variables for memorizing when was the need satisfied for the last time and making the maths easy.
+  ;Though, in principle, needs are shaped by the history of the agent rather than "regularly growing" and thus more advanced representations are advised --if needed.
+  ;For instance, a "food-security" need should be much more prevalent if the agent experienced forced hunger due to a shortage
+
+  ;Currently, the need level and the prevalence are weighted and scaled within [0,1], where 1 means "the most prevalent ever" and "the least satisfied ever".
+  ;Keeping the scale is very important for conceptual coherence.
+
+  ;Regarding assumptions/scale, my gut feeling (to be checked against theory) is that available plans and need prevalence should evolve over time when the agent faces new situations
+  ;Notably, new plans for satisfying should be learnable by agents (e.g. satisfying physical-activity needs might need some adaptation when locked in)
+  ;and traumatic events or long-term deprivation should affect the need structure (e.g. food deprivation should dramatically bump up the prevalence of food safety, thus causing rush to supermarkets for instance)
+  
+  ;;;;;;;; CULTURAL MODEL VARIABLES (by Amineh, Bart, Kurt) ;;;;;;;;
+
+  ;SCHWARTZ VALUE VARIABLES
+  importance-given-to-hedonism-value
+  importance-given-to-stimulation-value
+  importance-given-to-self-direction-value
+  importance-given-to-universalism-value
+  importance-given-to-benevolence-value
+  importance-given-to-conformity-tradition-value
+  importance-given-to-security-value
+  importance-given-to-power-value
+  importance-given-to-achievement-value
+  
+  ;IMPORTANCE of BELONGING needs
+  ;*** NOTE: the belonging only contains 1x subneed (more subneeds might be added to this category at a later stage) ***
+  importance-weight-belonging-subneed
+
+  ;IMPORTANCE of SURVIVAL needs
+  importance-weight-food-safety
+  importance-weight-financial-survival
+  importance-weight-health
+  importance-weight-sleep
+  importance-weight-conformity
+
+  ;IMPORTANCE of SAFETY needs
+  importance-weight-financial-stability
+  importance-weight-risk-avoidance
+  importance-weight-compliance
+
+  ;IMPORTANCE of ESTEEM needs
+  importance-weight-luxury
+  importance-weight-leisure
+  importance-weight-autonomy
+
+  ;Need satisfaction levels (i.e. level of watertanks)
+  ;The need satisfaction levels of food-safety, financial-survival, health, and financial-stability are reporters (see need_definition.nls)
+
+  ;SURVIVAL:
+  sleep-satisfaction-level
+  conformity-satisfaction-level
+
+  ;SAFETY:
+  risk-avoidance-satisfaction-level
+  compliance-satisfaction-level
+
+  ;BELONGING:
+  belonging-satisfaction-level
+
+  ;SELF-ESTEEM:
+  leisure-satisfaction-level
+  luxury-satisfaction-level
+  autonomy-satisfaction-level
+  
+  ;Variables for BELONGING needs
+  social-distance-profile
+  is-I-apply-social-distancing?
+  days-since-seen-relatives
+  days-since-seen-colleagues
+  days-since-seen-friends
+  
+  ;Variables for Luxury need (ESTEEM)
+  amount-of-last-luxury-items-bought
+
+  ;;L: this dichotomy is conceptually discussable: the evaluation of safety is BASED on these variables;
+  ;;but, in principles, these variables are not there for evaluating safety and they are/can/should influence other aspects (including other needs).
+  ;;same for all variables
+  ;Variables for Financial Safety need (SAFETY)
+  my-amount-of-capital
+  my-target-amount-of-capital
+  my-current-income
+  my-expected-income
+  
+  ;Other variables
+  number-of-people-I-infected
+  #days-I-should-remain-in-self-quarantining
+  events-to-process
+]
+
+to update-people-epistemic-status
+  ask people [update-epistemic-status]
+end
+
+to-report just-learned-I-am-infected-event
+  report "just-learned-I-am-infected"
+end
+
+
+
+
+to update-people-mind
+  update-people-epistemic-status
+  
+  update-quarantining-decisions
+  
+  ask people 
+  [
+    foreach events-to-process [[x]-> 
+      
+      if x = just-learned-I-am-infected-event [
+        quarantining-reaction-when-being-infected
+        ask [gatherers] of my-home
+        [quarantining-reaction-when-someone-from-household-is-infected]
+      ]
+      
+      update-people-epistemic-status
+    ]
+    set  events-to-process (list)
+  ]
+end
+
+
+to-report has-a-work?
+  report any? my-gathering-links with  [member? work-motive features]
+ end
+
+to-report homeless-people
+  report people with [not any? out-link-neighbors with [gathering-type = "home"]]
+end
+to-report children
+  report people with [is-young?]
+end
+
+to-report is-young?
+  report age = young-age
+end
+
+to-report total-amount-of-capital
+  report sum [my-amount-of-capital] of people
+end
+
+to-report retirees-average-amount-of-capital
+  report (sum [my-amount-of-capital] of people with [age = "retired"]) / (count people with [age = "retired"])
+end
+
+to-report workers-average-amount-of-capital
+  report mean [my-amount-of-capital] of workers
+end
+
+to-report students-average-amount-of-capital
+  report (sum [my-amount-of-capital] of people with [age = "student"]) / (count people with [age = "student"])
+end
+
+to-report young-average-amount-of-capital
+  report (sum [my-amount-of-capital] of people with [age = "young"]) / (count people with [age = "young"])
+end
+
+
+
+to-report app-users
+  report people with [is-user-of-tracking-app?]
+end
+
+to-report might-I-be-contagious?
+  report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
+end

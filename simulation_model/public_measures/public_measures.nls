@@ -1,0 +1,121 @@
+__includes["public_measures/global_quarantine.nls" "public_measures/tracing_app.nls" "public_measures/testing.nls" "public_measures/school_closing.nls" "public_measures/phasing_out.nls"]
+
+globals [
+  was-social-distancing-enforced?
+  #tests-done-today
+]
+
+to-report is-hard-lockdown-active?
+  if global-confinement-measures = "total-lockdown" [
+    set is-lockdown-active? true
+    report true
+  ]
+  if global-confinement-measures = "lockdown-10-5"
+  [
+    if(ratio-infected > 0.1 or (is-lockdown-active? and ratio-infected > 0.05))
+    [
+      set is-lockdown-active? true
+      report true
+    ]
+    if ratio-infected <= 0.05 [ set is-lockdown-active? false]
+    report false
+  ]
+  report false
+end
+
+to-report is-curfew-active?
+  if force-curfew-active? [report true]
+  if (ratio-infected >= ratio-omniscious-infected-that-trigger-curfew) [report true]
+  if trigger-curfew-when = "after-lockdown" and has-been-through-global-quarantine? [report true]
+  if trigger-curfew-when = "35-days-after-start-lockdown" [report is-global-quarantine-active? and (end-tick-of-global-quarantine != "never" and ticks >= start-tick-of-global-quarantine + 35 * #ticks-per-day)]
+  report false
+end
+
+to-report closed-non-essential?
+  report ratio-infected > ratio-omniscious-infected-that-trigger-non-essential-closing-measure
+  or
+  #days-trigger-non-essential-business-closing-measure <= current-day
+end
+
+
+
+
+to apply-active-measures
+  if slice-of-the-day = "morning" [ ; Reset the available tests
+    set #tests-done-today 0
+  ]
+  perform-daily-testing-public-measure
+  update-global-quarantine-measure
+  update-tracing-app-public-measure
+
+  if was-social-distancing-enforced? != is-social-distancing-measure-active? [
+    set was-social-distancing-enforced? is-social-distancing-measure-active?
+    inform-people-of-measures
+  ]
+  
+  check-phasing-out
+end
+
+
+
+to-report #still-available-tests
+  report #available-tests - #tests-done-today
+end
+
+to-report is-social-distancing-measure-active?
+  report ratio-omniscious-infected-that-trigger-social-distancing-measure < ratio-infected
+end
+
+
+to inform-people-of-measures
+  ask n-of (count people * percentage-news-watchers) people [
+    set I-know-of-social-distancing? true
+    set I-know-of-working-from-home? true
+  ]
+end
+
+to-report should-be-isolators
+  report people with [any? ([gatherers] of my-home) with [is-believing-to-be-infected?]]
+end
+
+to disable-all-measures
+  ; Keep schools, university, workplaces open
+  set ratio-omniscious-infected-that-trigger-school-closing-measure 1
+  set ratio-omniscious-infected-that-trigger-social-distancing-measure 1
+  set ratio-omniscious-infected-that-trigger-non-essential-closing-measure 1
+  set #days-trigger-school-closing-measure 10000
+  set #days-trigger-non-essential-business-closing-measure 10000
+  set is-closing-school-when-any-reported-case-measure? false
+  set global-confinement-measures "none"
+  set closed-universities? false
+  set closed-workplaces? false
+  ; Disable testing
+  set ratio-population-randomly-tested-daily 0
+  set ratio-population-daily-immunity-testing 0
+  set #available-tests 10000
+  set test-home-of-confirmed-people? false
+  set test-workplace-of-confirmed-people? false
+  set prioritize-testing-health-care? false
+  set prioritize-testing-education? false
+  set do-not-test-youth? true
+  set only-test-retirees-with-extra-tests? false
+  set when-is-daily-testing-applied? "never"
+  ; Disable tracing (Smartphone App)
+  set ratio-of-people-using-the-tracking-app 0
+  ; Disable isolation
+  set is-infected-and-their-families-requested-to-stay-at-home? false
+  set food-delivered-to-isolators? false
+  set is-psychorigidly-staying-at-home-when-quarantining? false
+  set ratio-self-quarantining-when-symptomatic 0
+  set ratio-self-quarantining-when-a-family-member-is-symptomatic 0
+  set is-working-from-home-recommended? false
+  ; Disable curfew
+  set force-curfew-active? false
+  set ratio-omniscious-infected-that-trigger-curfew 1
+  set trigger-curfew-when "never"
+  
+  disable-global-quarantine-measure
+  disable-tracing-app-measure
+  disable-daily-testing-measure
+end
+

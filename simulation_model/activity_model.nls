@@ -1,0 +1,369 @@
+__includes ["motives.nls" "transport.nls"]
+
+to execute-activity-effect
+  if is-currently-allocated-a-bed-in-hospital? and not (current-motivation = treatment-motive) [
+    release-bed-in-hospital
+  ]
+
+
+  if not is-currently-allocated-a-bed-in-hospital? and (current-motivation = treatment-motive)
+  [
+    try-acquire-a-bed-in-hospital
+  ]
+  
+  if not is-activity-successful? [stop]
+
+;  update-resources-based-on-current-activity
+
+  ;might be interesting to hold this variable as an integer, for storing when the next shopping will be needed
+  ;additionally, we might want at some point to hold additional variables within homes (i.e. one person getting the food for the whole community)
+
+  ;the epistemic infection status depends on whether the person has (had) visible symptoms, not on where it now gathers
+  ;though, gathering place might be to be recorded (i.e. a "maybe infected" state if public space has been visited and public space is believed to be contagious)
+  ;if [gathering-type] of current-activity = "hospital"
+  ;[ set epistemic-infection-status  infection-status ]
+
+  update-belief-based-on-current-activity
+
+end
+
+to-report activity-descriptor [gp mo]
+  if not is-gathering-point? gp [error (sentence gp mo "should be a gathering point")]
+  report (list gp mo)
+end
+
+to-report is-forced-to-be-here?
+  report is-forced-motive? current-motivation
+end
+
+
+
+; to update-resources-based-on-current-activity
+;   if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
+;   if current-activity = 0 [error "failed to select an activity"]
+
+;   if current-motivation = follow-person-in-charge-motive [stop]
+
+
+;   ;if is-at-home? [stop]
+
+;   if is-forced-to-be-in-school? or is-learning? or is-getting-tested? or is-resting? or is-relaxing?
+;   or (is-at-home? and is-forced-to-be-here?) [stop]
+
+;   if is-working?
+;   [
+;     let amount-to-earn workers-wages
+
+;     let amount-earned min (list amount-to-earn max (list [amount-of-capital] of my-work 0))
+;     if amount-earned > 0
+;     [
+;       perform-transaction self my-work (list "salary" amount-earned) (list "work")
+;     ]
+
+;     if government-pays-wages?
+;     [
+;       if amount-earned < amount-to-earn
+;       [
+;         let worker-subsidy ratio-of-wage-paid-by-the-government * (amount-to-earn - amount-earned)
+;         perform-transaction self "government" (list "subsidy" worker-subsidy) (list "nothing")
+;       ]
+;     ]
+
+;     stop
+;   ]
+
+;   if is-performing-essential-shopping?
+;   [
+;     let max-amount-of-rations-I-can-buy (floor my-amount-of-capital / price-of-rations-in-essential-shops)
+;     let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-essential-shops max (list max-amount-of-rations-I-can-buy 0))
+    
+    
+      
+;     ;let picked-essential-shop max-one-of essential-shops [stock-of-goods]
+
+;     let available-goods-in-my-essential-shop max (list [stock-of-goods] of current-activity 0)
+    
+;     ;show (sentence my-amount-of-capital  max-amount-of-rations-I-can-buy amount-of-rations-to-buy available-goods-in-my-essential-shop)
+
+;     set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-essential-shop)
+
+;     let amount-spent amount-of-rations-to-buy * price-of-rations-in-essential-shops * my-wealth-price-increase-factor
+
+;     perform-transaction self current-activity (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
+    
+;   ;  show (sentence "buying food:" self current-activity  amount-of-rations-I-buy-when-going-to-essential-shops (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent) essential-shop-amount-of-capital)
+
+;     stop
+;   ]
+
+;   if is-performing-non-essential-shopping?
+;   [
+;     if not closed-non-essential?
+;     [
+;       let max-amount-of-rations-I-can-buy my-amount-of-capital / price-of-rations-in-non-essential-shops
+;       let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-shops max (list max-amount-of-rations-I-can-buy 0))
+
+;       let available-goods-in-my-non-essential-shop max (list [stock-of-goods] of current-activity 0)
+
+;       set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-non-essential-shop)
+
+;       set amount-of-last-luxury-items-bought amount-of-rations-to-buy
+;       let amount-spent amount-of-rations-to-buy * price-of-rations-in-non-essential-shops
+
+;       perform-transaction self current-activity (to-enjoy-luxury-good amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
+;     ]
+;     stop
+;   ]
+
+;   if is-being-away? current-activity [stop]
+;   if current-motivation = treatment-motive [stop];;let's assume being treated is free for now
+
+;   error (sentence "not implemented" [gathering-type] of current-activity current-motivation)
+; end
+
+to-report is-being-away? [a]
+  report a = away-gathering-point
+end
+
+to-report is-working-at-work?
+  report is-working? and is-at-work?
+end
+
+to-report is-working?
+  report is-working-motive? current-motivation
+end
+
+to-report is-working-motive? [m]
+  report m = "contractual obligation"
+end
+
+to-report #workers-working
+  report count workers with [is-working?]
+end
+
+to-report #workers-working-at-essential-shop
+  report count workers with [is-working? and [gathering-type] of my-work = "essential-shop"]
+end
+
+to-report #workers-working-at-non-essential-shop
+  report count workers with [is-working? and [gathering-type] of my-work = "non-essential-shop"]
+end
+
+to-report #workers-working-at-university
+  report count workers with [is-working? and [gathering-type] of my-work = "university"]
+end
+
+to-report #workers-working-at-hospital
+  report count workers with [is-working? and [gathering-type] of my-work = "hospital"]
+end
+
+to-report #workers-working-at-workplace
+  report count workers with [is-working? and [gathering-type] of my-work = "workplace"]
+end
+
+to-report #workers-working-at-school
+  report count workers with [is-working? and [gathering-type] of my-work = "school"]
+end
+
+to-report follow-person-in-charge-motive
+  report "follow person in charge"
+end
+
+to-report is-I-have-contractual-obligations?
+  report age = "worker" and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
+  and not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
+end
+
+to-report is-rest-at-home-descriptor? [ad]
+  report first ad = my-home and item 1 ad = "rest"
+end
+
+to-report is-resting-at-home?
+  report is-resting?
+  and is-at-home?
+end
+
+to-report is-resting?
+  report current-motivation = "rest"
+end
+
+to-report is-relaxing?
+  report current-motivation = "relaxing"
+end
+
+to-report is-at-home?
+  report  current-activity = my-home
+end
+
+to-report is-forced-to-be-in-school?
+  report [gathering-type] of current-activity = "school" and current-motivation = "mandatory"
+end
+
+to-report is-learning?
+  report current-motivation = learning-motive
+end
+
+to-report learning-motive
+  report "learning"
+end
+
+to-report is-getting-tested?
+  report current-motivation = "get-tested"
+end
+
+to-report is-performing-essential-shopping?
+  report is-essential-shop-gathering-point? current-motivation
+end
+
+to-report is-essential-shop-gathering-point? [gp]
+  report gp = "essential shopping"
+end
+
+
+to-report is-performing-shopping?
+  report is-a-shopping-motivation? current-motivation
+end
+
+
+to-report is-performing-non-essential-shopping?
+  report is-a-non-essential-shopping-motivation? current-motivation and
+  is-a-non-essential-gathering-point? current-activity
+end
+
+to-report is-a-non-essential-gathering-point? [gp]
+  report [gathering-type] of gp = "non-essential-shop"
+end
+
+to-report is-a-non-essential-shopping-motivation? [m]
+  report  m = "shopping"
+end
+
+to-report is-a-shopping-motivation? [m]
+  report is-essential-shop-gathering-point? m or
+  is-a-non-essential-shopping-motivation? m
+end
+
+to-report amount-of-rations-I-buy-when-going-to-essential-shops
+  report days-of-rations-bought * count [gatherers] of my-home
+end
+
+to-report social-distancing-of [ad]
+  report item 2 ad
+end
+
+to-report motive-of [ad]
+  report item 1 ad
+end
+
+to-report location-of [ad]
+  report item 0 ad
+end
+
+to-report is-a-leisure-motivation? [motive]
+  report motive = "relaxing"
+end
+
+to-report is-home-gathering-point? [location]
+  report [gathering-type] of location = "home"
+end
+
+to-report can-be-done-with-a-dependable-person? [ad]
+  if
+  is-home-gathering-point? location-of ad
+  or ([is-hospital?] of first ad and last ad = "get-tested")
+  or (is-a-shopping-motivation? last ad)
+  or (is-a-leisure-motivation? motive-of ad)
+  or motive-of ad = treatment-motive
+  [report true]
+
+  if
+  ([is-university? or is-hospital? or is-workplace? or is-shop? or is-school?] of location-of ad)
+  and (motive-of ad = learning-motive or
+    is-contractual-obligation? motive-of ad)
+  [report false]
+
+  error (sentence "unimplemented" [gathering-type] of first ad last ad)
+end
+
+to-report  is-contractual-obligation? [m]
+  report m = "contractual obligation"
+end
+
+to perform-people-activities
+  reset-timer
+  
+  if food-delivered-to-isolators? [
+    let homes-to-be-delivered-food (turtle-set homes-in-isolation [my-home] of people with [is-officially-asked-to-quarantine?]) ; ToDo: Re-evaluate the secdon set
+    
+    
+    ask homes-to-be-delivered-food [
+      if available-food-rations / [amount-of-rations-I-buy-when-going-to-essential-shops] of one-of gatherers >= 1 [stop]
+      set #delivered-supply-proposed-this-tick  #delivered-supply-proposed-this-tick + 1
+      ; Find the store with the most stocks
+      let possible-stores reduce [[x y] -> (turtle-set x y)] [my-essential-shops] of gatherers 
+      let store max-one-of possible-stores [stock-of-goods]
+      ; Find the inhabitant with the most money
+      let buyer max-one-of gatherers [my-amount-of-capital]
+      let old-location [current-activity] of buyer
+      let old-motive [current-motivation] of buyer
+      ; Fake going to the store this round (internet order?)
+      ask buyer [ 
+        set current-activity store
+        set current-motivation "essential shopping"
+  ;      update-resources-based-on-current-activity
+        set current-activity old-location
+        set current-motivation old-motive
+      ]
+    ]
+  ]
+  
+  ask people [
+    if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
+    select-activity
+    if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
+
+    if is-currently-in-sitation-of-active-dependence? and current-person-I-depend-on != nobody
+    [
+      set current-activity [current-activity] of current-person-I-depend-on
+      set current-motivation follow-person-in-charge-motive
+    ]
+  ]
+
+  travelling-to-activity-phase
+  
+  ask people with [[capacity = disabled-capacity] of current-activity or not [is-operating?] of current-activity] [
+    set is-activity-successful? true
+  ]
+  
+  ask gathering-points with [capacity != disabled-capacity] [
+    ;error "why?"
+    ;ask gatherers [show myself show current-activity]
+    let all-people (gatherers with [current-activity != myself])
+    ifelse count all-people > current-capacity [
+      let succesful-people n-of current-capacity all-people
+      ask succesful-people [set is-activity-successful? true]
+      ask all-people with [not member? self succesful-people] [
+        set is-activity-successful? false
+      ]
+    ] [
+      ask all-people [ set is-activity-successful? true ]
+    ]
+  ]
+
+  ask people [
+    if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
+    execute-activity-effect
+    update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
+  ]
+  animate-walk-to-goal
+
+end
+
+to-report is-get-healed-to-hospital-descriptor? [d]
+  report [is-hospital?] of location-of d and motive-of d = treatment-motive
+end
+
+;;loose definition, to be tightened if needed
+to-report is-operating?
+  report any? hired-workers
+end

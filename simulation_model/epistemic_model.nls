@@ -1,0 +1,90 @@
+;this must be expanded and reworked, stigma is big influence - beliefs on ebola, trust in healthcare, also affects behaviour on funeral rites and likelihood of going to hospital, acknowledging disease
+;ethnographer please help with this
+;Fear-driven behavioral change coefficient; dual effect: reduces treatment-seeking AND increases clustering in home/funeral settings
+;how to model trust ; Trust (set of) parameter in ABM; higher mistrust = lower compliance with isolation/burial rules; community-led intervention = higher trust coefficient
+
+globals [#tests-performed]
+to update-epistemic-status
+  set am-I-experiencing-fake-symptoms? random-float 1 < daily-risk-believe-experiencing-fake-symptoms
+  
+  if infection-status = "dead" [
+    set epistemic-infection-status "dead"
+    stop
+  ]
+  
+   if epistemic-infection-status = "infected" and last-day-observed-symptoms < current-day - 3
+    [
+      set epistemic-infection-status had-symptoms-long-ago-infection-status
+    ]
+  
+  if has-internally-visible-symptoms? or am-I-experiencing-fake-symptoms?
+  [
+    ;;newly discovered to be infected
+      let knew-was-infected epistemic-infection-status = "infected"
+      set-believed-to-be-infected
+      
+      if not knew-was-infected and is-user-of-tracking-app? [perform-test]
+      
+      if not knew-was-infected and test-home-of-confirmed-people?
+      [
+        ; show "test"
+        ask [gatherers] of my-home [perform-test]
+      ]
+      if not knew-was-infected and test-workplace-of-confirmed-people? and has-a-work?
+      [
+        ask my-colleagues [perform-test]
+      ]
+    
+  ]
+end
+
+to set-believed-to-be-infected 
+  let knew-was-infected epistemic-infection-status = "infected"
+  set epistemic-infection-status "infected"
+  set last-day-observed-symptoms current-day
+  if not knew-was-infected [
+    set events-to-process lput just-learned-I-am-infected-event events-to-process 
+  ]
+end
+
+to-report is-believing-to-be-infected?
+  report epistemic-infection-status = "infected" 
+  
+end
+
+to perform-test
+  ; Make sure we don't do more tests than available
+  if #still-available-tests <= 0 [stop]
+  
+  set #tests-performed #tests-performed + 1
+  set #tests-done-today #tests-done-today + 1
+  
+  if not is-infected? and is-believing-to-be-infected? [set epistemic-infection-status "immune"]
+  if is-infected? [
+    let knew-was-infected? has-been-tested-infected?
+    set has-been-tested-infected? true
+    set-believed-to-be-infected 
+
+    if not knew-was-infected? and is-user-of-tracking-app? [
+      report-to-tracking-app self tested-positive-tracking-app-notification
+    ]
+  ]
+end
+
+to-report is-believing-to-be-immune?
+  report  has-been-tested-immune? or has-had-symptoms-long-ago?
+end
+
+to-report has-had-symptoms-long-ago?
+  report epistemic-infection-status = had-symptoms-long-ago-infection-status
+end
+
+to-report  had-symptoms-long-ago-infection-status
+  report "had-symptoms-long-ago"
+end
+
+to perform-immunity-test
+    if is-immune? [
+    set has-been-tested-immune? true 
+  ]
+end

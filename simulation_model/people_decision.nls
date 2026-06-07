@@ -1,0 +1,103 @@
+__includes ["need_management.nls" "country_specific_features/cultural_model.nls" "decision/quarantining.nls" "decision/select_activity.nls"]
+
+;reports a string, which can be related to a gathering point and a concrete activity
+to-report my-preferred-available-activity-descriptor 
+  if log-preferred-activity-decision? [ log-file-print (sentence "Person " who " " age)]
+  report item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
+  ;report reduce [[x y] -> ifelse-value global-prevalence-of x > global-prevalence-of y [x] [y]] my-available-activity-descriptors
+end
+
+
+to-report is-working-day-for-me?
+  if is-gathering-point? self [ ifelse is-shop? [report is-shops-open-today?] [report not (day-of-the-week = "saturday" or day-of-the-week = "sunday")]]
+  
+  if is-person? self 
+  [
+    if is-worker? [report [is-working-day-for-me?] of my-work]
+    report not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
+  ]
+  
+  error (sentence "wrong user of this function" self [age] of self)
+end
+
+to-report is-shops-open-today?
+  report not (day-of-the-week = "sunday")
+end
+
+to-report travelling-reason
+  report travelling-motive
+end
+
+
+
+to-report is-currently-in-sitation-of-active-dependence?
+  report is-child? and closed-schools?
+end
+
+to-report should-I-stay-home?
+  if is-hard-lockdown-active? [report true]
+  if is-officially-asked-to-quarantine? [report true]
+  if is-curfew-active? and (is-evening? or is-night?) [report true]
+  report false
+end
+
+
+to-report is-technically-feasible-to-work-from-home?
+  if not is-worker? [error "not a worker"]
+  report member? [gathering-type] of my-work ["workplace" "university"]
+  ;link-neighbors with [gathering-type = "workplace"]
+end
+
+to-report is-currently-watching-a-child?
+  report any? [current-gatherers with [is-child?]] of current-activity
+end
+
+to-report is-currently-watched-by-an-adult?
+  report any? [current-gatherers with [is-adult?]] of current-activity
+end
+
+to update-belief-based-on-current-activity
+  let family-here count my-relatives with [current-activity = [current-activity] of myself]
+  if any? my-relatives and family-here / count my-relatives > 0.5 [ set days-since-seen-relatives 0 ]
+  
+  if is-worker? 
+  [
+    let colleagues-here count my-colleagues with [current-activity = [current-activity] of myself]
+    if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]
+    if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
+  ]
+  let friends-here count my-friends with [current-activity = [current-activity] of myself]
+  if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
+  if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
+  
+  update-memory
+end
+
+to update-memory
+  let network-activities new-counter
+  if count my-network > 0 [
+    ask my-network [
+      set network-activities add-to-counter network-activities (list [gathering-type] of current-activity current-motivation)
+    ]
+  
+    let network-activity counter-max-value network-activities
+    ifelse is-working-day-for-me? [
+      set what-my-network-did-week-day lput network-activity what-my-network-did-week-day
+      if length what-my-network-did-week-day > 4 [
+        set what-my-network-did-week-day but-first what-my-network-did-week-day
+      ]
+    ] [
+      set what-my-network-did-weekend lput network-activity what-my-network-did-weekend
+      if length what-my-network-did-weekend > 4 [
+        set what-my-network-did-weekend but-first what-my-network-did-weekend
+      ]
+    ]
+    set did-my-network-socially-distance? 2 * count (my-network with [is-I-apply-social-distancing?]) >= count my-network
+    let quarantine-network my-network with [is-officially-asked-to-quarantine?]
+    ifelse any? quarantine-network [
+      set did-my-network-quarantine? 2 * count (quarantine-network with [is-in-quarantine?]) >= count quarantine-network
+    ] [
+      set did-my-network-quarantine? false
+    ]
+  ]
+end

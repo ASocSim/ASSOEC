@@ -1,0 +1,109 @@
+
+to-report sanity-checks
+  report 
+  min (list
+    behaviourspace-satisfaction-casualties 
+    hospital-gets-overloaded-when-no-measures
+    )
+end
+
+to-report hospital-gets-overloaded-when-no-measures
+  ;;when no measure is taken, then beds should be overloaded
+  ;;might be to be refined (e.g. "if there is a point where some shortage was needed")
+  report behaviourspace-load-variable no-measures-behaviourspace-experiment-name #max-hospital-beds-taken-behaviourspace-variable-name
+end 
+
+;;the ratio of casualties when closed shools & uni should be ideally twice larger as when everything is closed
+to-report behaviourspace-satisfaction-casualties
+  report bounded-linear-map 0 0.1 0 1 behaviourspace-load-variable no-measures-behaviourspace-experiment-name ratio-casualties-behaviourspace-variable-name
+end
+
+; If people are recommended to work from homw, there should be more people working from home
+to-report behaviourspace-soft-working-from-home-check
+  let no-measures-workers behaviourspace-load-variable no-measures-behaviourspace-experiment-name ratio-working-at-work-behaviourspace-variable-name
+  let soft-home-workers behaviourspace-load-variable soft-working-from-home-behaviourspace-experiment-name ratio-working-at-work-behaviourspace-variable-name
+  report bounded-linear-map 1 2 0 1 (no-measures-workers / soft-home-workers)
+end
+
+to-report check-infection-works [setup-params]
+  run setup-params
+  set all-self-isolate-for-35-days-when-first-hitting-2%-infected? false
+  setup repeat 200 [go]
+  if count people with [is-susceptible?] / count people > 0.1 [error "too many susceptible remaining in spite of no close down"]
+  report 1
+end
+
+to-report check-quarantine-stops-the-propagation [setup-params]
+  run setup-params
+  set all-self-isolate-for-35-days-when-first-hitting-2%-infected? true
+  setup while [not has-been-through-global-quarantine?] [go if ticks > 500 [error "global quarantine never reached or never ended"]]
+  if count people with [is-susceptible?] / count people < 0.6 [error "The quarantine failed to prevent a large part of the population from getting sick"]  
+  if peak-number-of-infected * 0.95 < count people with [is-infected?] [error "the quarantine failed to stop the disease to keep growing"]
+  report 1
+end
+to-report check-r0-works
+  set preset-scenario "default-scenario" load-scenario-specific-parameter-settings
+  set propagation-risk 0
+  setup repeat 50 [go]
+  let r0-no-spread r0
+  
+  set propagation-risk 0.05
+  setup repeat 50 [go]
+  let r0-0.05 r0
+  
+  set propagation-risk 0.1
+  setup repeat 50 [go]
+  let r0-0.1 r0
+  
+  ifelse r0-no-spread < r0-0.05 and
+  r0-0.05 < r0-0.1 [report 1]
+  [report 0]
+end
+
+to-report check-linear-growth-of-contacts-when-size-increase-no-infection
+  set preset-scenario "default-scenario" load-scenario-specific-parameter-settings
+  set #random-seed 0
+  let household-number-list n-values 5 [ i -> 100 * (i + 1)]
+  let contact-number table:make
+  
+  repeat 5
+  [
+    set #random-seed #random-seed + 1
+    foreach household-number-list
+    [
+      x ->
+      rescale-households-and-gathering-points-based-on-the-number-of-households x
+      
+      setup set with-infected? false
+      ask people [set-immune]
+      repeat 200 [go]
+      if not table:has-key? contact-number x [table:put contact-number x (list)]
+      
+      table:put contact-number x lput total-contacts-cumulated-over-time (table:get contact-number x)
+      print contact-number
+    ]  
+  ]
+  
+  foreach (table:keys contact-number)
+  [
+   x ->
+    let avg mean (table:get contact-number x)
+    table:put contact-number x avg
+  ]
+  print contact-number
+  
+  let average-contact-per-person table:make
+  foreach (table:keys contact-number)
+  [
+   x ->
+    table:put average-contact-per-person x (table:get contact-number x / x)
+  ]
+  
+  let mean-contact-per-person mean table:values average-contact-per-person
+  show (sentence "mean" mean-contact-per-person)
+  
+  let relative-distance-to-mean-list map  [x -> abs (x - mean-contact-per-person) / mean-contact-per-person] table:values average-contact-per-person
+  show (sentence "relative distance" relative-distance-to-mean-list)
+  
+  report 1 - max relative-distance-to-mean-list
+end

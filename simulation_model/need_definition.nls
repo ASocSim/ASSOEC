@@ -1,0 +1,103 @@
+to-report health-satisfaction-level
+  ;;constant value set to average
+  ;;survival needs often revolve around short-term temporality (e.g. stopping to breath)
+  if is-believing-to-be-infected?
+  [
+    if not (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0]
+    if is-observing-critical-symptoms? and (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.1]
+    
+    if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0.3]
+    error "undefined"
+  ]
+  
+  report 1
+end
+
+;*** food safety = survival or safety ? ***
+;;here, food-safety is rather a subaspect of safety (more cognitive, worries about the future)
+;;TBU: should be dependent on the current plan, i.e. acquiring food should be expected to lower this need
+to-report food-safety-satisfaction-level
+  if is-currently-being-treated-at-hospital? [
+    report 1
+  ]
+  report min (list ([available-food-rations] of my-home / amount-of-rations-I-buy-when-going-to-essential-shops) 1)
+end
+
+
+to-report financial-survival-satisfaction-level
+  report clamp-soft (my-amount-of-capital / (price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops))
+end
+
+to-report financial-stability-satisfaction-level
+  report ifelse-value my-target-amount-of-capital > 0 [clamp-soft (my-amount-of-capital / my-target-amount-of-capital)] [0]
+end
+
+
+to-report SDE-survival [ad]
+  let physiological-needs (list 
+    SDE-food-safety ad 
+    SDE-health ad
+    SDE-sleep ad  
+    SDE-conformity ad
+  )
+  if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
+    set physiological-needs fput (SDE-financial-survival ad) physiological-needs
+  ]
+  report max physiological-needs
+end
+
+to-report SDE-safety [ad]
+  ; Using min here the value is always zero (food can only go up when they go to the store, but that lowers compliance/risk avoidance).
+  ; The actual solution is to fully recalculate what safety would be after doing the action based on the satisfaction-gains calculated,
+  ;  pick the lowest one, and take the difference between that and current satisfaction
+  
+  let psychological-needs (list
+    (SDE-compliance ad)
+    (SDE-risk-avoidance ad)
+  )
+  let importances-psychological-needs (list importance-weight-compliance importance-weight-risk-avoidance)
+
+  if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
+    set psychological-needs fput (SDE-financial-stability ad) psychological-needs
+    set importances-psychological-needs fput importance-weight-financial-stability importances-psychological-needs
+  ]
+
+  report weighted-mean psychological-needs importances-psychological-needs
+  
+end
+
+to-report SDE-self-esteem [ad]
+  let needs (list 
+  SDE-leisure ad
+  SDE-autonomy ad)
+  let importances (list importance-weight-leisure importance-weight-autonomy)
+  if age != "young" [
+    set needs fput (SDE-luxury ad) needs
+    set importances fput importance-weight-luxury importances
+  ]
+  report weighted-mean needs importances
+  
+end
+
+to-report quality-of-life-indicator
+  
+  let quality-of-life (list 
+      ;Survival needs
+    (food-safety-satisfaction-level * importance-weight-food-safety) 
+    (financial-survival-satisfaction-level * importance-weight-financial-survival)
+    (sleep-satisfaction-level * importance-weight-sleep) 
+    (health-satisfaction-level * importance-weight-health) 
+    (conformity-satisfaction-level * importance-weight-conformity)
+    ;Safety needs
+    (compliance-satisfaction-level * importance-weight-compliance) 
+    (risk-avoidance-satisfaction-level * importance-weight-risk-avoidance) 
+    (financial-stability-satisfaction-level * importance-weight-financial-stability) 
+    ;Belonging needs
+    (belonging-satisfaction-level * importance-weight-belonging-subneed)
+    ;Esteem needs
+    (autonomy-satisfaction-level * importance-weight-autonomy) 
+    (luxury-satisfaction-level * importance-weight-luxury) 
+    (leisure-satisfaction-level * importance-weight-leisure))
+  
+  report sum quality-of-life
+end

@@ -1,0 +1,13 @@
+*.tmp.nlogo
+.project
+/description.txt
+/snapshot_*
+*.log
+processing/*.csv
+output/
+processing/behaviousearch/*.csv
+tmp_*.csv
+*.Rhistory
+*.csv
+*.pdf
+*.RData

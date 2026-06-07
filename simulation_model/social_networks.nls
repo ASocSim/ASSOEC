@@ -1,0 +1,143 @@
+directed-link-breed [dependable-adult-links dependable-adult-link]
+undirected-link-breed [my-friends-links my-friends-link]
+
+;;this representation works as long as the workplace network does not become too large
+;directed-link-breed [workplace-colleague-links workplace-colleague-link]
+
+;breed [work-social-networks work-social-network]
+
+to setup-social-networks
+  if network-generation-method = "random" 
+  [setup-social-networks-random stop]
+  if network-generation-method = "value-similarity"
+  [setup-social-networks-value-similarity stop]
+  error (sentence "Method" network-generation-method "for generating network unknown. Please select another")
+end
+
+to-report possible-friends
+  let agents-to-befriend reduce [ [x y] -> (turtle-set x y) ] ([gatherers] of (turtle-set my-private-leisure my-school my-university))
+  report other agents-to-befriend with [not my-friends-link-neighbor? myself and age = [age] of myself]
+end
+
+to setup-social-networks-random
+  ask children with [any? [gatherers with [is-adult?]] of my-home ][create-dependable-adult-link-to one-of [gatherers with [is-adult?]] of my-home ]
+  ;  ask workers [  create-workplace-colleague-links-to other workers with [my-workplace = [my-workplace] of myself]]
+  ask people [
+    ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
+    create-my-friends-links-with up-to-n-of peer-group-friend-links possible-friends
+  ]
+end
+
+to-report value-euclidean-distance [other-agent]
+  report sqrt sum (list 
+    ((importance-given-to-hedonism-value - [importance-given-to-hedonism-value] of other-agent) ^ 2)
+    ((importance-given-to-stimulation-value - [importance-given-to-stimulation-value] of other-agent) ^ 2)
+    ((importance-given-to-self-direction-value - [importance-given-to-self-direction-value] of other-agent) ^ 2)
+    ((importance-given-to-universalism-value - [importance-given-to-universalism-value] of other-agent) ^ 2)
+    ((importance-given-to-benevolence-value - [importance-given-to-benevolence-value] of other-agent) ^ 2)
+    ((importance-given-to-conformity-tradition-value - [importance-given-to-conformity-tradition-value] of other-agent) ^ 2)
+    ((importance-given-to-security-value - [importance-given-to-security-value] of other-agent) ^ 2)
+    ((importance-given-to-power-value - [importance-given-to-power-value] of other-agent) ^ 2)
+    ((importance-given-to-achievement-value - [importance-given-to-achievement-value] of other-agent) ^ 2))
+end
+
+to setup-social-networks-value-similarity
+  ; If there are less than 20 people, setup the social network randomly
+  ifelse count people > 20 [
+    ask people [
+      ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
+      create-my-friends-links-with turtle-set up-to-n-of peer-group-friend-links (sort-on [value-euclidean-distance myself] possible-friends)
+    ]
+    repeat round (percentage-of-agents-with-random-link * count people) [
+      ask one-of people with [any? possible-friends] [
+        let new-friend one-of possible-friends
+        ask one-of my-friends-links [ die ]
+        create-my-friends-link-with new-friend
+      ]
+    ]
+  ]
+  [
+    setup-social-networks-random
+  ]
+  
+  ;Due to stochastic nature of this procedure, it can occur that sometimes there exists an agent that has not been linked with any other agent.
+  ;If this is the case, the agent is identified and told to link up with a randomly selected agent within the simulated environment.
+  ask people with [count link-neighbors = 0] [
+    create-link-with one-of other people
+  ]
+  
+end
+
+to-report my-relatives
+  report other [gatherers] of my-home
+end
+
+to-report my-colleagues
+  if not is-worker? [report (turtle-set)]
+  report other [hired-workers] of my-work
+  ;report workplace-colleague-link-neighbors
+  ;let my-wp  my-workplace
+  ;if my-wp != nobody [
+  ;   report other [gatherers with [my-workplace = my-wp]] of my-wp
+  ; ]
+  ; report (turtle-set nobody)
+end
+
+to-report my-friends
+  report my-friends-link-neighbors
+end
+
+to-report my-network
+  report (turtle-set my-relatives my-colleagues my-friends)
+end
+
+to-report people-that-depend-on-me
+  report in-dependable-adult-link-neighbors
+end
+
+to-report workers
+  report people with [is-worker?]
+end
+
+to-report is-child?
+  report age = "young"
+end
+
+to-report students
+  report people with [ is-student?]
+end
+
+to-report is-adult?
+  report is-student? or is-worker? or is-retired?
+end
+
+to-report is-student?
+  report age = "student"
+end
+
+to-report is-worker?
+  report age = "worker"
+end
+
+to-report is-retired?
+  report age = "retired"
+end
+
+to-report retireds
+  report people with [is-retired?]
+end
+
+to write-network-to-file [file]
+  if file-exists? file [file-delete file]
+  file-open file
+  file-print "graph {"
+  file-print "graph [overlap=false];"
+  file-print "node [style=filled];"
+  ask my-friends-links [
+    let turtle1 min-one-of both-ends [who]
+    let turtle2 max-one-of both-ends [who]
+    file-print (word "\"" [who] of turtle1 "\" -- \"" [who] of turtle2 "\";") 
+  ]
+  file-print "}"
+  file-close
+end

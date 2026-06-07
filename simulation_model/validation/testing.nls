@@ -1,0 +1,576 @@
+__includes ["validation/sanity.nls" 
+  "validation/behaviourspace_scenario_1_checks.nls" 
+  "validation/behaviourspace_scenario_2_checks.nls" 
+  "validation/behaviourspace_scenario_3_checks.nls"
+  "validation/behaviourspace_scenario_9_checks.nls" 
+  "validation/behaviourspace_utils.nls"
+  "validation/scenario4.nls"]
+
+;;change counts to non-essential + public leisure (or count seperate and sum up later) as closing non-essential will make them go to public leisure
+;; add work-from-home scenario
+;;;;;;;;;;;;;;;;;;;;;;;;;;VARIABLE NAMES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to-report ratio-casualties-behaviourspace-variable-name
+	report "ratio-casualties-people"
+end
+
+to-report ratio-infected-behaviourspace-variable-name
+	report "ratio-infected-people"
+end
+
+to-report peak-infected-behaviourspace-variable-name
+	report "peak-infected-people" 
+end
+
+to-report #-tests-behaviourspace-variable-name
+	report "#-tests" 
+end
+
+to-report #max-hospital-beds-taken-behaviourspace-variable-name
+  report "#max-hospital-beds-taken-at-once"
+end
+
+to-report #-nonessentialshoppers-in-first-weekend-variable-name
+  report "#-nonessentialshoppers-in-first-weekend"
+end
+
+to-report #-publicleisure-in-first-weekend-variable-name
+  report "#-publicleisure-in-first-weekend"
+end
+
+to-report ratio-isolators-behaviourspace-variable-name
+  report "ratio-isolating-people"
+end
+
+to-report ratio-breaking-isolation-behaviourspace-variable-name
+  report "ratio-breaking-isolation"
+end
+
+to-report ratio-working-at-work-behaviourspace-variable-name
+  report "working-at-work"
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;EXPERIMENT NAMES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to-report mostly-elderly-household-behaviourspace-experiment-name
+	report "mostly-elderly-household"
+end
+
+to-report mostly-adults-household-behaviourspace-experiment-name
+	report "mostly-adults-household"
+end
+
+to-report mostly-families-household-behaviourspace-experiment-name
+	report "mostly-families-household"
+end
+
+to-report mostly-multigen-household-behaviourspace-experiment-name
+	report "mostly-multigen-household"
+end
+
+to-report evenly-distributed-household-behaviourspace-experiment-name
+	report "evenly-distributed-household"
+end
+
+to-report no-measures-behaviourspace-experiment-name
+  report "no-measures"
+end  
+  
+to-report no-random-testing-behaviorspace-experiment-name
+  report "no-random-testing"
+end
+
+to-report part-random-testing-behaviorspace-experiment-name
+  report "part-random-testing"
+end
+
+to-report full-random-testing-behaviorspace-experiment-name
+  report "full-random-testing"
+end
+
+to-report all-closed-behaviourspace-experiment-name
+  report "all-closed"
+end
+
+to-report closed-schools-and-uni-behaviourspace-experiment-name
+  report "closed-schools-and-uni"
+end
+
+to-report work-from-home-behaviourspace-experiment-name
+  report "work-from-home"
+end
+
+to-report no-family-isolation-behaviourspace-experiment-name
+  report "no-family-isolation"
+end
+
+to-report family-isolation-behaviourspace-experiment-name
+  report "family-isolation"
+end
+
+to-report food-delivery-behaviourspace-experiment-name
+  report "food-delivery"
+end
+
+to-report no-food-delivery-behaviourspace-experiment-name
+  report "no-food-delivery"
+end
+
+to-report soft-working-from-home-behaviourspace-experiment-name
+  report "recommend-working-from-home"
+end
+
+;;;;;;;;;;;;;;;;;;;;;;EXPERIMENTS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to run-scenario-1
+  execute-and-save "no-measures"
+  execute-and-save "closed-schools-and-uni"
+  execute-and-save "work-from-home"
+  execute-and-save "all-closed"
+end
+
+to run-no-measures-experiment
+  
+  ;;experiment protocol
+  disable-all-measures
+  setup
+  let total-#-nonessentialshoppers-in-first-weekend 0
+  let total-#-publicleisure-in-first-weekend 0
+  let total-number-peak-infected-people -1
+  let total-number-workers-at-work -1
+  let #workers count workers
+
+  while [any? people with [is-contagious?]] [
+    go
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-nonessentialshoppers-in-first-weekend total-#-nonessentialshoppers-in-first-weekend + count people-at-non-essential-shops]
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-publicleisure-in-first-weekend total-#-publicleisure-in-first-weekend + count people with [is-at-public-leisure-place?]]
+    if count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]]
+    if count workers with [is-at-work?] > total-number-workers-at-work [ set total-number-workers-at-work count workers with [is-at-work?] ]
+  ]
+
+  ;;saving all variables that can be relevant for later processing
+  let ratio-casualties-no-measures-tmp #dead-people / (count people + #dead-people)
+  save-on-file no-measures-behaviourspace-experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-no-measures-tmp
+  save-on-file no-measures-behaviourspace-experiment-name #max-hospital-beds-taken-behaviourspace-variable-name #max-hospital-beds-taken-at-once
+  save-on-file no-measures-behaviourspace-experiment-name #-nonessentialshoppers-in-first-weekend-variable-name total-#-nonessentialshoppers-in-first-weekend
+  save-on-file no-measures-behaviourspace-experiment-name #-publicleisure-in-first-weekend-variable-name total-#-publicleisure-in-first-weekend
+  save-on-file no-measures-behaviourspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+  save-on-file no-measures-behaviourspace-experiment-name ratio-working-at-work-behaviourspace-variable-name (total-number-workers-at-work / #workers)
+end
+
+
+to run-closed-schools-and-uni-experiment
+  disable-all-measures
+  load-closed-schools-and-uni-measures
+  setup
+  let total-#-nonessentialshoppers-in-first-weekend 0
+  let total-#-publicleisure-in-first-weekend 0
+  let total-number-peak-infected-people -1
+
+  while [any? people with [is-contagious?]] [
+    go
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-nonessentialshoppers-in-first-weekend total-#-nonessentialshoppers-in-first-weekend + count people-at-non-essential-shops]
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-publicleisure-in-first-weekend total-#-publicleisure-in-first-weekend + count people with [is-at-public-leisure-place?]]
+    if count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]]
+  ]
+
+  let ratio-casualties-closed-schools-and-uni-tmp #dead-people / (count people + #dead-people)
+  save-on-file closed-schools-and-uni-behaviourspace-experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-closed-schools-and-uni-tmp 
+  save-on-file closed-schools-and-uni-behaviourspace-experiment-name #-nonessentialshoppers-in-first-weekend-variable-name total-#-nonessentialshoppers-in-first-weekend
+  save-on-file closed-schools-and-uni-behaviourspace-experiment-name #-publicleisure-in-first-weekend-variable-name total-#-publicleisure-in-first-weekend
+  save-on-file closed-schools-and-uni-behaviourspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+end
+
+
+to run-work-from-home
+  disable-all-measures
+  set #days-trigger-non-essential-business-closing-measure 0
+  setup
+  
+  let total-#-nonessentialshoppers-in-first-weekend 0
+  let total-#-publicleisure-in-first-weekend 0
+  let total-number-peak-infected-people -1
+
+  while [any? people with [is-contagious?]] [
+    go
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-nonessentialshoppers-in-first-weekend total-#-nonessentialshoppers-in-first-weekend + count people-at-non-essential-shops]
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-publicleisure-in-first-weekend total-#-publicleisure-in-first-weekend + count people with [is-at-public-leisure-place?]]
+    if count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]]
+  ]
+
+  ;;saving all variables that can be relevant for later processing
+  let ratio-casualties-no-measures-tmp #dead-people / (count people + #dead-people)
+  save-on-file work-from-home-behaviourspace-experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-no-measures-tmp
+  save-on-file work-from-home-behaviourspace-experiment-name #max-hospital-beds-taken-behaviourspace-variable-name #max-hospital-beds-taken-at-once
+  save-on-file work-from-home-behaviourspace-experiment-name #-nonessentialshoppers-in-first-weekend-variable-name total-#-nonessentialshoppers-in-first-weekend
+  save-on-file work-from-home-behaviourspace-experiment-name #-publicleisure-in-first-weekend-variable-name total-#-publicleisure-in-first-weekend
+  save-on-file work-from-home-behaviourspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+end
+
+
+to run-all-closed-experiment
+  disable-all-measures
+  load-closed-schools-and-uni-measures
+  set #days-trigger-non-essential-business-closing-measure 0
+  setup
+  let total-#-nonessentialshoppers-in-first-weekend 0
+  let total-#-publicleisure-in-first-weekend 0
+  let total-number-peak-infected-people -1
+
+  while [any? people with [is-contagious?]] [
+    go
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-nonessentialshoppers-in-first-weekend total-#-nonessentialshoppers-in-first-weekend + count people-at-non-essential-shops]
+    if (member? day-of-the-week ["saturday" "sunday"]) and (ticks < 28) [set total-#-publicleisure-in-first-weekend total-#-publicleisure-in-first-weekend + count people with [is-at-public-leisure-place?]]
+    if count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]]
+  ]
+
+  let ratio-casualties #dead-people / (count people + #dead-people)
+  save-on-file all-closed-behaviourspace-experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties
+  save-on-file all-closed-behaviourspace-experiment-name #-nonessentialshoppers-in-first-weekend-variable-name total-#-nonessentialshoppers-in-first-weekend
+  save-on-file all-closed-behaviourspace-experiment-name #-publicleisure-in-first-weekend-variable-name total-#-publicleisure-in-first-weekend
+  save-on-file all-closed-behaviourspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+end
+
+to run-family-isolation-experiment [experiment-name family-isolation]
+  load-baseline-parameter-settings
+  disable-all-measures
+  
+  set food-delivered-to-isolators? true
+  set is-infected-and-their-families-requested-to-stay-at-home? family-isolation
+  set ratio-population-randomly-tested-daily 1
+  
+  setup
+  set #available-tests count people
+  
+  let total-number-peak-infected-people -1
+  let total-number-people count people
+  let total-number-isolators -1
+  
+  while [any? people with [is-contagious?]] [
+    go
+    if count people with [is-infected?] > total-number-peak-infected-people [
+      set total-number-peak-infected-people count people with [is-infected?]
+    ]
+    if count people with [is-officially-asked-to-quarantine?] > total-number-isolators [
+      set total-number-isolators count people with [is-officially-asked-to-quarantine?]
+    ]
+  ]
+  let total-number-dead-people #dead-people
+  let ratio-casualties-people  total-number-dead-people / total-number-people 
+  let ratio-infected-people  total-number-peak-infected-people / total-number-people
+  let ratio-isolators  total-number-isolators / total-number-people
+  
+  save-on-file experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-people
+  save-on-file experiment-name ratio-infected-behaviourspace-variable-name ratio-infected-people
+  save-on-file experiment-name ratio-isolators-behaviourspace-variable-name ratio-isolators
+end
+
+to run-food-delivery-experiment [experiment-name food-delivery]
+  load-baseline-parameter-settings
+  disable-all-measures
+  
+  set food-delivered-to-isolators? food-delivery
+  set is-infected-and-their-families-requested-to-stay-at-home? true
+  set ratio-population-randomly-tested-daily 1
+  
+  setup
+  set #available-tests count people
+  
+  let total-number-people count people
+  let total-number-breaking-isolation -1
+  
+  while [any? people with [is-contagious? or is-officially-asked-to-quarantine?]] [
+    go
+    if count people with [is-officially-asked-to-quarantine? and not is-in-quarantine?] > total-number-breaking-isolation [
+      set total-number-breaking-isolation count people with [is-officially-asked-to-quarantine? and not is-in-quarantine?]
+    ]
+  ]
+  let ratio-isolators  total-number-breaking-isolation / total-number-people
+  
+  save-on-file experiment-name ratio-breaking-isolation-behaviourspace-variable-name ratio-isolators
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;GLOBAL FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;to be very cautions about: some variables might be overriden by an experiment
+;;(e.g. an experiment playing with the number of hospital beds can leave an altered number of hospital beds at the end of the experiment)
+;;normally, this issue should not occur when using the "loading" function, but it might (his variable should then be reset to the right value)
+;; though, this voids the use of the autocalibrator, so be very wary when using it.
+to execute-and-save [experiment-name]
+  if experiment-name = no-measures-behaviourspace-experiment-name
+  [
+    run-no-measures-experiment
+    stop
+  ]
+  
+  if experiment-name = closed-schools-and-uni-behaviourspace-experiment-name
+  [
+    run-closed-schools-and-uni-experiment
+    stop
+  ]
+  
+  if experiment-name = work-from-home-behaviourspace-experiment-name
+  [
+    run-work-from-home
+    stop
+  ]
+  
+  if experiment-name = all-closed-behaviourspace-experiment-name
+  [
+    run-all-closed-experiment
+    stop
+  ]
+  
+  
+;===================================================================
+;FL 2020-04-16
+;===================================================================
+  
+  if experiment-name = no-random-testing-behaviorspace-experiment-name
+  [
+    load-baseline-parameter-settings
+    disable-all-measures
+    set ratio-population-randomly-tested-daily 0
+    set when-is-daily-testing-applied? "always"
+    setup
+    
+    let total-number-peak-infected-people -1
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+
+    save-on-file no-random-testing-behaviorspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+    save-on-file no-random-testing-behaviorspace-experiment-name #-tests-behaviourspace-variable-name #tests-performed
+    stop
+  ]
+  
+  if experiment-name = part-random-testing-behaviorspace-experiment-name
+  [
+    load-baseline-parameter-settings
+    disable-all-measures
+    set ratio-population-randomly-tested-daily 0.1
+    set when-is-daily-testing-applied? "always"
+    setup
+    
+    let total-number-peak-infected-people -1
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+
+    save-on-file part-random-testing-behaviorspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+    save-on-file part-random-testing-behaviorspace-experiment-name #-tests-behaviourspace-variable-name #tests-performed
+    stop
+  ]
+  
+   
+  if experiment-name = full-random-testing-behaviorspace-experiment-name
+  [
+    load-baseline-parameter-settings
+    disable-all-measures
+    set ratio-population-randomly-tested-daily 1
+    set when-is-daily-testing-applied? "always"
+    setup
+    
+    let total-number-peak-infected-people -1
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+
+    save-on-file full-random-testing-behaviorspace-experiment-name peak-infected-behaviourspace-variable-name total-number-peak-infected-people
+    save-on-file full-random-testing-behaviorspace-experiment-name #-tests-behaviourspace-variable-name #tests-performed
+    stop
+  ]
+  
+  if experiment-name = mostly-elderly-household-behaviourspace-experiment-name
+  [
+    disable-all-measures
+    set household-profiles "none"
+    set ratio-adults-homes 0.05
+    set ratio-retired-couple-homes 0.85
+    set ratio-family-homes 0.05
+    set ratio-multi-generational-homes 0.05
+    setup
+    
+    let total-number-peak-infected-people -1
+    let total-number-people count people
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+    let total-number-dead-people #dead-people
+    let ratio-casualties-people  total-number-dead-people / total-number-people 
+    let ratio-infected-people  total-number-peak-infected-people / total-number-people
+    
+    save-on-file experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-people
+    save-on-file experiment-name ratio-infected-behaviourspace-variable-name ratio-infected-people
+    stop
+  ]
+  
+  if experiment-name = mostly-adults-household-behaviourspace-experiment-name
+  [
+    disable-all-measures
+    set household-profiles "none"
+    set ratio-adults-homes 0.85
+    set ratio-retired-couple-homes 0.05
+    set ratio-family-homes 0.05
+    set ratio-multi-generational-homes 0.05
+    setup
+    
+    let total-number-peak-infected-people -1
+    let total-number-people count people
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+    let total-number-dead-people #dead-people
+    let ratio-casualties-people  total-number-dead-people / total-number-people 
+    let ratio-infected-people  total-number-peak-infected-people / total-number-people
+    
+    save-on-file experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-people
+    save-on-file experiment-name ratio-infected-behaviourspace-variable-name ratio-infected-people
+    stop
+  ]
+  
+  if experiment-name = mostly-families-household-behaviourspace-experiment-name
+  [
+    disable-all-measures
+    set household-profiles "none"
+    set ratio-adults-homes 0.05
+    set ratio-retired-couple-homes 0.05
+    set ratio-family-homes 0.85
+    set ratio-multi-generational-homes 0.05
+    setup
+    
+    let total-number-peak-infected-people -1
+    let total-number-people count people
+    
+    while [any? people with [is-infected?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+    let total-number-dead-people #dead-people
+    let ratio-casualties-people  total-number-dead-people / total-number-people 
+    let ratio-infected-people  total-number-peak-infected-people / total-number-people
+    
+    save-on-file experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-people
+    save-on-file experiment-name ratio-infected-behaviourspace-variable-name ratio-infected-people
+    stop
+  ]
+  
+  if experiment-name = mostly-multigen-household-behaviourspace-experiment-name
+  [
+    disable-all-measures
+    set household-profiles "none"
+    set ratio-adults-homes 0.05
+    set ratio-retired-couple-homes 0.05
+    set ratio-family-homes 0.05
+    set ratio-multi-generational-homes 0.85
+    setup
+    
+    let total-number-peak-infected-people -1
+    let total-number-people count people
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+    let total-number-dead-people #dead-people
+    let ratio-casualties-people  total-number-dead-people / total-number-people 
+    let ratio-infected-people  total-number-peak-infected-people / total-number-people
+    
+    save-on-file experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-people
+    save-on-file experiment-name ratio-infected-behaviourspace-variable-name ratio-infected-people
+    stop
+  ]
+   
+  if experiment-name = evenly-distributed-household-behaviourspace-experiment-name
+  [
+    disable-all-measures
+    set household-profiles "none"
+    set ratio-adults-homes 0.25
+    set ratio-retired-couple-homes 0.25
+    set ratio-family-homes 0.25
+    set ratio-multi-generational-homes 0.25
+    setup
+    
+    let total-number-peak-infected-people -1
+    let total-number-people count people
+    
+    while [any? people with [is-contagious?]] [
+      go
+      ifelse count people with [is-infected?] > total-number-peak-infected-people [set total-number-peak-infected-people count people with [is-infected?]][]
+    ]
+    let total-number-dead-people #dead-people
+    let ratio-casualties-people  total-number-dead-people / total-number-people 
+    let ratio-infected-people  total-number-peak-infected-people / total-number-people
+    
+    save-on-file experiment-name ratio-casualties-behaviourspace-variable-name ratio-casualties-people
+    save-on-file experiment-name ratio-infected-behaviourspace-variable-name ratio-infected-people
+    stop
+  ] 
+;===================================================================
+
+  if experiment-name = no-family-isolation-behaviourspace-experiment-name
+  [
+    run-family-isolation-experiment experiment-name false
+    stop
+  ]
+  if experiment-name = family-isolation-behaviourspace-experiment-name
+  [
+    run-family-isolation-experiment experiment-name true
+    stop
+  ]
+  
+  if experiment-name = no-food-delivery-behaviourspace-experiment-name
+  [
+    run-food-delivery-experiment experiment-name false
+    stop
+  ]
+  if experiment-name = food-delivery-behaviourspace-experiment-name
+  [
+    run-food-delivery-experiment experiment-name true
+    stop
+  ]
+  
+  if experiment-name = soft-working-from-home-behaviourspace-experiment-name
+  [
+    disable-all-measures
+    set is-working-from-home-recommended? true
+    setup
+    
+    let total-number-workers-at-work -1
+    let #workers count workers
+  
+    while [any? people with [is-contagious?]] [
+      go
+      if count workers with [is-at-work?] > total-number-workers-at-work [ set total-number-workers-at-work count workers with [is-at-work?] ]
+    ]
+    
+    save-on-file experiment-name ratio-working-at-work-behaviourspace-variable-name (total-number-workers-at-work / #workers)
+    stop
+  ]
+  
+  error (sentence "unimplemented for:" experiment-name)
+end
+
+to-report behaviourspace-global-fitness-value
+  ;;could be improved by repeating this experiment multiple times, or with different random seeds
+  
+  if file-exists? behaviourspace-tmp-file-location [file-delete behaviourspace-tmp-file-location]
+  
+  ;let f-sc-1 behaviourspace-satisfaction-scenario-1
+  let f-sc-3 behaviourspace-scenario-3-global-check
+  let f-sanity sanity-checks
+  
+  print(word "Fitness results: sc-1= -" ", sc-3="  f-sc-3  ", sanity=" sanity-checks)
+  
+  report f-sc-3 * 0.4 + f-sanity * 0.6
+end
