@@ -10,6 +10,7 @@ globals
   universities
   essential-shops
   non-essential-shops
+  burial-rites
 ]
 breed [gathering-points gathering-point]
 gathering-points-own [gathering-type
@@ -56,6 +57,9 @@ to-report proximity-factor
   if gathering-type = home-gathering-type[report density-factor-homes]
   if gathering-type = essential-shop-gathering-type [report density-factor-essential-shops]
   if gathering-type = non-essential-shop-gathering-type [report density-factor-non-essential-shops]
+  
+  if gathering-type = burial-gathering-type [report density-factor-burial-rites]
+  
   error (word gathering-type " not defined")
 end
 
@@ -63,7 +67,7 @@ end
 to-report is-practicable-at-home?
   if gathering-type = "school" or gathering-type = "university" or gathering-type = "workplace" or gathering-type = "home"
   [report true]
-  if gathering-type = "public-leisure" or gathering-type = "private-leisure" or gathering-type = "essential-shop" or gathering-type = "non-essential-shop" or gathering-type = "hospital" 
+  if gathering-type = "public-leisure" or gathering-type = "private-leisure" or gathering-type = "essential-shop" or gathering-type = "non-essential-shop" or gathering-type = "hospital" or gathering-type = "burial-rites"
   [report false]
 end
 
@@ -87,6 +91,14 @@ end
 
 to-report #sick-personel
   report count hired-workers with [has-internally-visible-symptoms?]
+end
+
+
+
+
+
+to-report is-burial?
+  report gathering-type = "burial-rites"
 end
 
 to-report is-at-work?
@@ -185,6 +197,11 @@ to-report expected-number-of-other-participants
   if cached-number-of-participants > 0 [report cached-number-of-participants]
  ; if is-practicable-at-home? and is-lockdown-enforced? [report 0]
   if is-hospital? [report random 5 + 2]
+  
+  ;MOD FOR EBOLA - ESTIMATING N PEOPLE AT BURIAL RITES AROUND 30
+  if is-burial?  [report random 30 + 2]
+  
+  
   set cached-number-of-participants count in-gathering-link-neighbors
   report cached-number-of-participants
 end

@@ -12,6 +12,7 @@ globals[#min-workers-in-adults-homes
   #min-retirees-in-multi-generational-homes
   distribution-control-variable
 ]
+
 to setup
   clear-all
   reset-ticks
@@ -263,6 +264,8 @@ to setup-relation-to-gathering-points
   [  set features (list "relaxing")]
   create-gathering-link-to one-of public-leisure-points
   [ set features (list "relaxing")]
+  create-gathering-link-to one-of burial-rites
+  [ set features (list "belonging")]
 
   setup-relation-to-gathering-points1
 end
@@ -333,6 +336,8 @@ to setup-activities
   set universities (turtle-set)
   set public-leisure-points (turtle-set)
   set private-leisure-points (turtle-set)
+  
+  set burial-rites (turtle-set)
 
   create-gathering-points #schools-gp [
     set schools (turtle-set schools self)
@@ -371,6 +376,11 @@ to setup-activities
     set hired-workers (turtle-set)
     set gathering-type "private-leisure" set shape "square" set color red + 3 set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "private-leisure"] / (#private-leisure-gp + 1)]
 
+  create-gathering-points #burial-rites-gp [
+    set burial-rites (turtle-set burial-rites self)
+    set hired-workers (turtle-set)
+    set gathering-type "burial-rites" set shape "face sad" set color white + 3 set xcor 9 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "burial-rites"] / (#burial-rites-gp + 1)]
+
   
   ask gathering-points [set hired-workers (turtle-set)] 
   
@@ -407,6 +417,9 @@ to setup-gathering-point-capacities
     set capacity count gatherers
   ]
   ask non-essential-shops [
+    set capacity count gatherers
+  ]
+  ask burial-rites [
     set capacity count gatherers
   ]
 end

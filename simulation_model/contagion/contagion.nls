@@ -266,6 +266,12 @@ to contaminate [infector context]
   set-contaminated-disease-status
 end
 
+
+
+
+
+;;THIS IS VERY DIFFERENT FOR EBOLA!
+
 to-report is-contagious?
   
   report not (infection-status = healthy-infection-status) and not (infection-status = "immune") and not (infection-status = dead-infection-status)
