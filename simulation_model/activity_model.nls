@@ -4,13 +4,10 @@ to execute-activity-effect
   if is-currently-allocated-a-bed-in-hospital? and not (current-motivation = treatment-motive) [
     release-bed-in-hospital
   ]
-
-
   if not is-currently-allocated-a-bed-in-hospital? and (current-motivation = treatment-motive)
   [
     try-acquire-a-bed-in-hospital
   ]
-  
   if not is-activity-successful? [stop]
 
 ;  update-resources-based-on-current-activity
@@ -27,99 +24,23 @@ to execute-activity-effect
 
 end
 
+
+
 to-report activity-descriptor [gp mo]
   if not is-gathering-point? gp [error (sentence gp mo "should be a gathering point")]
   report (list gp mo)
 end
 
+
+;;MY INTENTION HERE IS TO TRACK THE NW OF DECEASED PEOPLE AND LET THEM ATTEND BURIAL RITES
+; to-report is-at-burial?
+;   report is-mourning and is-at-burial?
+;   error (sentence "dont know if mourning yet")
+; end
+
 to-report is-forced-to-be-here?
   report is-forced-motive? current-motivation
 end
-
-
-
-; to update-resources-based-on-current-activity
-;   if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
-;   if current-activity = 0 [error "failed to select an activity"]
-
-;   if current-motivation = follow-person-in-charge-motive [stop]
-
-
-;   ;if is-at-home? [stop]
-
-;   if is-forced-to-be-in-school? or is-learning? or is-getting-tested? or is-resting? or is-relaxing?
-;   or (is-at-home? and is-forced-to-be-here?) [stop]
-
-;   if is-working?
-;   [
-;     let amount-to-earn workers-wages
-
-;     let amount-earned min (list amount-to-earn max (list [amount-of-capital] of my-work 0))
-;     if amount-earned > 0
-;     [
-;       perform-transaction self my-work (list "salary" amount-earned) (list "work")
-;     ]
-
-;     if government-pays-wages?
-;     [
-;       if amount-earned < amount-to-earn
-;       [
-;         let worker-subsidy ratio-of-wage-paid-by-the-government * (amount-to-earn - amount-earned)
-;         perform-transaction self "government" (list "subsidy" worker-subsidy) (list "nothing")
-;       ]
-;     ]
-
-;     stop
-;   ]
-
-;   if is-performing-essential-shopping?
-;   [
-;     let max-amount-of-rations-I-can-buy (floor my-amount-of-capital / price-of-rations-in-essential-shops)
-;     let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-essential-shops max (list max-amount-of-rations-I-can-buy 0))
-    
-    
-      
-;     ;let picked-essential-shop max-one-of essential-shops [stock-of-goods]
-
-;     let available-goods-in-my-essential-shop max (list [stock-of-goods] of current-activity 0)
-    
-;     ;show (sentence my-amount-of-capital  max-amount-of-rations-I-can-buy amount-of-rations-to-buy available-goods-in-my-essential-shop)
-
-;     set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-essential-shop)
-
-;     let amount-spent amount-of-rations-to-buy * price-of-rations-in-essential-shops * my-wealth-price-increase-factor
-
-;     perform-transaction self current-activity (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
-    
-;   ;  show (sentence "buying food:" self current-activity  amount-of-rations-I-buy-when-going-to-essential-shops (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent) essential-shop-amount-of-capital)
-
-;     stop
-;   ]
-
-;   if is-performing-non-essential-shopping?
-;   [
-;     if not closed-non-essential?
-;     [
-;       let max-amount-of-rations-I-can-buy my-amount-of-capital / price-of-rations-in-non-essential-shops
-;       let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-shops max (list max-amount-of-rations-I-can-buy 0))
-
-;       let available-goods-in-my-non-essential-shop max (list [stock-of-goods] of current-activity 0)
-
-;       set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-non-essential-shop)
-
-;       set amount-of-last-luxury-items-bought amount-of-rations-to-buy
-;       let amount-spent amount-of-rations-to-buy * price-of-rations-in-non-essential-shops
-
-;       perform-transaction self current-activity (to-enjoy-luxury-good amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
-;     ]
-;     stop
-;   ]
-
-;   if is-being-away? current-activity [stop]
-;   if current-motivation = treatment-motive [stop];;let's assume being treated is free for now
-
-;   error (sentence "not implemented" [gathering-type] of current-activity current-motivation)
-; end
 
 to-report is-being-away? [a]
   report a = away-gathering-point
@@ -168,6 +89,12 @@ end
 to-report follow-person-in-charge-motive
   report "follow person in charge"
 end
+
+
+
+
+
+
 
 to-report is-I-have-contractual-obligations?
   report age = "worker" and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
@@ -289,6 +216,8 @@ to-report  is-contractual-obligation? [m]
   report m = "contractual obligation"
 end
 
+
+
 to perform-people-activities
   reset-timer
   
@@ -367,3 +296,100 @@ end
 to-report is-operating?
   report any? hired-workers
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+; to update-resources-based-on-current-activity
+;   if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
+;   if current-activity = 0 [error "failed to select an activity"]
+
+;   if current-motivation = follow-person-in-charge-motive [stop]
+
+
+;   ;if is-at-home? [stop]
+
+;   if is-forced-to-be-in-school? or is-learning? or is-getting-tested? or is-resting? or is-relaxing?
+;   or (is-at-home? and is-forced-to-be-here?) [stop]
+
+;   if is-working?
+;   [
+;     let amount-to-earn workers-wages
+
+;     let amount-earned min (list amount-to-earn max (list [amount-of-capital] of my-work 0))
+;     if amount-earned > 0
+;     [
+;       perform-transaction self my-work (list "salary" amount-earned) (list "work")
+;     ]
+
+;     if government-pays-wages?
+;     [
+;       if amount-earned < amount-to-earn
+;       [
+;         let worker-subsidy ratio-of-wage-paid-by-the-government * (amount-to-earn - amount-earned)
+;         perform-transaction self "government" (list "subsidy" worker-subsidy) (list "nothing")
+;       ]
+;     ]
+
+;     stop
+;   ]
+
+;   if is-performing-essential-shopping?
+;   [
+;     let max-amount-of-rations-I-can-buy (floor my-amount-of-capital / price-of-rations-in-essential-shops)
+;     let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-essential-shops max (list max-amount-of-rations-I-can-buy 0))
+    
+    
+      
+;     ;let picked-essential-shop max-one-of essential-shops [stock-of-goods]
+
+;     let available-goods-in-my-essential-shop max (list [stock-of-goods] of current-activity 0)
+    
+;     ;show (sentence my-amount-of-capital  max-amount-of-rations-I-can-buy amount-of-rations-to-buy available-goods-in-my-essential-shop)
+
+;     set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-essential-shop)
+
+;     let amount-spent amount-of-rations-to-buy * price-of-rations-in-essential-shops * my-wealth-price-increase-factor
+
+;     perform-transaction self current-activity (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
+    
+;   ;  show (sentence "buying food:" self current-activity  amount-of-rations-I-buy-when-going-to-essential-shops (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent) essential-shop-amount-of-capital)
+
+;     stop
+;   ]
+
+;   if is-performing-non-essential-shopping?
+;   [
+;     if not closed-non-essential?
+;     [
+;       let max-amount-of-rations-I-can-buy my-amount-of-capital / price-of-rations-in-non-essential-shops
+;       let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-shops max (list max-amount-of-rations-I-can-buy 0))
+
+;       let available-goods-in-my-non-essential-shop max (list [stock-of-goods] of current-activity 0)
+
+;       set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-non-essential-shop)
+
+;       set amount-of-last-luxury-items-bought amount-of-rations-to-buy
+;       let amount-spent amount-of-rations-to-buy * price-of-rations-in-non-essential-shops
+
+;       perform-transaction self current-activity (to-enjoy-luxury-good amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
+;     ]
+;     stop
+;   ]
+
+;   if is-being-away? current-activity [stop]
+;   if current-motivation = treatment-motive [stop];;let's assume being treated is free for now
+
+;   error (sentence "not implemented" [gathering-type] of current-activity current-motivation)
+; end

@@ -26,7 +26,9 @@ to setup
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
+
   set list-of-dead-and-safely-buried-people []
+
   set was-social-distancing-enforced? false
   set when-has-2%-infected-threshold-first-been-met? "never"
   set when-has-5%-infected-threshold-first-been-met? "never"
@@ -228,9 +230,9 @@ to setup-person [current-home l-age]
     setup-relation-to-gathering-points
     
 
-    set can-I-perform-solo-transportation? random-float 1  <  owning-solo-transportation-probability
+    set can-I-perform-solo-transportation? random-float 1  <  owning-solo-transportation-probability   ;; IS THIS RELEVANT IN EBOLA?
 
-    set current-person-I-depend-on nobody
+    set current-person-I-depend-on nobody   ;;MOD FOR CARETAKING
     set color default-color
     set size 0.5
     set infection-state healthy-infection-status
@@ -264,6 +266,7 @@ to setup-relation-to-gathering-points
   [  set features (list "relaxing")]
   create-gathering-link-to one-of public-leisure-points
   [ set features (list "relaxing")]
+  
   create-gathering-link-to one-of burial-rites
   [ set features (list "belonging")]
 
@@ -327,7 +330,7 @@ end
 
 
 to setup-activities
-  set  hospitals (turtle-set)
+  set hospitals (turtle-set)
   set workplaces (turtle-set)
   set schools (turtle-set)
   set homes (turtle-set)
@@ -402,14 +405,6 @@ to setup-activities
   ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
 end
 
-; to setup-economy
-;   ask gathering-points with [gathering-type = "school"] [set amount-of-capital my-default-available-liquidities]
-;   ask gathering-points with [gathering-type = "university"] [set amount-of-capital my-default-available-liquidities]
-;   ask gathering-points with [gathering-type = "workplace"] [set amount-of-capital my-default-available-liquidities set stock-of-goods my-max-stock-of-goods]
-;   ask gathering-points with [gathering-type = "essential-shop"] [set amount-of-capital my-default-available-liquidities set stock-of-goods max-stock-of-goods-in-a-shop]
-;   ask gathering-points with [gathering-type = "non-essential-shop"] [set amount-of-capital my-default-available-liquidities set stock-of-goods max-stock-of-goods-in-a-shop]
-;   ask gathering-points with [gathering-type = "hospital"] [set amount-of-capital my-default-available-liquidities]
-; end
 
 to setup-gathering-point-capacities
   ask gathering-points [
@@ -472,6 +467,22 @@ to setup-activity-animate-positions
 
 
 end
+
+
+
+
+
+; to setup-economy
+;   ask gathering-points with [gathering-type = "school"] [set amount-of-capital my-default-available-liquidities]
+;   ask gathering-points with [gathering-type = "university"] [set amount-of-capital my-default-available-liquidities]
+;   ask gathering-points with [gathering-type = "workplace"] [set amount-of-capital my-default-available-liquidities set stock-of-goods my-max-stock-of-goods]
+;   ask gathering-points with [gathering-type = "essential-shop"] [set amount-of-capital my-default-available-liquidities set stock-of-goods max-stock-of-goods-in-a-shop]
+;   ask gathering-points with [gathering-type = "non-essential-shop"] [set amount-of-capital my-default-available-liquidities set stock-of-goods max-stock-of-goods-in-a-shop]
+;   ask gathering-points with [gathering-type = "hospital"] [set amount-of-capital my-default-available-liquidities]
+; end
+
+
+
 
 ; to setup-economic-model
 ;   set government-reserve-of-capital government-initial-reserve-of-capital

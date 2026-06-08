@@ -10,7 +10,10 @@ people-own [
   time-when-infected
   epistemic-infection-status
   
-  ;;
+  ;;add mourning and burial rites MAYBE NOT HERE
+  is-mourning?
+  
+  
   is-activity-successful?
   current-activity
   is-moving-outside-for-reaching-current-activity?
@@ -29,7 +32,6 @@ people-own [
   #people-in-my-transport
   
   is-currently-allocated-a-bed-in-hospital?
-  ;set-default-shape turtles "circle"
   
   list-of-people-met-per-day-as-recorded-by-the-tracking-app
   is-user-of-tracking-app?

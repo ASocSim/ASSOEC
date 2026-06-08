@@ -1,8 +1,8 @@
- to-report burial-gathering-type
+to-report burial-gathering-type
   report "burial-rites"
 end
 
- to-report hospital-gathering-type
+to-report hospital-gathering-type
   report "hospital"
 end
 

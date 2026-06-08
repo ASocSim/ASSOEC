@@ -349,6 +349,22 @@ end
 ;scores taken from https://www.hofstede-insights.com/product/compare-countries/
 to load-nations-hofstede-dimension-scores
 
+  
+  if load-country-specific-settings = "DRC" [
+    ;HARDCODING THIS AS UGANDA and Africa EAST PARTIAL METRICS FOR NOW, PLEASE ADD DRC
+    set power-distance 64
+    set individualism-vs-collectivism 24 ;uganda, use 32 for east africa
+    set masculinity-vs-femininity 41
+    set uncertainty-avoidance 52
+    set long-vs-short-termism 32
+    set indulgence-vs-restraint 40
+    stop
+    
+  ]
+  
+  
+  
+  
   if load-country-specific-settings = "Custom" [
     set power-distance power-distance
     set individualism-vs-collectivism individualism-vs-collectivism
