@@ -10,7 +10,7 @@ people-own [
   time-when-infected
   epistemic-infection-status
   
-  ;;add mourning and burial rites MAYBE NOT HERE
+  ;;add mourning and burial rites PLACEHOLDER when one agent dies, their social network is in mourning and will attend a safe or unsafe burial
   is-mourning?
   
   

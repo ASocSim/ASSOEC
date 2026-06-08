@@ -26,7 +26,7 @@ to setup
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
-
+;; in ebola death does not prevent contagion
   set list-of-dead-and-safely-buried-people []
 
   set was-social-distancing-enforced? false

@@ -123,7 +123,7 @@ to-report is-retired?
   report age = "retired"
 end
 
-to-report retireds
+to-report retireds ;; YOU KNOW IT'S RETIREES BUT NO WORRIES
   report people with [is-retired?]
 end
 

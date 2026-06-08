@@ -232,7 +232,7 @@ end
 
 to kill-person 
   set infection-state dead-infection-status
-  set #infected #infected - 1
+;  set #infected #infected - 1
   set #dead-people #dead-people + 1
   set list-of-dead-and-safely-buried-people fput who list-of-dead-and-safely-buried-people
   

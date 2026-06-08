@@ -126,7 +126,6 @@ if not any? people with [is-contagious?]
     <note x="707" y="562" backgroundDark="0" fontSize="11" width="150" markdown="false" height="18" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Age model</note>
     <slider x="828" step="0.01" y="1076" max="1" width="150" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-schools"></slider>
     <slider x="983" step="0.01" y="1076" max="1" width="150" display="density-factor-universities" height="50" min="0" direction="Horizontal" default="0.2" variable="density-factor-universities"></slider>
-    <slider x="1138" step="0.01" y="1076" max="1" width="150" display="density-factor-workplaces" height="50" min="0" direction="Horizontal" default="0.2" variable="density-factor-workplaces"></slider>
     <slider x="1293" step="0.01" y="1076" max="1" width="150" display="density-factor-public-leisure" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-public-leisure"></slider>
     <slider x="1448" step="0.01" y="1127" max="1" width="150" display="density-factor-private-leisure" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-private-leisure"></slider>
     <slider x="553" step="0.01" y="1075" max="1" width="175" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
@@ -205,7 +204,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <note x="3654" y="1097" backgroundDark="0" fontSize="16" width="155" markdown="false" height="40" textColorDark="-1" textColorLight="-6459832" backgroundLight="0">Migration model</note>
     <slider x="3686" step="0.01" y="1142" max="1" width="274" display="probability-infection-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-infection-when-abroad"></slider>
     <slider x="3971" step="0.01" y="1254" max="1" width="297" display="probability-getting-back-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-getting-back-when-abroad"></slider>
-    <switch x="3926" y="1148" height="40" on="false" variable="migration?" width="112" display="migration?"></switch>
     <slider x="4016" step="0.01" y="856" max="1" width="244" display="density-walking-outside" height="50" min="0" direction="Horizontal" default="0.05" variable="density-walking-outside"></slider>
     <monitor x="556" precision="17" y="1302" height="60" fontSize="11" width="100" display="#@home">count people with [[gathering-type] of current-activity = "home"]</monitor>
     <monitor x="661" precision="17" y="1303" height="60" fontSize="11" width="100" display="#@school">count people with [[gathering-type] of current-activity = "school"]</monitor>
@@ -285,7 +283,7 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <slider x="548" step="0.01" y="1901" max="1" width="212" display="ratio-tax-on-workplaces" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-tax-on-workplaces"></slider>
     <slider x="548" step="0.01" y="1956" max="1" width="212" display="ratio-tax-on-workers" height="50" min="0" direction="Horizontal" default="0.42" variable="ratio-tax-on-workers"></slider>
     <note x="551" y="1771" backgroundDark="0" fontSize="11" width="198" markdown="false" height="18" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Taxes charged by the government</note>
-    <chooser x="583" y="442" height="60" variable="household-profiles" current="8" width="160" display="household-profiles">
+    <chooser x="583" y="442" height="60" variable="household-profiles" current="0" width="160" display="household-profiles">
       <choice type="string" value="custom"></choice>
       <choice type="string" value="Belgium"></choice>
       <choice type="string" value="Canada"></choice>
@@ -309,7 +307,7 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <slider x="547" step="1" y="2018" max="50" width="209" display="goods-produced-by-work-performed" height="50" min="1" direction="Horizontal" default="12.0" variable="goods-produced-by-work-performed"></slider>
     <slider x="547" step="0.1" y="2073" max="5" width="209" display="unit-price-of-goods" height="50" min="0.1" direction="Horizontal" default="2.9" variable="unit-price-of-goods"></slider>
     <switch x="668" y="47" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
-    <chooser x="548" y="96" height="60" variable="preset-scenario" current="15" width="242" display="preset-scenario">
+    <chooser x="548" y="96" height="60" variable="preset-scenario" current="0" width="242" display="preset-scenario">
       <choice type="string" value="default-scenario"></choice>
       <choice type="string" value="scenario-1-zero-action-scandinavia"></choice>
       <choice type="string" value="scenario-1-closing-schools-and-uni"></choice>
@@ -702,15 +700,6 @@ As simplifications: each person relates to a fix set of spaces over time (same s
       <choice type="string" value="oxford"></choice>
       <choice type="string" value="bunia"></choice>
     </chooser>
-    <plot x="1687" autoPlotX="true" yMax="0.01" autoPlotY="true" y="664" xMin="0.0" height="175" legend="false" xMax="1.0" yMin="0.0" width="230" display="avg-infectiousity per person">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="default" color="-16777216" legend="true">
-        <setup></setup>
-        <update>ifelse not any? people with [is-infected?] [plot 0]
-[plot mean [oxford-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
-      </pen>
-    </plot>
     <monitor x="1590" precision="17" y="844" height="60" fontSize="11" width="208">count people with [is-officially-asked-to-quarantine?]</monitor>
     <slider x="549" step="1" y="1660" max="10" width="228" display="amount-of-rations-I-buy-when-going-to-shops" height="50" min="0" direction="Horizontal" default="6.0" variable="amount-of-rations-I-buy-when-going-to-shops"></slider>
     <note x="1326" y="215" backgroundDark="0" fontSize="11" width="82" markdown="false" height="57" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">ASSOCC
@@ -821,6 +810,17 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
       <choice type="string" value="Sweden"></choice>
       <choice type="string" value="U.S.A."></choice>
     </chooser>
+    <switch x="3991" y="1141" height="40" on="false" variable="migration?" width="112" display="migration?"></switch>
+    <plot x="1554" autoPlotX="true" yMax="0.01" autoPlotY="true" y="647" xMin="0.0" height="175" legend="false" xMax="1.0" yMin="0.0" width="230" display="avg-infectiousity per person">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="default" color="-16777216" legend="true">
+        <setup></setup>
+        <update>ifelse not any? people with [is-infected?] [plot 0]
+[plot mean [oxford-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
+      </pen>
+    </plot>
+    <slider x="1138" step="0.01" y="1076" max="1" width="150" display="density-factor-workplaces" height="50" min="0" direction="Horizontal" default="0.2" variable="density-factor-workplaces"></slider>
   </widgets>
   <info>## WHAT IS IT?
 

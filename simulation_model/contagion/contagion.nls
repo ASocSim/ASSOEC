@@ -18,39 +18,10 @@ to spread-contagion
   
 end
 
-; to spread-by-travelling
-;   let travellers people with [is-moving-outside-for-reaching-current-activity?]
-  
-;   let contagious travellers with [is-contagious?]
-;   ask people [if is-away? [apply-risk-of-contamination-when-away]]
-  
-;   ask travellers [
-;     apply-risk-of-contamination-when-travelling travellers contagious
-;   ]
-  
-;   foreach list-of-buses [
-;     x -> spread-within-a-set-of-people x "bus"
-;   ]
-  
-;   foreach list-of-shared-cars [
-;     x -> spread-within-a-set-of-people x "cars"
-;   ]
-  
-;   let people-waiting-for-bus people with [stayed-out-queuing-for-bus?]
-;   spread-within-a-set-of-people
-;   people-waiting-for-bus
-;   "queue-waiting-for-bus"
-; end
-
-
 
 to spread-by-funeral-rites
- write "funeral rites not implemented yet"
+ ;placeholder for contagion at funeral rites if extra checks needed
 end
-
-
-
-
 
 
 to spread-by-activity-proximity
@@ -165,13 +136,6 @@ end
 
 
 
-
-
-
-
-
-
-
 ;;HERE IS THE JUICY STUFF FOR EBOLA disease CHANGES
 
 to-report relative-infection-rate-of-infection-status [is]
@@ -213,14 +177,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
 to-report density-factor-of [context]
   if is-gathering-point? context [
     report [proximity-factor] of context
@@ -235,18 +191,6 @@ end
 ;infected-critical-infection-status  
 ;hospital-to-rec-infection-status dead-infection-status
  
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -296,3 +240,31 @@ end
 to-report infection-rate-of [context]
   report density-factor-of context
 end
+
+
+
+
+
+; to spread-by-travelling
+;   let travellers people with [is-moving-outside-for-reaching-current-activity?]
+  
+;   let contagious travellers with [is-contagious?]
+;   ask people [if is-away? [apply-risk-of-contamination-when-away]]
+  
+;   ask travellers [
+;     apply-risk-of-contamination-when-travelling travellers contagious
+;   ]
+  
+;   foreach list-of-buses [
+;     x -> spread-within-a-set-of-people x "bus"
+;   ]
+  
+;   foreach list-of-shared-cars [
+;     x -> spread-within-a-set-of-people x "cars"
+;   ]
+  
+;   let people-waiting-for-bus people with [stayed-out-queuing-for-bus?]
+;   spread-within-a-set-of-people
+;   people-waiting-for-bus
+;   "queue-waiting-for-bus"
+; end
