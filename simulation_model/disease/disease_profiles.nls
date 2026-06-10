@@ -1,5 +1,4 @@
-
-
+;ebola update
 
 ;SUSCEPTIBLE
 to-report healthy-infection-status
@@ -69,6 +68,11 @@ to-report safely-buried-infection-status
   report "safely-buried"
 end
 
+
+
+
+
+
 ;;MOD
 
 to-report pre-symptomatic-to-mild-infection-status
@@ -82,10 +86,6 @@ end
 to-report pre-symptomatic-to-severe-infection-status
   report "pre-symptomatic-to-severe"
 end
-
-
-
-
 
 
 

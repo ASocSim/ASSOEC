@@ -342,6 +342,29 @@ to setup-activities
   
   set burial-rites (turtle-set)
 
+  
+  ;;TO CALIBRATE
+  if bunia_proxemics [
+  set #hospital-gp 2
+  set density-factor-hospitals 1
+    set #universities-gp 1
+    set density-factor-universities 0.4
+    set #workplaces-gp 20
+    set density-factor-workplaces 0.5
+    set #public-leisure-gp 20
+    set density-factor-public-leisure 0.3
+    set #private-leisure-gp 50
+    set density-factor-private-leisure 0.6
+    set #essential-shops-gp 10
+    set #non-essential-shops-gp 9
+    set density-factor-essential-shops 0.7
+    set density-factor-non-essential-shops 0.7
+    set #burial-rites-gp 5
+    set density-factor-burial-rites 0.8
+  ]
+  
+  
+  
   create-gathering-points #schools-gp [
     set schools (turtle-set schools self)
     set hired-workers (turtle-set)
