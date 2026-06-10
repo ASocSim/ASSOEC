@@ -11,24 +11,6 @@ to-report just-contaminated-infection-status
 end
 
 
-to-report infectious-stage-one-infection-status
-  report "no"
-end
-
-to-report infectious-stage-two-infection-status
-  report "no"
-end
-
-to-report symptomatic-to-hospitalized-infection-status
-  report "no"
-end
-
-to-report symptomatic-to-non-hospitalized-infection-status
-  report "no"
-end
-
-
-
 to-report hospitalized-to-recovery-if-treated-profile
   report "recovery if treated"
 end

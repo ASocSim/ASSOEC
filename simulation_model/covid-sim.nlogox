@@ -185,10 +185,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <note x="1597" y="28" backgroundDark="0" fontSize="16" width="167" markdown="false" height="27" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Disease Model</note>
     <note x="1246" y="98" backgroundDark="0" fontSize="11" width="294" markdown="false" height="33" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Time between transitions</note>
     <input x="1212" multiline="false" y="121" height="60" variable="infection-to-asymptomatic-contagiousness" type="number" width="243">8.0</input>
-    <input x="1459" multiline="false" y="154" height="60" variable="asympomatic-contagiousness-to-symptomatic-contagiousness" type="number" width="337">16.0</input>
-    <input x="1799" multiline="false" y="153" height="60" variable="symptomatic-to-critical-or-heal" type="number" width="187">7.0</input>
-    <input x="1995" multiline="false" y="154" height="60" variable="critical-to-terminal" type="number" width="112">2.0</input>
-    <input x="2116" multiline="false" y="153" height="60" variable="terminal-to-death" type="number" width="119">7.0</input>
     <slider x="1518" step="0.01" y="496" max="1" width="245" display="probability-unavoidable-death" height="50" min="0" direction="Horizontal" default="0.1" variable="probability-unavoidable-death"></slider>
     <slider x="1413" step="0.01" y="221" max="1" width="265" display="probability-self-recovery-symptoms" height="50" min="0" direction="Horizontal" default="0.6" variable="probability-self-recovery-symptoms"></slider>
     <slider x="1409" step="0.01" y="386" max="1" width="269" display="probability-recorvery-if-treated" height="50" min="0" direction="Horizontal" default="0.1" variable="probability-recorvery-if-treated"></slider>
@@ -696,9 +692,9 @@ while [slice-of-the-day != "morning"] [go]</button>
     <slider x="3233" step="1" y="147" max="25" width="233" display="influence-of-age-on-value-system" height="50" min="0" direction="Horizontal" default="5.0" variable="influence-of-age-on-value-system"></slider>
     <note x="559" y="933" backgroundDark="0" fontSize="10" width="566" markdown="false" height="40" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
 As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
-    <chooser x="1885" y="18" height="60" variable="contagion-model" current="0" width="138" display="contagion-model">
+    <chooser x="1885" y="18" height="60" variable="contagion-model" current="1" width="138" display="contagion-model">
       <choice type="string" value="oxford"></choice>
-      <choice type="string" value="bunia"></choice>
+      <choice type="string" value="ebola"></choice>
     </chooser>
     <monitor x="1590" precision="17" y="844" height="60" fontSize="11" width="208">count people with [is-officially-asked-to-quarantine?]</monitor>
     <slider x="549" step="1" y="1660" max="10" width="228" display="amount-of-rations-I-buy-when-going-to-shops" height="50" min="0" direction="Horizontal" default="6.0" variable="amount-of-rations-I-buy-when-going-to-shops"></slider>
@@ -821,10 +817,14 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
       </pen>
     </plot>
     <slider x="1138" step="0.01" y="1076" max="1" width="150" display="density-factor-workplaces" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-workplaces"></slider>
-    <switch x="1179" y="905" height="40" on="true" variable="bunia_proxemics" width="142" display="bunia_proxemics"></switch>
     <input x="1051" multiline="false" y="1012" height="60" variable="#workplaces-gp" type="number" width="100">20.0</input>
-    <slider x="1338" step="0.01" y="901" max="1" width="250" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.5" variable="trust_in_hospital"></slider>
-    <slider x="2030" step="0.01" y="26" max="1" width="187" display="CFR" height="50" min="0" direction="Horizontal" default="0.18" variable="CFR"></slider>
+    <slider x="2030" step="0.01" y="26" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.18" variable="CFR" width="187" sizeVersion="0"></slider>
+    <input x="1799" multiline="false" y="153" height="60" variable="symptomatic-to-critical-or-heal" type="number" width="187">7.0</input>
+    <input x="1459" multiline="false" y="154" height="60" variable="asympomatic-contagiousness-to-symptomatic-contagiousness" type="number" width="337">16.0</input>
+    <input x="2116" multiline="false" y="153" height="60" variable="terminal-to-death" type="number" width="119">7.0</input>
+    <input x="1995" multiline="false" y="154" height="60" variable="critical-to-terminal" type="number" width="112">2.0</input>
+    <switch x="1179" y="905" height="40" on="true" variable="bunia_proxemics" display="bunia_proxemics" width="142" sizeVersion="0"></switch>
+    <slider x="1912" step="0.01" y="255" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.5" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
   </widgets>
   <info>## WHAT IS IT?
 

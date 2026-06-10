@@ -1,9 +1,10 @@
 __includes ["disease/disease_profiles.nls" "disease/oxford_disease_model.nls" "disease/ebola_profiles.nls" "disease/ebola_disease_model.nls"]
 
+;;the goal is to KEEP ONLY LOGIC HERE AND SPLIT EBOLA AND COVID CONTAGION DISEASE MODELS
 
 globals [
-  #people-saved-by-hospitalization
-  #people-dying-due-to-lack-of-hospitalization
+  #people-saved-by-hospitalization ; this is not in use?
+  #people-dying-due-to-lack-of-hospitalization ;neither is this?
   #infected
    infected-people
   list-of-dead-and-safely-buried-people
@@ -23,7 +24,8 @@ to-report infection-status
 end
 
 to-report is-immune?
-  report infection-status = immune-infection-status
+    if  disease-fsm-model = "oxford" [  report infection-status = immune-infection-status]
+  if disease-fsm-model = "ebola" [report infection-status = immune-infection-status] ;THEY DO THE SAME THING FOR NOW, MIGHT CHANGE LATER
 end
 
 to-report is-susceptible?
@@ -32,75 +34,6 @@ to-report is-susceptible?
 if disease-fsm-model = "ebola" [
     report infection-state = susceptible-infection-status]
 end
-
-to-report next-infection-state
-  if disease-fsm-model = "assocc" [update-disease-status-assocc] 
-  if disease-fsm-model = "oxford" [report next-state-odm infection-state]
-    if disease-fsm-model = "ebola" [report next-state-ebo infection-state]
-  error "unimplemented"
-end
-
-to update-disease-status-assocc
-  
- ;   ifelse random-float 1 < my-probability-to-recover-after-asymptomatic-contagious-infection-status
-;  [
- ;   set-immune
-;  ]
- ; ifelse disease-profile = "self-recovery with no symptoms" [set-immune]
-    ;  [
-    ;    set infection-status "infected-symptomatic"
-   ;     set duration-current-disease-status symptomatic-to-critical-or-heal
-;  ]
-  
- ;  if infection-status = "asymptomatic noncontagious" 
- ;   [
-  ;    set infection-status "infected-asymptomatic"
-  ;    set duration-current-disease-status  asympomatic-contagiousness-to-symptomatic-contagiousness
- ;     stop
- ;   ]
-    
-;    if infection-status = infected-asymptomatic-status
-;    [
-   ;   fsm-infection-transition-after-infected-asymptomatic-infection-status
-  ;    update-within-disease-status     
-  ;    stop
- ;   ]
-    
- ;   if infection-status = "infected-symptomatic"
- ;   [
-  ;    if disease-profile = recovery-if-treated-profile or disease-profile = "unavoidable death"
-  ;    [
- ;       set infection-status "infected-critical"
- ;       set duration-current-disease-status critical-to-terminal
- ;       stop
- ;    ]
-     ; if disease-profile = "self-recovery with symptoms"[set-immune stop]
-    ;  error (sentence "unimplemented: " disease-profile duration-current-disease-status infection-status)
- ;   ]
-    
-;    if infection-status = "infected-critical"
- ;   [
-;      if is-currently-being-treated-at-hospital?; and disease-profile = "recovery if treated" 
-;      [
-;        set-immune
- ;       set #people-saved-by-hospitalization #people-saved-by-hospitalization + 1
-;        stop
- ;     ]
-      
-;      set infection-status "infected-terminal"
-;      set duration-current-disease-status terminal-to-death
-;      stop
- ;   ]
-    
-;    if infection-status = "infected-terminal"
- ;   [kill-person]
-    
-;   error (sentence "unimplemented")
- ; ]
-;  [stop]
-error "unimplemented"
-end
-
 
 
 to set-immune
@@ -111,11 +44,18 @@ to set-immune
     set infection-state immune-infection-status
 end
 
+to-report next-infection-state
+  if disease-fsm-model = "assocc" [update-disease-status-assocc] 
+  if disease-fsm-model = "oxford" [report next-state-odm infection-state]
+    if disease-fsm-model = "ebola" [report next-state-ebo infection-state]
+  error "unimplemented"
+end
 
 
 
 to-report infected-asymptomatic-status
-  report "infected-asymptomatic"
+  if  disease-fsm-model = "oxford" [  
+    report "infected-asymptomatic"]
 end
 
 to set-infection-status [infection]
@@ -137,7 +77,7 @@ end
 
 
 
-
+;; THESE ONLY WORK FOR ASSOCC OXFORD
 to-report is-severe-infection-state? [in]
   if is-timed-state? in [report is-infected-infection-status? state-of-timed-state in]
   if in = symptomatic-severe-infection-status
@@ -286,6 +226,77 @@ to update-within-agent-disease-status
   ask people [
     set-infection-status next-infection-state
     if infection-status = dead-infection-status [kill-person ]
-   ; if infection-status = safely-buried [kill-person]
+    if infection-status = dead-to-safe-burial-infection-status or infection-status = dead-to-unsafe-burial-infection-status [kill-person]
   ]
+end
+
+
+
+
+
+
+
+
+
+
+
+to update-disease-status-assocc
+  
+ ;   ifelse random-float 1 < my-probability-to-recover-after-asymptomatic-contagious-infection-status
+;  [
+ ;   set-immune
+;  ]
+ ; ifelse disease-profile = "self-recovery with no symptoms" [set-immune]
+    ;  [
+    ;    set infection-status "infected-symptomatic"
+   ;     set duration-current-disease-status symptomatic-to-critical-or-heal
+;  ]
+  
+ ;  if infection-status = "asymptomatic noncontagious" 
+ ;   [
+  ;    set infection-status "infected-asymptomatic"
+  ;    set duration-current-disease-status  asympomatic-contagiousness-to-symptomatic-contagiousness
+ ;     stop
+ ;   ]
+    
+;    if infection-status = infected-asymptomatic-status
+;    [
+   ;   fsm-infection-transition-after-infected-asymptomatic-infection-status
+  ;    update-within-disease-status     
+  ;    stop
+ ;   ]
+    
+ ;   if infection-status = "infected-symptomatic"
+ ;   [
+  ;    if disease-profile = recovery-if-treated-profile or disease-profile = "unavoidable death"
+  ;    [
+ ;       set infection-status "infected-critical"
+ ;       set duration-current-disease-status critical-to-terminal
+ ;       stop
+ ;    ]
+     ; if disease-profile = "self-recovery with symptoms"[set-immune stop]
+    ;  error (sentence "unimplemented: " disease-profile duration-current-disease-status infection-status)
+ ;   ]
+    
+;    if infection-status = "infected-critical"
+ ;   [
+;      if is-currently-being-treated-at-hospital?; and disease-profile = "recovery if treated" 
+;      [
+;        set-immune
+ ;       set #people-saved-by-hospitalization #people-saved-by-hospitalization + 1
+;        stop
+ ;     ]
+      
+;      set infection-status "infected-terminal"
+;      set duration-current-disease-status terminal-to-death
+;      stop
+ ;   ]
+    
+;    if infection-status = "infected-terminal"
+ ;   [kill-person]
+    
+;   error (sentence "unimplemented")
+ ; ]
+;  [stop]
+error "unimplemented"
 end

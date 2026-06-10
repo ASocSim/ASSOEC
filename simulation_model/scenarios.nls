@@ -392,14 +392,13 @@ to load-default-disease-model
   set with-infected? true
   set propagation-risk 0.15
   set critical-to-terminal 2
-  set probability-recorvery-if-treated-old 0.6
+  set probability-recorvery-if-treated-old 0.6 ;typo?
   set probability-unavoidable-death-old 0.2
   set probability-self-recovery-symptoms-old 0.1
   set probability-unavoidable-death 0.1
-  set probability-recorvery-if-treated 0.1
+  set probability-recorvery-if-treated 0.1 ;typo?
   set probability-self-recovery-symptoms 0.6
 end
-
 
 to load-default-contagion-model
   set density-factor-hospitals 0.80

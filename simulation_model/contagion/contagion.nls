@@ -60,6 +60,8 @@ to process-contacts-within-group-event [ts context]
   increment-contacts-due-to-group-gathering-global-metrics ts context
 end
 
+
+
 ;WHAT ARE THE CONTEXTUAL MITIGATION FACTORS FOR EBOLA, IF ANY?
 to-report contextual-contagion-modificators
   report age-infection-risk-mitigation-factor * social-distancing-risk-mitigation-factor
@@ -99,6 +101,7 @@ to apply-risk-of-contamination-when-travelling [travellers contagious]
   if not was-sick? and is-infected? [set #who-became-sick-while-travelling-locally #who-became-sick-while-travelling-locally + 1]
 end
 
+
 to-report age-infection-risk-mitigation-factor
   report ifelse-value is-young? [factor-reduction-probability-transmission-young] [1]
 end
@@ -125,42 +128,25 @@ end
 
 to-report risks-of-contamination [infector susceptible context]
   if contagion-model = "oxford" [report (oxford-contagion-factor-between infector susceptible context) * social-distancing-risk-mitigation-factor]
-  
+  if contagion-model = "ebola" [report (ebola-contagion-factor-between infector susceptible context) ]
   error (sentence "not implemented for" contagion-model)
 end
 
 
 
-
-;;HERE IS THE JUICY STUFF FOR EBOLA disease CHANGES
-
 to-report relative-infection-rate-of-infection-status [is]
-  ;anyone not infectious here
   if is = just-contaminated-infection-status or
   is = immune-infection-status or
-  is = healthy-infection-status 
-  ;or
- ; is = safely-buried-infection-status
+  is = healthy-infection-status or
+  is = dead-infection-status
   [report 0]
   
-  ; lower infectious chance for deceased pat? not 0, 0 only with safe burials
-  if is = asymptomatic-to-rec-infection-status [report 0] ; remove later, there are few asymptomatic ebola cases
+  if is = asymptomatic-to-rec-infection-status [report 0.29]
   
-  ;phase 1 and 2 and deceased
   if is = pre-symptomatic-to-mild-infection-status
   or is = symptomatic-mild-infection-status
   or is = mild-to-rec-infection-status [report 0.48]
   
-  if is = infectious-stage-one-infection-status
-  or is = infectious-stage-two-infection-status
-  or is = symptomatic-to-hospitalized-infection-status
-  or is = symptomatic-to-non-hospitalized-infection-status
- ; or is = non-hospitalized-to-dead-infectious-infection-status
- ; or is = hospitalized-to-dead-infectious-infection-status
-  or is = hospitalized-to-recovery-if-treated-profile
-  [report 1]
-  
-;remove these
   if is = pre-symptomatic-to-severe-infection-status or
   is = symptomatic-severe-infection-status or
   is = severe-to-hospital-infection-status or
@@ -168,9 +154,46 @@ to-report relative-infection-rate-of-infection-status [is]
   is =  hospital-to-death-infection-status or
   is = hospital-to-rec-infection-status
   [report 1]
+  error (sentence "not implemented" infection-status)
+end
+
+
+
+
+;;HERE IS THE JUICY STUFF FOR EBOLA disease CHANGES
+
+to-report ebo-relative-infection-rate-of-infection-status [is]
+  ;anyone not infectious here
+  if is = just-exposed-infection-status or
+  is = susceptible-infection-status or
+  is = unsafe-burial-to-removed-infection-status or
+  is = dead-to-safe-burial-infection-status or
+  is = safe-burial-to-removed-infection-status
+  [report 0]
+  
+  ; lower infectious chance for deceased pat? not 0, 0 only with safe burials
+  if is = exposed-to-stage-one-infection-status 
+  [report 0] ; remove later, there are few asymptomatic ebola cases
+  
+  ;phase 1 transition
+  if is = stage-one-to-hospitalised-infection-status
+  or is = immune-infection-status ;; ADD STATE HERE IF THERE ARE ISOLATION PRACTICES THAT WORK
+  [report 0.5]
+  
+  if is = stage-one-to-non-hospitalised-infection-status
+  or is = stage-one-to-stage-two-infection-status
+  or is = stage-two-to-hospitalised-infection-status
+  or is = stage-two-to-non-hospitalised-infection-status
+  or is = hospitalized-to-dead-infectious-infection-status 
+  or is = non-hospitalized-to-dead-infectious-infection-status
+  or is = dead-to-unsafe-burial-infection-status
+  [report 1]
   
   error (sentence "not implemented" infection-status)
 end
+
+
+
 
 
 

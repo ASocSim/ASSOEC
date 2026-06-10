@@ -27,7 +27,6 @@ write "transition model for ebola"
   
   if s = dead-infection-status [report stochastic-fsm-transition (list (list dead-infection-status 1))]
   
-  
   error (sentence "unimplemented" s)
   
 end
