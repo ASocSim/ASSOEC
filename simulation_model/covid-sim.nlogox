@@ -119,16 +119,15 @@ if not any? people with [is-contagious?]
     </plot>
     <note x="565" y="850" backgroundDark="0" fontSize="16" width="278" markdown="false" height="46" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
     <input x="841" multiline="false" y="1012" height="60" variable="#schools-gp" type="number" width="100">12.0</input>
-    <input x="946" multiline="false" y="1012" height="60" variable="#universities-gp" type="number" width="100">4.0</input>
-    <input x="1051" multiline="false" y="1012" height="60" variable="#workplaces-gp" type="number" width="100">23.0</input>
+    <input x="946" multiline="false" y="1012" height="60" variable="#universities-gp" type="number" width="100">1.0</input>
     <note x="739" y="986" backgroundDark="0" fontSize="11" width="753" markdown="false" height="20" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Number of units per activity type (sharing a unit incurs a transmission risk: due to contact)</note>
-    <input x="1156" multiline="false" y="1012" height="60" variable="#public-leisure-gp" type="number" width="115">18.0</input>
+    <input x="1156" multiline="false" y="1012" height="60" variable="#public-leisure-gp" type="number" width="115">20.0</input>
     <input x="1276" multiline="false" y="1012" height="60" variable="#private-leisure-gp" type="number" width="118">50.0</input>
     <note x="707" y="562" backgroundDark="0" fontSize="11" width="150" markdown="false" height="18" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Age model</note>
     <slider x="828" step="0.01" y="1076" max="1" width="150" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-schools"></slider>
-    <slider x="983" step="0.01" y="1076" max="1" width="150" display="density-factor-universities" height="50" min="0" direction="Horizontal" default="0.2" variable="density-factor-universities"></slider>
-    <slider x="1293" step="0.01" y="1076" max="1" width="150" display="density-factor-public-leisure" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-public-leisure"></slider>
-    <slider x="1448" step="0.01" y="1127" max="1" width="150" display="density-factor-private-leisure" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-private-leisure"></slider>
+    <slider x="983" step="0.01" y="1076" max="1" width="150" display="density-factor-universities" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-universities"></slider>
+    <slider x="1293" step="0.01" y="1076" max="1" width="150" display="density-factor-public-leisure" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-public-leisure"></slider>
+    <slider x="1448" step="0.01" y="1127" max="1" width="150" display="density-factor-private-leisure" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-private-leisure"></slider>
     <slider x="553" step="0.01" y="1075" max="1" width="175" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
     <note x="1969" y="1133" backgroundDark="0" fontSize="16" width="308" markdown="false" height="46" textColorDark="-1" textColorLight="-13345367" backgroundLight="0">Measures (Interventions) Model</note>
     <chooser x="2478" y="1248" height="60" variable="global-confinement-measures" current="0" width="215" display="global-confinement-measures">
@@ -166,11 +165,11 @@ if not any? people with [is-contagious?]
     </plot>
     <monitor x="1420" precision="17" y="1283" height="60" fontSize="11" width="118">day-of-the-week</monitor>
     <monitor x="1414" precision="17" y="1353" height="60" fontSize="11" width="116">slice-of-the-day</monitor>
-    <slider x="1603" step="0.01" y="1146" max="1" width="150" display="density-factor-essential-shops" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-essential-shops"></slider>
-    <slider x="1758" step="0.01" y="1146" max="1" width="150" display="density-factor-non-essential-shops" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-non-essential-shops"></slider>
+    <slider x="1603" step="0.01" y="1146" max="1" width="150" display="density-factor-essential-shops" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-essential-shops"></slider>
+    <slider x="1758" step="0.01" y="1146" max="1" width="150" display="density-factor-non-essential-shops" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-non-essential-shops"></slider>
     <input x="1523" multiline="false" y="1063" height="60" variable="#non-essential-shops-gp" type="number" width="129">9.0</input>
-    <input x="736" multiline="false" y="1012" height="60" variable="#hospital-gp" type="number" width="100">4.0</input>
-    <slider x="736" step="0.01" y="1076" max="1" width="186" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="0.8" variable="density-factor-hospitals"></slider>
+    <input x="736" multiline="false" y="1012" height="60" variable="#hospital-gp" type="number" width="100">2.0</input>
+    <slider x="736" step="0.01" y="1076" max="1" width="186" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-hospitals"></slider>
     <slider x="961" step="0.01" y="554" max="1" width="250" display="probability-hospital-personel" height="50" min="0" direction="Horizontal" default="0.28" variable="probability-hospital-personel"></slider>
     <slider x="966" step="0.01" y="685" max="1" width="249" display="probability-school-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-school-personel"></slider>
     <slider x="958" step="0.01" y="740" max="1" width="248" display="probability-university-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-university-personel"></slider>
@@ -484,7 +483,7 @@ while [current-day <= end-day] [ go ]]]></button>
     <slider x="1801" step="0.01" y="1928" max="1" width="239" display="ratio-retired-with-phones" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-retired-with-phones"></slider>
     <monitor x="2066" precision="17" y="1792" height="60" fontSize="11" width="130" display="#phone-owners">count people with [has-mobile-phone?]</monitor>
     <monitor x="2066" precision="17" y="1857" height="60" fontSize="11" width="132" display="ratio-phone-owners">count people with [has-mobile-phone?] / count people</monitor>
-    <chooser x="1734" y="18" height="60" variable="disease-fsm-model" current="1" width="138" display="disease-fsm-model">
+    <chooser x="1734" y="18" height="60" variable="disease-fsm-model" current="2" width="138" display="disease-fsm-model">
       <choice type="string" value="assocc"></choice>
       <choice type="string" value="oxford"></choice>
       <choice type="string" value="ebola"></choice>
@@ -791,7 +790,7 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
       </pen>
     </plot>
     <button x="12" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="89" display="setup">setup</button>
-    <input x="1529" multiline="false" y="1004" height="60" variable="#burial-rites-gp" type="number" width="250">4.0</input>
+    <input x="1529" multiline="false" y="1004" height="60" variable="#burial-rites-gp" type="number" width="250">5.0</input>
     <slider x="1674" step="0.01" y="1068" max="1" width="250" display="density-factor-burial-rites" height="50" min="0" direction="Horizontal" default="0.8" variable="density-factor-burial-rites"></slider>
     <input x="1399" multiline="false" y="1012" height="60" variable="#essential-shops-gp" type="number" width="119">10.0</input>
     <chooser x="2820" y="60" height="60" variable="load-country-specific-settings" current="0" width="217" display="load-country-specific-settings">
@@ -821,7 +820,11 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
 [plot mean [oxford-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
       </pen>
     </plot>
-    <slider x="1138" step="0.01" y="1076" max="1" width="150" display="density-factor-workplaces" height="50" min="0" direction="Horizontal" default="0.2" variable="density-factor-workplaces"></slider>
+    <slider x="1138" step="0.01" y="1076" max="1" width="150" display="density-factor-workplaces" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-workplaces"></slider>
+    <switch x="1179" y="905" height="40" on="true" variable="bunia_proxemics" width="142" display="bunia_proxemics"></switch>
+    <input x="1051" multiline="false" y="1012" height="60" variable="#workplaces-gp" type="number" width="100">20.0</input>
+    <slider x="1338" step="0.01" y="901" max="1" width="250" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.5" variable="trust_in_hospital"></slider>
+    <slider x="2030" step="0.01" y="26" max="1" width="187" display="CFR" height="50" min="0" direction="Horizontal" default="0.18" variable="CFR"></slider>
   </widgets>
   <info>## WHAT IS IT?
 

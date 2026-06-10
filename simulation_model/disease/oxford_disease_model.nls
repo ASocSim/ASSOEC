@@ -2,6 +2,7 @@ to-report transition-odm [s]
   if s = healthy-infection-status [report stochastic-fsm-transition (list (list healthy-infection-status 1))]
   if s = immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
   if s = dead-infection-status [report stochastic-fsm-transition (list (list dead-infection-status 1))]
+  
   if s = just-contaminated-infection-status [
     report stochastic-fsm-transition (list 
       (list timed-state asymptomatic-to-rec-infection-status tau-a-rec p-asymptomatic-odm )
@@ -41,6 +42,9 @@ to-report transition-odm [s]
   
   error (sentence "unimplemented" s)
 end
+
+
+
 
 to-report next-state-odm [s]
   report stochastic-transition-apply transition-odm s

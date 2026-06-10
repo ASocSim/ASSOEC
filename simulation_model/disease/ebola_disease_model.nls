@@ -1,0 +1,83 @@
+
+
+;BASIC EBOLA IMPLEMENTATION, disease progression without time and probability due to susceptibility transitions
+
+
+to-report transition-ebo [s]
+write "transition model for ebola"
+  ;static states: susceptible (healthy), and buried deceased
+  if s = susceptible-infection-status [report stochastic-fsm-transition (list (list susceptible-infection-status 1))]
+  if s = unsafe-burial-to-removed-infection-status [report stochastic-fsm-transition (list (list unsafe-burial-to-removed-infection-status 1))]
+  if s = safe-burial-to-removed-infection-status [report stochastic-fsm-transition (list (list safe-burial-to-removed-infection-status 1))]
+  if s = hospitalised-to-immune-infection-status [report stochastic-fsm-transition (list (list hospitalised-to-immune-infection-status 1))]
+  
+  ;remove triad - so far immediately move to stage 1
+  if s = just-exposed-infection-status [report stochastic-fsm-transition (list (list exposed-to-stage-one-infection-status ))]
+  if s = exposed-to-stage-one-infection-status [report stochastic-fsm-transition (list (list stage-one-to-stage-two-infection-status ))]
+  
+
+  if is-timed-state? s and time-of-timed-state s > 0 [
+    report stochastic-fsm-transition (list 
+    (list timed-state state-of-timed-state s (time-of-timed-state s - 1)))
+  ]  
+  
+  if state-of-timed-state s = hospitalized-to-dead-infectious-infection-status
+  or state-of-timed-state s = non-hospitalized-to-dead-infectious-infection-status
+  [ report stochastic-fsm-transition (list (list dead-to-unsafe-burial-infection-status 1))] ;we're only doing unsafe burials for now THIS WILL NEED ADDITIONS LATER
+  
+  if s = dead-infection-status [report stochastic-fsm-transition (list (list dead-infection-status 1))]
+  
+  
+  error (sentence "unimplemented" s)
+  
+end
+
+to-report next-state-ebo [s]
+  report stochastic-transition-apply transition-ebo s
+end
+
+
+;these numbers are made up and need to be calibrated later
+to-report p-pre-symptomatic-to-one-ebo
+  report 1 ; ALL INFECTED WILL PROCEED TO STAGE ONE
+end
+
+
+to-report p-hosp-ebo
+  ;INSTEAD OF AGE, THIS DEPENDS ON TRUST IN HOSPITAL SLIDER VALUE
+  report trust_in_hospital ;expand this later, good for testing now
+end
+
+to-report tau-hosp-ebo
+  report 10  * #ticks-per-day
+end
+
+;it takes very long for a patient to recover
+to-report tau-hosp-rec-ebo
+  let mean-val ((59 + 270) / 2)
+  let variance-val 5
+  report round (random-gamma (mean-val * mean-val / variance-val) (1 / (variance-val / mean-val)))  * #ticks-per-day
+end
+
+;how log does it take for a person to die
+to-report tau-hospital-to-death-ebo
+  report 10 * #ticks-per-day
+
+end
+
+;probability of survival, using the inverse of latest case fatality rate, adjust
+to-report p-survival-in-hospital-ebo
+  report 1 - CFR ; not real
+end
+  
+;assuming people who do not go to the hospital will not survive
+; to-report tau-rec
+;   let mean-val 12
+;   let variance-val 5
+;   report round (random-gamma (mean-val * mean-val / variance-val) (1 / (variance-val / mean-val)))  * #ticks-per-day
+; end
+
+;day 0 is when pat shows symptoms
+to-report tau-sym-ebo
+  report 0  * #ticks-per-day
+end

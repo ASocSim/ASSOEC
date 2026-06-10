@@ -1,0 +1,69 @@
+;EBOLA ONLY
+
+;SUSCEPTIBLE
+to-report susceptible-infection-status
+  report "healthy"
+end
+
+;;EXPOSED
+to-report just-exposed-infection-status
+  report "just-contaminated"
+end
+
+;; INFECTIOUS
+to-report exposed-to-stage-one-infection-status
+  report "infected-stage-1"
+end
+
+to-report stage-one-to-hospitalised-infection-status
+  report "hospitalized"
+end
+
+to-report stage-one-to-non-hospitalised-infection-status
+  report "non-hospitalized"
+end
+
+to-report stage-one-to-stage-two-infection-status
+  report "infected-stage-2"
+end
+  
+to-report stage-two-to-hospitalised-infection-status
+  report "hospitalized"
+end
+
+to-report stage-two-to-non-hospitalised-infection-status
+  report "non-hospitalized"
+end
+
+to-report hospitalised-to-immune-infection-status
+  report "immune"
+end
+
+to-report non-hospitalized-to-dead-infectious-infection-status
+  report "dead-infectious"
+end
+
+to-report hospitalized-to-dead-infectious-infection-status
+  report "dead-infectious"
+end
+
+to-report dead-to-unsafe-burial-infection-status
+  report "unsafe-burial"
+end
+
+to-report dead-to-safe-burial-infection-status
+  report "safe-burial"
+end
+
+;;REMOVED
+
+to-report unsafe-burial-to-removed-infection-status
+  report "removed"
+end
+
+to-report safe-burial-to-removed-infection-status
+  report "removed"
+end
+
+
+

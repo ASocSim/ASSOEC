@@ -1,6 +1,6 @@
-;ebola update
 
-;SUSCEPTIBLE
+;;COVID
+
 to-report healthy-infection-status
   report "healthy"
 end
@@ -10,91 +10,6 @@ to-report just-contaminated-infection-status
   report "just-contaminated"
 end
 
-to-report exposed-to-stage-one
-  report "infected-stage-1"
-end
-
-to-report stage-one-to-hospitalised
-  report "hospitalized"
-end
-
-to-report stage-one-to-non-hospitalised
-  report "non-hospitalized"
-end
-
-to-report stage-one-to-stage-two
-  report "infected-stage-2"
-end
-  
-to-report stage-two-to-hospitalised
-  report "hospitalized"
-end
-
-to-report stage-two-to-non-hospitalised
-  report "non-hospitalized"
-end
-
-to-report hospitalised-to-immune
-  report "immune"
-end
-
-to-report non-hospitalized-to-dead-infectious-infection-status
-  report "dead-infectious"
-end
-
-to-report hospitalized-to-dead-infectious-infection-status
-  report "dead-infectious"
-end
-
-to-report dead-to-unsafe-burial
-  report "unsafe-burial"
-end
-
-to-report dead-to-safe-burial
-  report "safe-burial"
-end
-
-to-report unsafe-burial-to-removed
-  report "removed"
-end
-
-to-report safe-burial-to-removed
-  report "removed"
-end
-
-
-;removed status
-to-report safely-buried-infection-status
-  report "safely-buried"
-end
-
-
-
-
-
-
-;;MOD
-
-to-report pre-symptomatic-to-mild-infection-status
-  report "pre-symptomatic-to-mild"
-end
-
-to-report symptomatic-mild-infection-status
-  report "symptomatic-mild"
-end
-
-to-report pre-symptomatic-to-severe-infection-status
-  report "pre-symptomatic-to-severe"
-end
-
-
-
-
-
-
-
-
-;;REMOVE FOR EBOLA
 
 to-report infectious-stage-one-infection-status
   report "no"
@@ -160,3 +75,20 @@ end
 to-report hospital-to-rec-infection-status
   report "hospital-to-rec"
 end
+
+
+;;MOD
+
+to-report pre-symptomatic-to-mild-infection-status
+  report "pre-symptomatic-to-mild"
+end
+
+to-report symptomatic-mild-infection-status
+  report "symptomatic-mild"
+end
+
+to-report pre-symptomatic-to-severe-infection-status
+  report "pre-symptomatic-to-severe"
+end
+
+

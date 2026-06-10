@@ -1,8 +1,9 @@
-__includes ["contagion/oxford_contagion_factor.nls"]
+__includes ["contagion/oxford_contagion_factor.nls" "contagion/ebola_contagion_model.nls"]
   ;;this contagion model should be revised by making contacts explicit and making contagion as a side-effect of contacts
 
 
 to spread-contagion
+  
   ;spread-by-travelling
   spread-by-activity-proximity
   ;Delay distribution (days) before seeking care; multiplier on community transmission duration; ~20-40% of symptomatic patients not presenting promptly
@@ -16,10 +17,6 @@ to spread-contagion
   
 end
 
-
-to spread-by-funeral-rites
- ;placeholder for contagion at funeral rites if extra checks needed
-end
 
 
 to spread-by-activity-proximity
@@ -141,8 +138,9 @@ to-report relative-infection-rate-of-infection-status [is]
   ;anyone not infectious here
   if is = just-contaminated-infection-status or
   is = immune-infection-status or
-  is = healthy-infection-status or
-  is = safely-buried-infection-status
+  is = healthy-infection-status 
+  ;or
+ ; is = safely-buried-infection-status
   [report 0]
   
   ; lower infectious chance for deceased pat? not 0, 0 only with safe burials
@@ -157,8 +155,8 @@ to-report relative-infection-rate-of-infection-status [is]
   or is = infectious-stage-two-infection-status
   or is = symptomatic-to-hospitalized-infection-status
   or is = symptomatic-to-non-hospitalized-infection-status
-  or is = non-hospitalized-to-dead-infectious-infection-status
-  or is = hospitalized-to-dead-infectious-infection-status
+ ; or is = non-hospitalized-to-dead-infectious-infection-status
+ ; or is = hospitalized-to-dead-infectious-infection-status
   or is = hospitalized-to-recovery-if-treated-profile
   [report 1]
   
