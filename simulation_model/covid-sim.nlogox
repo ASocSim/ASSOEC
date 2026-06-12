@@ -4,7 +4,6 @@
 __includes ["setup/setup.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls" ]
 breed [people person]
 
-
 globals [
   slice-of-the-day
   day-of-the-week
@@ -25,9 +24,7 @@ to go
   reset-timer
   reset-metrics
 ;  reset-economy-measurements
-  
-  ;rumor-mill ;define later how mis/information spreads
-  
+  ;rumor-mill ;define later how mis/information spreads  
   spread-contagion
   update-within-agent-disease-status
   update-people-mind
