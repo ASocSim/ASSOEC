@@ -33,8 +33,8 @@ to-report transition-ebo [s]
   ;if state-of-timed-state s = stage-two-infection-status [
   if s = stage-two-infection-status[
     report stochastic-fsm-transition (list 
-      (list timed-state stage-two-to-non-hospitalised-infection-status tau-hosp ( 1 - p-hosp ))
       (list timed-state stage-two-to-hospitalised-infection-status tau-hosp p-hosp)
+      (list timed-state stage-two-to-non-hospitalised-infection-status tau-hosp)
   )
     
   ]
@@ -42,18 +42,18 @@ to-report transition-ebo [s]
   ;hospital to recovery or death (CFR)
   if s = in-hospital-infection-status or state-of-timed-state s = in-hospital-infection-status [
     report stochastic-fsm-transition (list
-    (list timed-state hospitalised-to-immune-infection-status tau-rec (1 - p-mortality-in-hospital))
     (list timed-state hospitalised-to-dead-infectious-infection-status tau-hospital-to-death p-mortality-in-hospital)
+    (list timed-state hospitalised-to-immune-infection-status tau-rec)
   )
   ]
   
   ;death to burials
-  if s =  dead-infection-status or state-of-timed-state s = dead-infection-status 
-  or s = non-hospitalised-to-dead-infectious-infection-status or state-of-timed-state s = non-hospitalised-to-dead-infectious-infection-status
+;  if s =  dead-infection-status or state-of-timed-state s = dead-infection-status 
+  if s = non-hospitalised-to-dead-infectious-infection-status or state-of-timed-state s = non-hospitalised-to-dead-infectious-infection-status
   or s = hospitalised-to-dead-infectious-infection-status or state-of-timed-state s = hospitalised-to-dead-infectious-infection-status
   [report stochastic-fsm-transition (list
-    (list timed-state dead-to-unsafe-burial-infection-status tau-bur (1 - p-safe-burial))
     (list timed-state dead-to-safe-burial-infection-status tau-bur p-safe-burial)
+    (list timed-state dead-to-unsafe-burial-infection-status tau-bur)
   )
   ]
   
@@ -123,7 +123,7 @@ end
 
 ;time in stage 1
 to-report tau-sym-ebo
-  let mean-val ((5 + 6) / 2)
+  let mean-val ((5 + 7) / 2)
   let variance-val 1
   report round (random-gamma (mean-val * mean-val / variance-val) (1 / (variance-val / mean-val)))  * #ticks-per-day 
 end
@@ -135,19 +135,19 @@ to-report tau-s2
 end
 
 to-report tau-hosp
-  report 10  * #ticks-per-day
+  report 3  * #ticks-per-day
 end
 
 ;how log does it take for a person to die in hosp
 to-report tau-hospital-to-death
-  report 3 * #ticks-per-day
+  report 10 * #ticks-per-day
 end
 
 
 ;it takes very long for a patient to recover
 to-report tau-rec
   let mean-val ((59 + 270) / 2)
-  let variance-val 5
+  let variance-val 50
   report round (random-gamma (mean-val * mean-val / variance-val) (1 / (variance-val / mean-val)))  * #ticks-per-day
 end
 

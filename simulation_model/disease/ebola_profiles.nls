@@ -59,9 +59,9 @@ to-report hospitalised-to-dead-infectious-infection-status
   report "dead-infectious"
 end
 
-to-report dead-infection-status
-  report "dead"
-end
+;to-report dead-infection-status
+;  report "dead"
+;end
 
 to-report dead-to-unsafe-burial-infection-status
   report "unsafe-burial"

@@ -486,7 +486,7 @@ save-world-state</button>
       <choice type="string" value="ebola"></choice>
     </chooser>
     <switch x="769" y="10" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
-    <slider x="579" step="0.01" y="242" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.24" variable="CFR" width="249" sizeVersion="0"></slider>
+    <slider x="579" step="0.01" y="242" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.18" variable="CFR" width="249" sizeVersion="0"></slider>
     <input x="898" multiline="false" y="70" height="60" variable="#beds-in-hospital" type="number" width="195">11.0</input>
     <plot x="909" autoPlotX="true" yMax="10.0" autoPlotY="true" y="138" xMin="0.0" height="192" legend="true" xMax="10.0" yMin="0.0" width="302" display="hospitals">
       <setup></setup>
@@ -745,7 +745,7 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
       </pen>
     </plot>
     <button x="12" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="89" display="setup">setup</button>
-    <slider x="579" step="0.1" y="184" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="1.0" variable="trust-in-institutions"></slider>
+    <slider x="579" step="0.1" y="184" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.3" variable="trust-in-institutions"></slider>
     <slider x="578" step="0.01" y="130" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.5" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
     <plot x="1016" autoPlotX="true" yMax="1.0" autoPlotY="true" y="1645" xMin="0.0" height="219" legend="true" xMax="1.0" yMin="0.0" width="508" display="measures">
       <setup></setup>
@@ -784,8 +784,8 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
       </pen>
       <pen interval="1.0" mode="0" display="Dead" color="-10873583" legend="true">
         <setup></setup>
-        <update>;plot #dead-people
-plot count people with [infection-status = "removed"]</update>
+        <update>plot #dead-people
+;plot count people with [infection-status = "removed"]</update>
       </pen>
       <pen interval="1.0" mode="0" display="Infected" color="-2674135" legend="true">
         <setup></setup>
@@ -799,25 +799,21 @@ plot count people with [infection-status = "removed"]</update>
         <setup></setup>
         <update>plot count people with [is-believing-to-be-immune?]</update>
       </pen>
+      <pen interval="1.0" mode="0" display="Immune" color="-7500403" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = "immune"]</update>
+      </pen>
     </plot>
     <plot x="20" autoPlotX="true" yMax="10.0" autoPlotY="true" y="783" xMin="0.0" height="175" legend="true" xMax="10.0" yMin="0.0" width="522" xAxis="time" display="sanity-check-ebola-disease">
       <setup></setup>
       <update></update>
       <pen interval="1.0" mode="0" display="Unsafe burial" color="-13297659" legend="true">
         <setup>plot count people with [infection-status = "unsafe-burial"]</setup>
-        <update>plot #unsafely-buried</update>
+        <update>plot count people with [infection-status = "unsafe-burial"]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Safe burial" color="-15973838" legend="true">
+      <pen interval="1.0" mode="0" display="Safe burial" color="-11881837" legend="true">
         <setup></setup>
-        <update>plot #safely-buried</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="Hospitalised" color="-14835848" legend="true">
-        <setup></setup>
-        <update>plot #hospitalised</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="Non hospitalised" color="-7500403" legend="true">
-        <setup></setup>
-        <update>plot #non-hospitalised</update>
+        <update>plot count people with [infection-status = "safe-burial"]</update>
       </pen>
     </plot>
   </widgets>
