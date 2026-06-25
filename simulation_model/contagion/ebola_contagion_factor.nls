@@ -11,9 +11,10 @@ end
 to-report ebola-contagion-factor-between [infector susceptible context]
   let t [(ticks - time-when-infected)] of infector
   
-  let I-a-s ebo-average-expected-number-of-interactions ;of susceptible
+  let I-a-s ebo-average-expected-number-of-interactions ;of susceptible REMOVING FOR AGE, ADD FOR GENDER
   
-  let integral ebo-gamma-interal (t / 4) ((t + 1) / 4)
+  let integral abs ebo-gamma-interal (t / 4) ((t + 1) / 4)
+  print integral
   
   let R 5.75 * 2  ;is this the epidemiological R?
   

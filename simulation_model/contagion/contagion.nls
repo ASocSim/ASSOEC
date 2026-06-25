@@ -136,7 +136,7 @@ to-report ebo-relative-infection-rate-of-infection-status [is]
   
   if is = immune-infection-status
   ;; ADD STATE HERE IF THERE ARE ISOLATION PRACTICES THAT WORK for non-hospitalised
-  [report 0.7]
+  [report 0.5]
   
   if is = stage-one-to-stage-two-infection-status
   or is = stage-two-infection-status
@@ -144,10 +144,14 @@ to-report ebo-relative-infection-rate-of-infection-status [is]
   or is = stage-two-to-non-hospitalised-infection-status  
   or is = in-hospital-infection-status
   or is = hospitalised-to-immune-infection-status
+
+  [report 1]
+  
+  ;split for deceased
+  if is = dead-to-unsafe-burial-infection-status
   or is = hospitalised-to-dead-infectious-infection-status 
   or is = non-hospitalised-to-dead-infectious-infection-status
-  or is = dead-to-unsafe-burial-infection-status
-  [report 1]
+  [report 0.734]
   
   error (sentence "not implemented" infection-status is)
 end
