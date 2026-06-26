@@ -11,18 +11,17 @@ end
 to-report ebola-contagion-factor-between [infector susceptible context]
   let t [(ticks - time-when-infected)] of infector
   
-  let I-a-s ebo-average-expected-number-of-interactions ;of susceptible REMOVING FOR AGE, ADD FOR GENDER
+  let I-a-s ebo-average-expected-number-of-interactions ;of susceptible 
   
   let integral abs ebo-gamma-interal (t / 4) ((t + 1) / 4)
-  print integral
   
-  let R 5.75 * 2  ;is this the epidemiological R?
+  let R 5.75  ;is this the epidemiological R?
   
-  ;let s-a-s infection-scale-factor ;of susceptible  NOT SURE WHY THIS DOES NOT WORK, MIGHT HAVE SOMETHING TO DO WITH AGENT PROPERTIES
-  ;let a-s-i ebo-relative-infection-rate-of-infection-status [infection-status] of infector
+  let s-g infection-scale-factor ;[gender] of susceptible  ;NOT SURE WHY THIS DOES NOT WORK, MIGHT HAVE SOMETHING TO DO WITH AGENT PROPERTIES
+  let a-s-i ebo-relative-infection-rate-of-infection-status [infection-status] of infector
   let B-n infection-rate-of context
   
-  let lambda R * B-n * integral / I-a-s
+  let lambda R * a-s-i * B-n * integral / I-a-s
   
   ;let lambda R * S-a-s * A-s-i * B-n * integral / I-a-s
   let result 1 - exp (- lambda)
@@ -31,7 +30,7 @@ to-report ebola-contagion-factor-between [infector susceptible context]
 end 
 
 ;;susceptibility age caetgories removed, all equally likely
-to-report infection-scale-factor
+to-report infection-scale-factor; [gender]
   report 1
   ;might need this for gender later
 end

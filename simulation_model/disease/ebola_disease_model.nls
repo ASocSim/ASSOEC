@@ -18,12 +18,12 @@ to-report transition-ebo [s]
   
   ;time management
   if is-timed-state? s and time-of-timed-state s > 0 [
-    ;print (list (timed-state state-of-timed-state s (time-of-timed-state s - 1)))
     report stochastic-fsm-transition (list 
     (list timed-state state-of-timed-state s (time-of-timed-state s - 1)))
   ]
   
   ;to go to the hospital or not to go
+  ;;this procedure needs further connection with hospital and activity modules (Be and Emil look into this)
   if s = stage-two-infection-status[
     report stochastic-fsm-transition (list 
       (list timed-state stage-two-to-hospitalised-infection-status tau-hosp p-hosp)
@@ -43,10 +43,9 @@ to-report transition-ebo [s]
      if s = in-hospital-infection-status or state-of-timed-state s = hospitalised-to-immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
   
   ;death to burials
-;  if s =  dead-infection-status or state-of-timed-state s = dead-infection-status 
+  ;;This procedure needs to trigger a social network response to let agents connected to the deceased attend the burial
   if state-of-timed-state s = non-hospitalised-to-dead-infectious-infection-status 
   or s = non-hospitalised-to-dead-infectious-infection-status
- ; or s = hospitalised-to-dead-infectious-infection-status 
   or state-of-timed-state s = hospitalised-to-dead-infectious-infection-status
   [report stochastic-fsm-transition (list
     (list timed-state dead-to-safe-burial-infection-status tau-bur p-safe-burial)
