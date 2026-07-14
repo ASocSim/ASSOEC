@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [main, master]
+
+name: NetLogo check
+permissions: read-all
+
+jobs:
+  check-netlogo:
+    name: Check NetLogo models
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up NetLogo
+        uses: danielvartan/logoactions/setup-netlogo@v1
