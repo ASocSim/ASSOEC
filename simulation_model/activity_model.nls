@@ -272,8 +272,8 @@ to perform-people-activities
 
 end
 
-to-report is-get-healed-to-hospital-descriptor? [d]
-  report [is-hospital?] of location-of d and motive-of d = treatment-motive
+to-report is-get-healed-to-hospital-descriptor? [an-activity-descriptor]
+  report [is-hospital?] of location-of an-activity-descriptor and motive-of an-activity-descriptor = treatment-motive
 end
 
 ;;loose definition, to be tightened if needed
