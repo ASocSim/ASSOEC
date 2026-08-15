@@ -161,7 +161,7 @@ to-report is-performing-non-essential-shopping?
 end
 
 to-report is-a-non-essential-gathering-point? [a-gathering-point]
-  report [gathering-type] of gathering-point = "non-essential-shop"
+  report [gathering-type] of a-gathering-point = "non-essential-shop"
 end
 
 to-report is-a-non-essential-shopping-motivation? [a-motive]
