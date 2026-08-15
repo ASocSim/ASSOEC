@@ -65,8 +65,8 @@ to-report is-working?
   report is-working-motive? current-motivation
 end
 
-to-report is-working-motive? [m]
-  report m = "contractual obligation"
+to-report is-working-motive? [a-motive]
+  report a-motive = "contractual obligation"
 end
 
 to-report #workers-working
@@ -133,10 +133,6 @@ end
 
 to-report is-learning?
   report current-motivation = learning-motive
-end
-
-to-report learning-motive
-  report "learning"
 end
 
 to-report is-getting-tested?
