@@ -35,13 +35,14 @@ to try-acquire-a-bed-in-hospital
   [set #denied-requests-for-hospital-beds #denied-requests-for-hospital-beds + 1]
 end
 
-to-report hospital-effectiveness
-  ifelse sum [count hired-workers] of hospitals = 0 [report 0]
-  [report mean [ifelse-value (count hired-workers > 0) [1 - ratio-sick-personnel] [0]] of hospitals]
-end
+;;this is confusing and we are removing it
+; to-report hospital-effectiveness
+;   ifelse sum [count hired-workers] of hospitals = 0 [report 0]
+;   [report mean [ifelse-value (count hired-workers > 0) [1 - ratio-sick-personnel] [0]] of hospitals]
+; end
 
 to-report #beds-available-for-admission
-  report floor (#beds-in-hospital * hospital-effectiveness - #taken-hospital-beds)
+  report floor (#beds-in-hospital - #taken-hospital-beds) ; removing this hospital-effectiveness for now
 end
 
 to-report #healthy-hospital-personel

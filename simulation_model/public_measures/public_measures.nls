@@ -87,7 +87,6 @@ to disable-all-measures
   set #days-trigger-non-essential-business-closing-measure 10000
   set is-closing-school-when-any-reported-case-measure? false
   set global-confinement-measures "none"
-  set closed-universities? false
   set closed-workplaces? false
   ; Disable testing
   set ratio-population-randomly-tested-daily 0

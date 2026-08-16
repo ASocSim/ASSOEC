@@ -6,12 +6,12 @@ end
 to load-scaled-gathering-point-distribution [#hld]
   set #hospital-gp round (#hld / 100)
   set #schools-gp round (#hld / 30)
-  set #universities-gp round (#hld / 100)
-  set #workplaces-gp round (#hld / 15)
-  set #public-leisure-gp round (#hld / 20)
-  set #private-leisure-gp round (#hld / 7)
-  set #essential-shops-gp round (#hld / 40)
-  set #non-essential-shops-gp round (#hld / 40)
+ ; set #universities-gp round (#hld / 100)
+  set #mines-gp round (#hld / 15)
+  set #agriculture-gp round (#hld / 15)
+  set #churches-gp round (#hld / 20)
+  set #markets-gp round (#hld / 7)
+;  set #essential-shops-gp round (#hld / 40)
   set #households #hld
   set #bus-per-timeslot round (#hld / 13)
 end

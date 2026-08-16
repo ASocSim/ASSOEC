@@ -39,8 +39,11 @@ to update-people-display
 end
 
 to-report default-color
-  if age = "young" [report green]
-  if age = "student" [report orange]
-  if age = "worker" [report blue]
-  if age = "retired" [report red]
+  if sex = "female" [report red]
+  if sex = "male" [report green]
+
+;   if age = "young" [report green]
+;   if age = "student" [report orange]
+;   if age = "worker" [report blue]
+;   if age = "retired" [report red]
 end

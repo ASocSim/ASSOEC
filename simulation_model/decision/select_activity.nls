@@ -1,6 +1,7 @@
 ;;here one should also include caring for children.
 ;;Now it's highjacking the decision process
 to-report my-available-activity-descriptors
+  
   if migration? and is-away?
   [
     if (not (random-float 1 < probability-getting-back-when-abroad)) [
@@ -11,47 +12,45 @@ to-report my-available-activity-descriptors
   let activities (list (list my-home "rest"))
 
   if has-internally-visible-symptoms? or is-believing-to-be-infected?
-  [ set activities lput activity-descriptor my-hospital treatment-motive activities ]
+  [ set activities lput activity-descriptor my-hospital treatment-motive activities ] ;; THIS NEEDS TO BE EXPANDED FOR THE PIVOTAL CHOICE OF GOING TO HOSPITAL OR NOT
 
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
     [
-      if is-child? [set activities (lput (activity-descriptor my-school  "mandatory") activities)]
-      if is-student?
-      [
-        set activities (lput (activity-descriptor my-university  "learning") activities)
-      ]
-
-      if is-worker? [
-        if is-technically-feasible-to-work-from-home? and I-know-of-working-from-home? [
-          set activities (lput (activity-descriptor
-            my-home
-            work-motive)
-            activities)
-        ]
+      if is-female? [set activities (lput (activity-descriptor my-home  "providing") activities)]
+      if is-male? [set activities (lput (activity-descriptor my-mine  "providing") activities)]
+       
+      if is-child? [set activities (lput (activity-descriptor my-school  "learning") activities)]
+    ;  if is-student? [set activities (lput (activity-descriptor my-university  "learning") activities)]
+;       if is-worker? [
+;         if is-technically-feasible-to-work-from-home? and I-know-of-working-from-home? [
+;           set activities (lput (activity-descriptor
+;             my-home
+;             work-motive)
+;             activities)
+;         ]
         
-        set activities (lput (activity-descriptor
-          my-work
-          work-motive)
-          activities)
-      ]
+;         set activities (lput (activity-descriptor
+;           my-work
+;           work-motive)
+;           activities)
+;       ]
   ]
   
-  if slice-of-the-day = "evening" or not is-working-day-for-me? or age = "retired"
+  if slice-of-the-day = "evening" or not is-working-day-for-me? ; or age = "retired"
+  
   [
     if age != "young" and slice-of-the-day != "night" and is-shops-open-today? [
-      set activities lput (activity-descriptor one-of my-essential-shops "essential shopping") activities
+      set activities lput (activity-descriptor one-of my-stores "essential shopping") activities
     ]
 
-    set activities lput (activity-descriptor my-private-leisure "relaxing") activities
-    set activities lput (activity-descriptor my-public-leisure "relaxing" ) activities
-    if age != "young" and slice-of-the-day != "night" and is-shops-open-today? [
-      set activities lput (activity-descriptor my-non-essential-shop "shopping") activities
+   ; set activities lput (activity-descriptor my-private-leisure "relaxing") activities
+   ; set activities lput (activity-descriptor my-public-leisure "relaxing" ) activities
+   ; if age != "young" and slice-of-the-day != "night" and is-shops-open-today? [
+   ;   set activities lput (activity-descriptor my-non-essential-shop "shopping") activities
     ]
     
 
-  ]
-
-  set activities lput (list my-hospital "get-tested") activities
+ ; set activities lput (list my-hospital "get-tested") activities
   set activities filter [ i -> [is-accessible?] of first i] activities
 
   ;show [gathering-type] of (turtle-set map [ad -> first ad] activities)
@@ -79,6 +78,9 @@ to-report my-available-activity-descriptors
 
   report ret
 end
+
+
+
 
 to select-activity
   let c-a my-preferred-available-activity-descriptor

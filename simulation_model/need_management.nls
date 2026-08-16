@@ -55,6 +55,28 @@ to update-needs-for-playing [current-activity-descriptor]
   set conformity-satisfaction-level clamp 0 1 (conformity-satisfaction-level + SDA-conformity current-activity-descriptor)
 end
 
+; to update-needs-for-playing-ebola [current-activity-descriptor]
+;   decay-satisfaction-level
+;   if not is-activity-successful? [stop]
+;   ;;SURVIVAL
+;   set food-safety-satisfaction-level clamp 0 1 (food-safety-satisfaction-level + SDE-food-safety current-activity-descriptor)
+;   set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
+;   set health-satisfaction-level clamp 0 1 (health-satisfaction-level + SDE-health current-activity-descriptor)
+;   set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
+  
+; ;;BELONGING
+;   set belonging-satisfaction-level clamp 0 1 (belonging-satisfaction-level + SDA-belonging current-activity-descriptor)
+
+;  ;;SAFETY
+;   set safety-satisfaction-level clamp 0 1 (safety-satisfaction-level + SDE-safety current-activity-descriptor)
+
+;;  SELF ESTEEM  
+;   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
+;   set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)
+;   set provide-satisfaction-level clamp 0 1 (provide-satisfaction-level + SDE-provide current-activity-descriptor)
+  
+; end
+
 
 ;;this procedure is a simple representation of need decay
 ;important features:
@@ -102,6 +124,56 @@ to decay-satisfaction-level
   ]
 end
 
+; to decay-satisfaction-level-ebola
+  
+;   ;SURVIVAL
+;   set financial-survival-satisfaction-level financial-survival-satisfaction-level * financial-survival-decay
+;   if financial-survival-satisfaction-level < 0 [set financial-survival-satisfaction-level 0]
+  
+;   set food-satisfaction-level food-satisfaction-level * food-decay
+;   if food-satisfaction-level < 0 [set food-satisfaction-level 0]
+  
+;   set health-satisfaction-level health-satisfaction-level * health-decay
+;   if health-satisfaction-level < 0 [set health-satisfaction-level 0]
+  
+;   set sleep-satisfaction-level sleep-satisfaction-level * 0.8 
+;   if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
+  
+  
+;   ;BELONGING
+;   let group-belonging-decay 0.01
+;   let family-belonging-decay 0.01
+
+;  ; set belonging-satisfaction-level belonging-satisfaction-level - belonging-decay
+;   ;if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
+  
+;   ;;SAFETY
+;    set safety-satisfaction-level safety-satisfaction-level * safety-decay
+;   if safety-satisfaction-level < 0 [set safety-satisfaction-level 0]
+
+;   ; SELF ESTEEM
+;   set autonomy-satisfaction-level autonomy-satisfaction-level * 0.99
+;   if autonomy-satisfaction-level < 0 [set autonomy-satisfaction-level 0]
+  
+;   let provide-decay 0.8
+;   let social-status-decay 0.8
+;     if CONDITION [
+;     set social-status-decay social-status-decay - (1 - social-status-decay) ; Double the decay
+;     set provide-decay provide-decay - (1 - provide-decay)
+;   ]
+
+; ;exclusions for age and gender here
+  
+;   ]
+; end
+
+
+
+
+
+
+
+
 ;Future work:
 ;update these numbers based on how many people are actually met when moving
 ;include networks and joint meetings
@@ -109,7 +181,7 @@ to-report SUE-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
 
-  if gp != my-work and not member? ([gathering-type] of gp) (list home-gathering-type private-leisure-gathering-type public-leisure-gathering-type university-gathering-type school-gathering-type non-essential-shop-gathering-type)
+  if gp != my-work and not member? ([gathering-type] of gp) (list home-gathering-type markets-gathering-type churches-gathering-type workplace-mine-gathering-type school-gathering-type workplace-agriculture-gathering-type)
   [ report 0 ]
   let number [expected-number-of-other-participants] of gp
   let base 0
@@ -142,12 +214,12 @@ to-report SUE-belonging [ad]
   ;;moreover it was checking whether the other type of agent is at the current point
   ;;which was a bit weird as agents keep moving and in theory don't really know what is the gathering point of others (and whether they plan to go there or are currently there)
   ;;another solution might be to create a form of a likelihood factor: agents increase/decrease this factor when they meet/do not meet a friend
-  let friends-present [is-leisure-point?] of location-of ad or 
-  ([is-school?] of location-of ad and is-young?) or
-  ([is-university?] of location-of ad and is-student?)
+  let friends-present ;[is-leisure-point?] of location-of ad or 
+  ([is-school?] of location-of ad and is-young?) ;or
+ ; ([is-university?] of location-of ad and is-student?)
   ;any? my-friends with [current-activity = [current-activity] of myself]
   if friends-present and days-since-seen-friends > 0 [
-    set network-bonus network-bonus + min (list 0.5 (days-since-seen-friends / 28))
+    set network-bonus network-bonus + min (list 0.5 (days-since-seen-friends / 28)) 
   ]
 
   report base * network-bonus * social-distancing-cut
@@ -158,7 +230,9 @@ to-report SUA-belonging [ad]
   let motive motive-of ad
 
   ; Only your home, and public and private leisure places satisfy belonging needs
-  if gp != my-work and not member? ([gathering-type] of gp) (list home-gathering-type private-leisure-gathering-type public-leisure-gathering-type university-gathering-type school-gathering-type non-essential-shop-gathering-type)
+  ;in ebola, belonging is satisfied by multiple places, CHECK THIS AGAINST NEW MATRIX
+  
+  if gp != my-work and not member? ([gathering-type] of gp) (list home-gathering-type markets-gathering-type stores-gathering-type workplace-agriculture-gathering-type workplace-mine-gathering-type school-gathering-type churches-gathering-type)
   [ report 0 ]
   let number count people with [current-activity = gp]
   let base 0
@@ -188,6 +262,9 @@ to-report SUA-belonging [ad]
   ]
   report base * network-bonus * social-distancing-cut
 end
+
+
+
 
 to-report risk-avoidance-increase [ad others]
   let gp location-of ad
@@ -467,6 +544,7 @@ to-report SUE-financial-stability [ad]
   report 0
 end
 
+
 to-report SUE-health [ad]
   let base 1
   let sd-bonus 0.8
@@ -492,10 +570,10 @@ to-report SUE-health [ad]
   report base * sd-bonus
 end
 
-to-report conformity-increase [an-activity-descriptor network-action]
-  let gp location-of an-activity-descriptor
-  let motive motive-of an-activity-descriptor
-  let sd social-distancing-of an-activity-descriptor
+to-report conformity-increase [ad network-action]
+  let gp location-of ad
+  let motive motive-of ad
+  let sd social-distancing-of ad
   let result 0
   
   if should-I-stay-home? [
@@ -560,7 +638,7 @@ to-report global-prevalence-of [ad]
     ;Safety needs
     (SDE-compliance ad * importance-weight-compliance) 
     (SDE-risk-avoidance ad * importance-weight-risk-avoidance) 
-    (SDE-financial-stability ad * importance-weight-financial-stability) 
+ ;   (SDE-financial-stability ad * importance-weight-financial-stability) 
     ;Belonging needs
     (SDE-belonging ad * importance-weight-belonging-subneed)
     ;Esteem needs
@@ -585,7 +663,7 @@ to debug-global-prevalence-of [ad]
       ;Safety needs
     debug-print (word "  Compliance:" (SDE-compliance ad * importance-weight-compliance))
     debug-print (word "  Risk Avoidance:" (SDE-risk-avoidance ad * importance-weight-risk-avoidance))
-    debug-print (word "  Financial Stability:" (SDE-financial-stability ad * importance-weight-financial-stability))
+   ; debug-print (word "  Financial Stability:" (SDE-financial-stability ad * importance-weight-financial-stability))
       ;Belonging needs
     debug-print (word "  Belonging:" (SDE-belonging ad * importance-weight-belonging-subneed))
       ;Esteem needs
@@ -605,11 +683,11 @@ end
 
 ;;; SDE and SDA SURVIVAL NEEDS
 
-to-report SDE-health [ad]
-  let expected-increase SUE-health ad
-  let discounted-increase expected-increase * (1 - health-satisfaction-level)
-  report discounted-increase
-end
+; to-report SDE-health [ad]
+;   let expected-increase SUE-health ad
+;   let discounted-increase expected-increase * (1 - health-satisfaction-level)
+;   report discounted-increase
+; end
 
 to-report SDE-food-safety [ad]
   let expected-increase SUE-food-safety ad
@@ -643,9 +721,9 @@ end
 
 ;;; SDE and SDA SAFETY NEEDS
 
-to-report SDE-financial-stability [ad]
-  let expected-increase SUE-financial-stability ad
-  let discounted-increase expected-increase * (1 - financial-stability-satisfaction-level)
+to-report SDE-health [ad]
+  let expected-increase SUE-health ad
+  let discounted-increase expected-increase * (1 - health-satisfaction-level)
   report discounted-increase
 end
 

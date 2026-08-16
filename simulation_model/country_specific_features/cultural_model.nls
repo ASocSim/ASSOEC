@@ -9,6 +9,10 @@
 ; ... (i.e. values placed closer to one another in the circumplex correlate positively, while values placed further apart in the circumplex correlate negatively)
 ;load-nations-hofstede-dimension-scores: calibrate Hofstede dimensions based on a nation's Hofstede dimension scorecard
 
+
+;;2026 update for ebola adaptation: set-initial-need-satisfaction-levels now shows
+
+
 to setup-person-values-and-needs
   load-nations-hofstede-dimension-scores
   calibrate-agent-value-systems
@@ -19,7 +23,7 @@ end
 
 to calibrate-agent-value-systems
   set-values-based-on-culture
-  recalibrate-value-system-according-to-age-group-of-agent
+ ; recalibrate-value-system-according-to-age-group-of-agent
   increase-logical-consistency-of-agent-value-systems
 end
 
@@ -347,11 +351,14 @@ to increase-logical-consistency-of-agent-value-systems
 end
 
 ;scores taken from https://www.hofstede-insights.com/product/compare-countries/
+;;;;;;;;;;;;;;;;;;;;;;EBOLA ;;;;;;;;;;;;;;;;;;;;,
+;;;;;;;;;HARDCODING THIS AS UGANDA and Africa EAST PARTIAL METRICS FOR NOW, PLEASE ADD DRC if values are available or discuss
+
 to load-nations-hofstede-dimension-scores
 
   
   if load-country-specific-settings = "DRC" [
-    ;HARDCODING THIS AS UGANDA and Africa EAST PARTIAL METRICS FOR NOW, PLEASE ADD DRC
+
     set power-distance 64
     set individualism-vs-collectivism 24 ;uganda, use 32 for east africa
     set masculinity-vs-femininity 41
@@ -359,10 +366,7 @@ to load-nations-hofstede-dimension-scores
     set long-vs-short-termism 32
     set indulgence-vs-restraint 40
     stop
-    
   ]
-  
-  
   
   
   if load-country-specific-settings = "Custom" [
@@ -375,44 +379,44 @@ to load-nations-hofstede-dimension-scores
     stop
   ]
   
- let country-specific-data-list []
-  file-open "country-specific-data.csv"
+  ;COVID legacy
+  
+;  let country-specific-data-list []
+;   file-open "country-specific-data.csv"
   
 
-  while [not file-at-end? ] [
-    let csv file-read-line
-    set csv word csv ";"  ; add comma for loop termination 
+;   while [not file-at-end? ] [
+;     let csv file-read-line
+;     set csv word csv ";"  ; add comma for loop termination 
 
-    let mylist []  ; list of values 
-    while [not empty? csv] 
-    [
-      let $x position ";" csv 
-      let $item substring csv 0 $x  ; extract item 
-      carefully [set $item read-from-string $item][] ; convert if number 
-      set mylist lput $item mylist  ; append to list 
-      set csv substring csv ($x + 1) length csv  ; remove item and comma 
-    ] 
+;     let mylist []  ; list of values 
+;     while [not empty? csv] 
+;     [
+;       let $x position ";" csv 
+;       let $item substring csv 0 $x  ; extract item 
+;       carefully [set $item read-from-string $item][] ; convert if number 
+;       set mylist lput $item mylist  ; append to list 
+;       set csv substring csv ($x + 1) length csv  ; remove item and comma 
+;     ] 
     
-    if first mylist = load-country-specific-settings [
-      set country-specific-data-list but-first mylist ]
-  ]
-  if empty? country-specific-data-list [error (sentence "Country is not in country-specific-data file" load-country-specific-settings)]
-  file-close
-  set country-specific-data-list sublist country-specific-data-list 4 10
-  set power-distance first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  set individualism-vs-collectivism first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  set masculinity-vs-femininity first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  set uncertainty-avoidance first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  set long-vs-short-termism first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  set indulgence-vs-restraint first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list  
-    
-  
+;     if first mylist = load-country-specific-settings [
+;       set country-specific-data-list but-first mylist ]
+;   ]
+;   if empty? country-specific-data-list [error (sentence "Country is not in country-specific-data file" load-country-specific-settings)]
+;   file-close
+;   set country-specific-data-list sublist country-specific-data-list 4 10
+;   set power-distance first country-specific-data-list
+;   set country-specific-data-list but-first country-specific-data-list
+;   set individualism-vs-collectivism first country-specific-data-list
+;   set country-specific-data-list but-first country-specific-data-list
+;   set masculinity-vs-femininity first country-specific-data-list
+;   set country-specific-data-list but-first country-specific-data-list
+;   set uncertainty-avoidance first country-specific-data-list
+;   set country-specific-data-list but-first country-specific-data-list
+;   set long-vs-short-termism first country-specific-data-list
+;   set country-specific-data-list but-first country-specific-data-list
+;   set indulgence-vs-restraint first country-specific-data-list
+;   set country-specific-data-list but-first country-specific-data-list  
 end
 
 ;the computational procedure within this reporter is based on Heidari et al. (2018)
