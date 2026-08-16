@@ -15,7 +15,7 @@ to setup-social-networks
 end
 
 to-report possible-friends
-  let agents-to-befriend reduce [ [x y] -> (turtle-set x y) ] ([gatherers] of (turtle-set my-private-leisure my-school my-university))
+  let agents-to-befriend reduce [ [x y] -> (turtle-set x y) ] ([gatherers] of (turtle-set my-church my-school))
   report other agents-to-befriend with [not my-friends-link-neighbor? myself and age = [age] of myself]
 end
 

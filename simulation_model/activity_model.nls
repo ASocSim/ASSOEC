@@ -21,27 +21,30 @@ to execute-activity-effect
   ;[ set epistemic-infection-status  infection-status ]
 
   update-belief-based-on-current-activity
+
 end
 
-; Create a list describing an activity based on a gathering point and a motive
-; Why only 2 elements in the returned list when there is a function social-distancing-of that extract the third element of this list?
-to-report activity-descriptor [a-gathering-point a-motive]
-  if not is-gathering-point? a-gathering-point [error (sentence a-gathering-point "should be a gathering point")]
-  report (list a-gathering-point a-motive)
+;gp = gathering point (breed) and mo = motive
+
+to-report activity-descriptor [gp mo]
+  if not is-gathering-point? gp [error (sentence gp mo "should be a gathering point")]
+  report (list gp mo)
 end
 
-; Why this not called gathering-point?
-to-report location-of [an-activity-descriptor]
-  report item 0 an-activity-descriptor
+;; this is the structure of the ad parameter passed to need_management
+to-report location-of [ad]
+  report item 0 ad
 end
 
-to-report motive-of [an-activity-descriptor]
-  report item 1 an-activity-descriptor
+to-report motive-of [ad]
+  report item 1 ad
 end
 
-to-report social-distancing-of [an-activity-descriptor]
-  report item 2 an-activity-descriptor
+to-report social-distancing-of [ad]
+  report item 2 ad
 end
+
+
 
 ;;MY INTENTION HERE IS TO TRACK THE NW OF DECEASED PEOPLE AND LET THEM ATTEND BURIAL RITES
 ; to-report is-at-burial?
@@ -65,49 +68,64 @@ to-report is-working?
   report is-working-motive? current-motivation
 end
 
-to-report is-working-motive? [a-motive]
-  report a-motive = "contractual obligation"
+to-report is-working-motive? [motive]
+  report motive = "contractual obligation"
 end
 
 to-report #workers-working
   report count workers with [is-working?]
 end
 
-to-report #workers-working-at-essential-shop
-  report count workers with [is-working? and [gathering-type] of my-work = "essential-shop"]
-end
+;;;WORKERS AT EACH WORKING PLACE
 
-to-report #workers-working-at-non-essential-shop
-  report count workers with [is-working? and [gathering-type] of my-work = "non-essential-shop"]
-end
-
-to-report #workers-working-at-university
-  report count workers with [is-working? and [gathering-type] of my-work = "university"]
-end
 
 to-report #workers-working-at-hospital
   report count workers with [is-working? and [gathering-type] of my-work = "hospital"]
 end
 
-to-report #workers-working-at-workplace
-  report count workers with [is-working? and [gathering-type] of my-work = "workplace"]
+to-report #workers-working-at-mine
+  report count workers with [is-working? and [gathering-type] of my-work = "workplace-mines"]
 end
 
 to-report #workers-working-at-school
   report count workers with [is-working? and [gathering-type] of my-work = "school"]
 end
 
+to-report #workers-working-at-store
+  report count workers with [is-working? and [gathering-type] of my-work = "store"]
+end
+
+to-report #workers-working-at-market
+  report count workers with [is-working? and [gathering-type] of my-work = "market"]
+end
+
+
+to-report #workers-working-at-agriculture
+  report count workers with [is-working? and [gathering-type] of my-work = "agriculture"]
+end
+
+to-report #workers-working-at-church
+  report count workers with [is-working? and [gathering-type] of my-work = "church"]
+end
+
+to-report #workers-working-at-house
+  report count workers with [is-working? and [gathering-type] of my-work = "house"]
+end
+
+
+
 to-report follow-person-in-charge-motive
   report "follow person in charge"
 end
+
 
 to-report is-I-have-contractual-obligations?
   report age = "worker" and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
   and not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
 end
 
-to-report is-rest-at-home-descriptor? [an-activity-descriptor]
-  report location-of an-activity-descriptor = my-home and motive-of an-activity-descriptor = "rest"
+to-report is-rest-at-home-descriptor? [ad]
+  report first ad = my-home and item 1 ad = "rest"
 end
 
 to-report is-resting-at-home?
@@ -135,100 +153,114 @@ to-report is-learning?
   report current-motivation = learning-motive
 end
 
+to-report learning-motive
+  report "learning"
+end
+
 to-report is-getting-tested?
   report current-motivation = "get-tested"
 end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;please modify from here for ebola
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to-report is-performing-essential-shopping?
   report is-essential-shop-gathering-point? current-motivation
 end
 
-to-report is-essential-shop-gathering-point? [a-gathering-point]
-  report a-gathering-point = "essential shopping"
+to-report is-essential-shop-gathering-point? [gp]
+  report gp = "essential shopping"
 end
+
 
 to-report is-performing-shopping?
   report is-a-shopping-motivation? current-motivation
 end
+
 
 to-report is-performing-non-essential-shopping?
   report is-a-non-essential-shopping-motivation? current-motivation and
   is-a-non-essential-gathering-point? current-activity
 end
 
-to-report is-a-non-essential-gathering-point? [a-gathering-point]
-  report [gathering-type] of a-gathering-point = "non-essential-shop"
+to-report is-a-non-essential-gathering-point? [gp]
+  report [gathering-type] of gp = "non-essential-shop"
 end
 
-to-report is-a-non-essential-shopping-motivation? [a-motive]
-  report  a-motive = "shopping"
+to-report is-a-non-essential-shopping-motivation? [m]
+  report  m = "shopping"
 end
 
-to-report is-a-shopping-motivation? [a-motive]
-  report is-essential-shop-gathering-point? a-motive or
-  is-a-non-essential-shopping-motivation? a-motive
+to-report is-a-shopping-motivation? [m]
+  report is-essential-shop-gathering-point? m or
+  is-a-non-essential-shopping-motivation? m
 end
 
 to-report amount-of-rations-I-buy-when-going-to-essential-shops
   report days-of-rations-bought * count [gatherers] of my-home
 end
 
-to-report is-a-leisure-motivation? [a-motive]
-  report a-motive = "relaxing"
-end
 
-to-report is-contractual-obligation? [a-motive]
-  report a-motive = "contractual obligation"
+
+to-report is-a-leisure-motivation? [motive]
+  report motive = "relaxing"
 end
 
 to-report is-home-gathering-point? [location]
   report [gathering-type] of location = "home"
 end
 
-to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
+to-report can-be-done-with-a-dependable-person? [ad]
   if
-  is-home-gathering-point? location-of an-activity-descriptor
-  or ([is-hospital?] of first an-activity-descriptor and motive-of an-activity-descriptor = "get-tested")
-  or (is-a-shopping-motivation? motive-of an-activity-descriptor)
-  or (is-a-leisure-motivation? motive-of an-activity-descriptor)
-  or motive-of an-activity-descriptor = treatment-motive
+  is-home-gathering-point? location-of ad
+  or ([is-hospital?] of first ad and last ad = "get-tested")
+  or (is-a-shopping-motivation? last ad)
+  or (is-a-leisure-motivation? motive-of ad)
+  or motive-of ad = treatment-motive
   [report true]
 
   if
-  ([is-university? or is-hospital? or is-workplace? or is-shop? or is-school?] of location-of an-activity-descriptor)
-  and (motive-of an-activity-descriptor = learning-motive or
-    is-contractual-obligation? motive-of an-activity-descriptor)
+  ([is-market? or is-hospital? or is-workplace? or is-store? or is-school?] of location-of ad)
+  and (motive-of ad = learning-motive or
+    is-contractual-obligation? motive-of ad)
   [report false]
 
-  error (sentence "unimplemented" [gathering-type] of first an-activity-descriptor last an-activity-descriptor)
+  error (sentence "unimplemented" [gathering-type] of first ad last ad)
 end
+
+to-report  is-contractual-obligation? [m]
+  report m = "contractual obligation"
+end
+
+
 
 to perform-people-activities
   reset-timer
   
-  if food-delivered-to-isolators? [
-    let homes-to-be-delivered-food (turtle-set homes-in-isolation [my-home] of people with [is-officially-asked-to-quarantine?]) ; ToDo: Re-evaluate the secdon set
-    
-    ask homes-to-be-delivered-food [
-      if available-food-rations / [amount-of-rations-I-buy-when-going-to-essential-shops] of one-of gatherers >= 1 [stop]
-      set #delivered-supply-proposed-this-tick  #delivered-supply-proposed-this-tick + 1
-      ; Find the store with the most stocks
-      let possible-stores reduce [[x y] -> (turtle-set x y)] [my-essential-shops] of gatherers 
-      let store max-one-of possible-stores [stock-of-goods]
-      ; Find the inhabitant with the most money
-      let buyer max-one-of gatherers [my-amount-of-capital]
-      let old-location [current-activity] of buyer
-      let old-motive [current-motivation] of buyer
-      ; Fake going to the store this round (internet order?)
-      ask buyer [ 
-        set current-activity store
-        set current-motivation "essential shopping"
-  ;      update-resources-based-on-current-activity
-        set current-activity old-location
-        set current-motivation old-motive
-      ]
-    ]
-  ]
+;   if food-delivered-to-isolators? [
+;     let homes-to-be-delivered-food (turtle-set homes-in-isolation [my-home] of people with [is-officially-asked-to-quarantine?]) ; ToDo: Re-evaluate the secdon set
+  
+;     ask homes-to-be-delivered-food [
+;       if available-food-rations / [amount-of-rations-I-buy-when-going-to-essential-shops] of one-of gatherers >= 1 [stop]
+;       set #delivered-supply-proposed-this-tick  #delivered-supply-proposed-this-tick + 1
+;       ; Find the store with the most stocks
+;       let possible-stores reduce [[x y] -> (turtle-set x y)] [my-stores] of gatherers 
+;       let store max-one-of possible-stores [stock-of-goods]
+;       ; Find the inhabitant with the most money
+;       let buyer max-one-of gatherers [my-amount-of-capital]
+;       let old-location [current-activity] of buyer
+;       let old-motive [current-motivation] of buyer
+;       ; Fake going to the store this round (internet order?)
+;       ask buyer [ 
+;         set current-activity store
+;         set current-motivation "essential shopping"
+;   ;      update-resources-based-on-current-activity
+;         set current-activity old-location
+;         set current-motivation old-motive
+;       ]
+;     ]
+;   ]
   
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
@@ -272,14 +304,28 @@ to perform-people-activities
 
 end
 
-to-report is-get-healed-to-hospital-descriptor? [an-activity-descriptor]
-  report [is-hospital?] of location-of an-activity-descriptor and motive-of an-activity-descriptor = treatment-motive
+to-report is-get-healed-to-hospital-descriptor? [d]
+  report [is-hospital?] of location-of d and motive-of d = treatment-motive
 end
 
 ;;loose definition, to be tightened if needed
 to-report is-operating?
   report any? hired-workers
 end
+
+
+
+
+
+
+
+
+
+
+
+;;;,;;;;;;;,,LEGACY COVID
+
+
 
 ; to update-resources-based-on-current-activity
 ;   if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]

@@ -1,5 +1,5 @@
-to-report is-forced-motive? [a-motive]
-  report a-motive = "mandatory"
+ to-report is-forced-motive? [m]
+  report m = "mandatory"
 end
 
 to-report treatment-motive
@@ -12,8 +12,4 @@ end
   
 to-report travelling-motive
   report "travelling"
-end
-
-to-report learning-motive
-  report "learning"
 end

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <model version="NetLogo 7.0.3" snapToGrid="false">
   <code><![CDATA[extensions [profiler table]
-__includes ["setup/setup.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls" ]
+__includes [ "setup/setup-ebola.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls" ]
 breed [people person]
 
 globals [
@@ -34,7 +34,7 @@ to go
   update-display
   inspect-agents
   increment-time
-  apply-active-measures
+ ; apply-active-measures
   update-metrics
   
   ; Tick goes at the end of the go procedure for better plot updating
@@ -51,7 +51,7 @@ end
 
 
 to startup
-  setup
+  setup-ebola
 end
 
 to-report epistemic-accuracy if #infected = 0 [report 1] report count people with [is-infected? and is-believing-to-be-infected?] / #infected end
@@ -59,23 +59,19 @@ to-report epistemic-accuracy if #infected = 0 [report 1] report count people wit
 to-report epistemic-false-positive-error-ratio report count people with [is-believing-to-be-infected? and not is-infected?] / count people end
 
 to-report epistemic-error-of-ignored-immunity-ratio report count people with [not is-believing-to-be-immune? and not is-immune?] / count people end
-]]></code>
+  ]]></code>
   <widgets>
     <view x="115" wrappingAllowedX="false" y="59" frameRate="30.0" minPycor="0" height="403" showTickCounter="true" patchSize="7.824" fontSize="10" wrappingAllowedY="false" width="403" tickCounterLabel="ticks" maxPycor="50" updateMode="1" maxPxcor="50" minPxcor="0"></view>
     <button x="13" y="134" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="92" display="go">go
 if not any? people with [is-contagious?]
 [stop]</button>
     <note x="565" y="850" backgroundDark="0" fontSize="16" width="278" markdown="false" height="46" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
-    <input x="841" multiline="false" y="1012" height="60" variable="#schools-gp" type="number" width="100">12.0</input>
-    <input x="946" multiline="false" y="1012" height="60" variable="#universities-gp" type="number" width="100">1.0</input>
+    <input x="841" multiline="false" y="1012" height="60" variable="#schools-gp" type="number" width="100">2.0</input>
+    <input x="946" multiline="false" y="1012" height="60" variable="#mines-gp" type="number" width="100">10.0</input>
     <note x="739" y="986" backgroundDark="0" fontSize="11" width="753" markdown="false" height="20" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Number of units per activity type (sharing a unit incurs a transmission risk: due to contact)</note>
-    <input x="1156" multiline="false" y="1012" height="60" variable="#public-leisure-gp" type="number" width="115">20.0</input>
-    <input x="1276" multiline="false" y="1012" height="60" variable="#private-leisure-gp" type="number" width="118">50.0</input>
+    <input x="1156" multiline="false" y="1012" height="60" variable="#stores-gp" type="number" width="115">5.0</input>
+    <input x="1276" multiline="false" y="1012" height="60" variable="#churches-gp" type="number" width="118">3.0</input>
     <note x="707" y="562" backgroundDark="0" fontSize="11" width="150" markdown="false" height="18" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Age model</note>
-    <slider x="828" step="0.01" y="1076" max="1" width="150" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-schools"></slider>
-    <slider x="983" step="0.01" y="1076" max="1" width="150" display="density-factor-universities" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-universities"></slider>
-    <slider x="1293" step="0.01" y="1076" max="1" width="150" display="density-factor-public-leisure" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-public-leisure"></slider>
-    <slider x="1448" step="0.01" y="1127" max="1" width="150" display="density-factor-private-leisure" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-private-leisure"></slider>
     <slider x="553" step="0.01" y="1075" max="1" width="175" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
     <note x="1969" y="1133" backgroundDark="0" fontSize="16" width="308" markdown="false" height="46" textColorDark="-1" textColorLight="-13345367" backgroundLight="0">Measures (Interventions) Model</note>
     <chooser x="2478" y="1248" height="60" variable="global-confinement-measures" current="0" width="215" display="global-confinement-measures">
@@ -83,15 +79,9 @@ if not any? people with [is-contagious?]
       <choice type="string" value="total-lockdown"></choice>
       <choice type="string" value="lockdown-10-5"></choice>
     </chooser>
-    <monitor x="1420" precision="17" y="1283" height="60" fontSize="11" width="118">day-of-the-week</monitor>
-    <monitor x="1414" precision="17" y="1353" height="60" fontSize="11" width="116">slice-of-the-day</monitor>
-    <slider x="1603" step="0.01" y="1146" max="1" width="150" display="density-factor-essential-shops" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-essential-shops"></slider>
-    <slider x="1758" step="0.01" y="1146" max="1" width="150" display="density-factor-non-essential-shops" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-non-essential-shops"></slider>
-    <input x="1523" multiline="false" y="1063" height="60" variable="#non-essential-shops-gp" type="number" width="129">9.0</input>
     <input x="736" multiline="false" y="1012" height="60" variable="#hospital-gp" type="number" width="100">2.0</input>
     <slider x="736" step="0.01" y="1076" max="1" width="186" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-hospitals"></slider>
     <switch x="2191" y="1333" height="40" on="false" variable="closed-workplaces?" width="270" display="closed-workplaces?"></switch>
-    <switch x="2476" y="1162" height="40" on="false" variable="closed-universities?" width="222" display="closed-universities?"></switch>
     <monitor x="549" precision="17" y="1232" height="60" fontSize="11" width="117">#dead-people</monitor>
     <monitor x="709" precision="17" y="1232" height="60" fontSize="11" width="103">#dead-retired</monitor>
     <button x="10" y="224" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Week Run">go
@@ -256,7 +246,6 @@ while [current-day <= end-day] [ go ]]]></button>
     <slider x="1801" step="0.01" y="1928" max="1" width="239" display="ratio-retired-with-phones" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-retired-with-phones"></slider>
     <monitor x="2066" precision="17" y="1792" height="60" fontSize="11" width="130" display="#phone-owners">count people with [has-mobile-phone?]</monitor>
     <monitor x="2066" precision="17" y="1857" height="60" fontSize="11" width="132" display="ratio-phone-owners">count people with [has-mobile-phone?] / count people</monitor>
-    <monitor x="1696" precision="17" y="909" height="60" fontSize="11" width="100">r0</monitor>
     <input x="3000" multiline="false" y="1022" height="61" variable="#available-tests" type="number" width="118">10000.0</input>
     <switch x="2288" y="884" height="40" on="false" variable="prioritize-testing-health-care?" width="291" display="prioritize-testing-health-care?"></switch>
     <button x="12" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="92" display="1 Day run">if slice-of-the-day = "morning" [go]
@@ -321,49 +310,37 @@ while [slice-of-the-day != "morning"] [go]</button>
         <setup></setup>
         <update>plot #people-infected-in-hospitals</update>
       </pen>
-      <pen interval="1.0" mode="0" display="workplaces" color="-7500403" legend="true">
+      <pen interval="1.0" mode="0" display="mines" color="-7500403" legend="true">
         <setup></setup>
-        <update>plot #people-infected-in-workplaces</update>
+        <update>plot #people-infected-in-mines</update>
       </pen>
       <pen interval="1.0" mode="0" display="homes" color="-2674135" legend="true">
         <setup></setup>
         <update>plot #people-infected-in-homes</update>
       </pen>
-      <pen interval="1.0" mode="0" display="public-leisure" color="-955883" legend="true">
+      <pen interval="1.0" mode="0" display="markets" color="-955883" legend="true">
         <setup></setup>
-        <update>plot #people-infected-in-public-leisure</update>
+        <update>plot #people-infected-in-markets</update>
       </pen>
-      <pen interval="1.0" mode="0" display="private-leisure" color="-6459832" legend="true">
+      <pen interval="1.0" mode="0" display="stores" color="-6459832" legend="true">
         <setup></setup>
-        <update>plot #people-infected-in-private-leisure</update>
+        <update>plot #people-infected-in-stores</update>
       </pen>
       <pen interval="1.0" mode="0" display="schools" color="-1184463" legend="true">
         <setup></setup>
         <update>plot #people-infected-in-schools</update>
       </pen>
-      <pen interval="1.0" mode="0" display="universities" color="-10899396" legend="true">
+      <pen interval="1.0" mode="0" display="churches" color="-10899396" legend="true">
         <setup></setup>
-        <update>plot #people-infected-in-universities</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="e-shops" color="-13840069" legend="true">
-        <setup></setup>
-        <update>plot #people-infected-in-essential-shops</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="ne-shops" color="-14835848" legend="true">
-        <setup></setup>
-        <update>plot #people-infected-in-non-essential-shops</update>
+        <update>plot #people-infected-in-churches</update>
       </pen>
       <pen interval="1.0" mode="0" display="pub-trans" color="-11221820" legend="true">
         <setup></setup>
-        <update>plot #people-infected-in-pubtrans</update>
+        <update>;plot #people-infected-in-pubtrans</update>
       </pen>
       <pen interval="1.0" mode="0" display="priv-trans" color="-13791810" legend="true">
         <setup></setup>
-        <update>plot #people-infected-in-shared-cars</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="queuing" color="-13345367" legend="true">
-        <setup></setup>
-        <update>plot #people-infected-in-queuing</update>
+        <update>;plot #people-infected-in-shared-cars</update>
       </pen>
     </plot>
     <monitor x="2831" precision="17" y="1829" height="60" fontSize="11" width="359">ratio-quarantiners-currently-complying-to-quarantine</monitor>
@@ -371,7 +348,6 @@ while [slice-of-the-day != "morning"] [go]</button>
     <slider x="3233" step="1" y="147" max="25" width="233" display="influence-of-age-on-value-system" height="50" min="0" direction="Horizontal" default="5.0" variable="influence-of-age-on-value-system"></slider>
     <note x="559" y="933" backgroundDark="0" fontSize="10" width="566" markdown="false" height="40" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
 As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
-    <monitor x="1590" precision="17" y="844" height="60" fontSize="11" width="208">count people with [is-officially-asked-to-quarantine?]</monitor>
     <switch x="1967" y="1449" height="40" on="false" variable="is-working-from-home-recommended?" width="275" display="is-working-from-home-recommended?"></switch>
     <chooser x="2379" y="1857" height="60" variable="condition-phasing-out" current="3" width="135" display="condition-phasing-out">
       <choice type="string" value="35 days of quarantine"></choice>
@@ -396,16 +372,13 @@ As simplifications: each person relates to a fix set of spaces over time (same s
     <switch x="1635" y="2013" height="40" on="true" variable="is-quarantining-for-14-days-people-in-contact-with-a-sick-person-track-and-trace?" width="511" display="is-quarantining-for-14-days-people-in-contact-with-a-sick-person-track-and-trace?"></switch>
     <switch x="1758" y="1408" height="40" on="false" variable="force-curfew-active?" width="196" display="force-curfew-active?"></switch>
     <slider x="1764" step="0.01" y="1298" max="1" width="197" display="ratio-omniscious-infected-that-trigger-curfew" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-omniscious-infected-that-trigger-curfew"></slider>
-    <chooser x="1519" y="1464" height="60" variable="trigger-curfew-when" current="1" width="212" display="trigger-curfew-when">
+    <chooser x="1519" y="1464" height="60" variable="trigger-curfew-when" current="0" width="212" display="trigger-curfew-when">
       <choice type="string" value="never"></choice>
       <choice type="string" value="after-lockdown"></choice>
       <choice type="string" value="35-days-after-start-lockdown"></choice>
     </chooser>
     <monitor x="1623" precision="17" y="1529" height="60" fontSize="11" width="108">is-curfew-active?</monitor>
     <input x="2272" multiline="false" y="1491" height="60" variable="lockdown-duration" type="number" width="155">56.0</input>
-    <input x="1529" multiline="false" y="1004" height="60" variable="#burial-rites-gp" type="number" width="250">5.0</input>
-    <slider x="1674" step="0.01" y="1068" max="1" width="250" display="density-factor-burial-rites" height="50" min="0" direction="Horizontal" default="0.8" variable="density-factor-burial-rites"></slider>
-    <input x="1399" multiline="false" y="1012" height="60" variable="#essential-shops-gp" type="number" width="119">10.0</input>
     <chooser x="2820" y="60" height="60" variable="load-country-specific-settings" current="0" width="217" display="load-country-specific-settings">
       <choice type="string" value="DRC"></choice>
       <choice type="string" value="Custom"></choice>
@@ -427,14 +400,13 @@ As simplifications: each person relates to a fix set of spaces over time (same s
     <plot x="1554" autoPlotX="true" yMax="0.01" autoPlotY="true" y="647" xMin="0.0" height="175" legend="false" xMax="1.0" yMin="0.0" width="230" display="avg-infectiousity per person">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="default" color="-16777216" legend="true">
+      <pen interval="1.0" mode="0" display="pen-1" color="-5298144" legend="true">
         <setup></setup>
         <update>ifelse not any? people with [is-infected?] [plot 0]
-[plot mean [oxford-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
+[plot mean [ebola-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
       </pen>
     </plot>
-    <slider x="1138" step="0.01" y="1076" max="1" width="150" display="density-factor-workplaces" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-workplaces"></slider>
-    <input x="1051" multiline="false" y="1012" height="60" variable="#workplaces-gp" type="number" width="100">20.0</input>
+    <input x="1051" multiline="false" y="1012" height="60" variable="#agriculture-gp" type="number" width="100">10.0</input>
     <switch x="1179" y="905" height="40" on="true" variable="bunia_proxemics" display="bunia_proxemics" width="142" sizeVersion="0"></switch>
     <note x="22" y="13" backgroundDark="0" fontSize="32" width="271" markdown="false" height="42" textColorDark="-1" textColorLight="-5298144" backgroundLight="0">ASSOCC2EBOLA</note>
     <note x="4065" y="22" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
@@ -462,7 +434,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
       <choice type="string" value="scenario-9-smart-testing"></choice>
       <choice type="string" value="scenario-7-cultural-model"></choice>
     </chooser>
-    <button x="4321" y="107" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="258" display="load scenario-specific parameter settings">load-scenario-specific-parameter-settings</button>
+    <button x="4321" y="107" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="258" display="load scenario-specific parameter settings">;load-scenario-specific-parameter-settings</button>
     <button x="4066" y="172" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="66" display="import">ask-user-for-import-file
 load-scenario-from-file</button>
     <button x="4137" y="172" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="69" display="export">ask-user-for-export-file
@@ -486,23 +458,7 @@ save-world-state</button>
       <choice type="string" value="ebola"></choice>
     </chooser>
     <switch x="769" y="10" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
-    <slider x="579" step="0.01" y="242" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.18" variable="CFR" width="249" sizeVersion="0"></slider>
-    <input x="898" multiline="false" y="70" height="60" variable="#beds-in-hospital" type="number" width="195">0.0</input>
-    <plot x="909" autoPlotX="true" yMax="10.0" autoPlotY="true" y="138" xMin="0.0" height="192" legend="true" xMax="10.0" yMin="0.0" width="302" display="hospitals">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="#taken-beds" color="-2674135" legend="true">
-        <setup></setup>
-        <update>plot #taken-hospital-beds</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="#available-beds" color="-10899396" legend="true">
-        <setup></setup>
-        <update>plot #beds-available-for-admission</update>
-      </pen>
-    </plot>
-    <monitor x="1219" precision="17" y="205" height="60" fontSize="11" width="182">#sick-hospital-personel</monitor>
-    <monitor x="1218" precision="17" y="137" height="60" fontSize="11" width="184">#healthy-hospital-personel</monitor>
-    <monitor x="1219" precision="17" y="270" height="60" fontSize="11" width="180">hospital-effectiveness</monitor>
+    <slider x="579" step="0.01" y="242" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.16" variable="CFR" width="249" sizeVersion="0"></slider>
     <note x="4233" y="452" backgroundDark="0" fontSize="11" width="294" markdown="false" height="33" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Time between transitions</note>
     <slider x="4235" step="0.01" y="561" max="1" width="194" display="propagation-risk" height="50" min="0" direction="Horizontal" default="0.15" variable="propagation-risk"></slider>
     <slider x="4437" step="0.01" y="563" max="1" width="350" display="daily-risk-believe-experiencing-fake-symptoms" height="50" min="0" direction="Horizontal" default="0.0" variable="daily-risk-believe-experiencing-fake-symptoms"></slider>
@@ -518,37 +474,19 @@ model
 (deprecated)</note>
     <chooser x="582" y="442" height="60" variable="household-profiles" current="0" width="187" display="household-profiles">
       <choice type="string" value="custom"></choice>
-      <choice type="string" value="Belgium"></choice>
-      <choice type="string" value="Canada"></choice>
-      <choice type="string" value="Germany"></choice>
-      <choice type="string" value="Great Britain"></choice>
-      <choice type="string" value="France"></choice>
-      <choice type="string" value="Italy"></choice>
-      <choice type="string" value="Korea South"></choice>
-      <choice type="string" value="Netherlands"></choice>
-      <choice type="string" value="Norway"></choice>
-      <choice type="string" value="Spain"></choice>
-      <choice type="string" value="Singapore"></choice>
-      <choice type="string" value="Sweden"></choice>
-      <choice type="string" value="U.S.A."></choice>
     </chooser>
-    <slider x="701" step="0.01" y="700" max="1" width="248" display="ratio-retired-couple-homes" height="50" min="0" direction="Horizontal" default="0.276" variable="ratio-retired-couple-homes"></slider>
-    <slider x="701" step="0.01" y="644" max="1" width="248" display="ratio-family-homes" height="50" min="0" direction="Horizontal" default="0.432" variable="ratio-family-homes"></slider>
-    <slider x="703" step="0.01" y="589" max="1" width="247" display="ratio-adults-homes" height="50" min="0" direction="Horizontal" default="0.272" variable="ratio-adults-homes"></slider>
-    <slider x="700" step="0.01" y="755" max="1" width="248" display="ratio-multi-generational-homes" height="50" min="0" direction="Horizontal" default="0.02" variable="ratio-multi-generational-homes"></slider>
+    <slider x="701" step="0.01" y="644" max="1" width="248" display="ratio-family-homes" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-family-homes"></slider>
+    <slider x="703" step="0.01" y="589" max="1" width="247" display="ratio-adults-homes" height="50" min="0" direction="Horizontal" default="0.32" variable="ratio-adults-homes"></slider>
+    <slider x="700" step="0.01" y="755" max="1" width="248" display="ratio-displaced-homes" height="50" min="0" direction="Horizontal" default="0.77" variable="ratio-displaced-homes"></slider>
     <slider x="989" step="0.01" y="641" max="1" width="250" display="probability-hospital-personel" height="50" min="0" direction="Horizontal" default="0.28" variable="probability-hospital-personel"></slider>
     <slider x="988" step="0.01" y="699" max="1" width="249" display="probability-school-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-school-personel"></slider>
-    <slider x="986" step="0.01" y="754" max="1" width="248" display="probability-university-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-university-personel"></slider>
+    <slider x="986" step="0.01" y="754" max="1" width="248" display="probability-church-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-church-personel"></slider>
     <slider x="986" step="0.01" y="809" max="1" width="245" display="probability-shopkeeper" height="50" min="0" direction="Horizontal" default="0.04" variable="probability-shopkeeper"></slider>
     <note x="990" y="591" backgroundDark="0" fontSize="11" width="282" markdown="false" height="49" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Worker distribution (relevant for economic model)</note>
-    <monitor x="1191" precision="17" y="457" height="60" fontSize="11" width="108" display="Retired couples">count houses-hosting-retired-couple</monitor>
     <monitor x="858" precision="17" y="393" height="60" fontSize="11" width="100" display="#children">count children</monitor>
-    <monitor x="901" precision="17" y="462" height="60" fontSize="11" width="169" display="Adults rooming together">count houses-hosting-adults2</monitor>
-    <monitor x="967" precision="17" y="394" height="60" fontSize="11" width="100" display="#students">count students</monitor>
-    <monitor x="1078" precision="17" y="462" height="60" fontSize="11" width="100" display="Family">count houses-hosting-family</monitor>
-    <monitor x="1077" precision="17" y="394" height="60" fontSize="11" width="100" display="#workers">count workers</monitor>
-    <monitor x="1192" precision="17" y="394" height="60" fontSize="11" width="106" display="#retired">count retireds</monitor>
-    <monitor x="1209" precision="17" y="521" height="60" fontSize="11" width="175" display="Multi-generational living">count houses-hosting-multiple-generations</monitor>
+    <monitor x="901" precision="17" y="462" height="60" fontSize="11" width="169" display="Displaced males (#houses)">count houses-hosting-males</monitor>
+    <monitor x="967" precision="17" y="394" height="60" fontSize="11" width="100" display="#females">count females</monitor>
+    <monitor x="1077" precision="17" y="394" height="60" fontSize="11" width="100" display="#males">count males</monitor>
     <note x="582" y="392" backgroundDark="0" fontSize="16" width="208" markdown="false" height="38" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Demographics Model</note>
     <plot x="10" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1419" xMin="0.0" height="219" legend="true" xMax="10.0" yMin="0.0" width="510" display="Activities">
       <setup></setup>
@@ -666,78 +604,33 @@ model
         <update>plot #workers-working-at-school</update>
       </pen>
     </plot>
-    <monitor x="557" precision="17" y="1746" height="60" fontSize="11" width="133">#essential-shop-workers</monitor>
-    <monitor x="557" precision="17" y="1814" height="60" fontSize="11" width="132">#university-workers</monitor>
+    <monitor x="557" precision="17" y="1746" height="60" fontSize="11" width="133">#store-workers</monitor>
+    <monitor x="557" precision="17" y="1814" height="60" fontSize="11" width="132">#market-workers</monitor>
     <monitor x="697" precision="17" y="1882" height="60" fontSize="11" width="105">#school-workers</monitor>
-    <monitor x="561" precision="17" y="1882" height="60" fontSize="11" width="131">#workplace-workers</monitor>
-    <monitor x="697" precision="17" y="1746" height="60" fontSize="11" width="175">#non-essential-shop-workers</monitor>
+    <monitor x="561" precision="17" y="1882" height="60" fontSize="11" width="131">#mine-workers</monitor>
+    <monitor x="697" precision="17" y="1746" height="60" fontSize="11" width="175">#church-workers</monitor>
     <monitor x="697" precision="17" y="1814" height="60" fontSize="11" width="113">#hospital-workers</monitor>
-    <note x="42" y="1978" backgroundDark="0" fontSize="16" width="150" markdown="false" height="26" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Economic Model</note>
-    <slider x="43" step="0.01" y="2720" max="1" width="192" display="export-value-decay-factor" height="50" min="0" direction="Horizontal" default="0.1" variable="export-value-decay-factor"></slider>
-    <slider x="44" step="0.01" y="2382" max="1" width="211" display="ratio-tax-on-essential-shops" height="50" min="0" direction="Horizontal" default="0.76" variable="ratio-tax-on-essential-shops"></slider>
-    <slider x="44" step="0.01" y="2437" max="1" width="212" display="ratio-tax-on-non-essential-shops" height="50" min="0" direction="Horizontal" default="0.85" variable="ratio-tax-on-non-essential-shops"></slider>
-    <slider x="44" step="0.01" y="2548" max="1" width="212" display="ratio-tax-on-workers" height="50" min="0" direction="Horizontal" default="0.42" variable="ratio-tax-on-workers"></slider>
-    <note x="47" y="2363" backgroundDark="0" fontSize="11" width="198" markdown="false" height="18" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Taxes charged by the government</note>
-    <slider x="47" step="0.1" y="2076" max="10" width="212" display="price-of-rations-in-essential-shops" height="50" min="0.5" direction="Horizontal" default="2.8" variable="price-of-rations-in-essential-shops"></slider>
-    <slider x="43" step="1" y="2610" max="50" width="209" display="goods-produced-by-work-performed" height="50" min="1" direction="Horizontal" default="12.0" variable="goods-produced-by-work-performed"></slider>
-    <slider x="43" step="0.1" y="2665" max="5" width="209" display="unit-price-of-goods" height="50" min="0.1" direction="Horizontal" default="2.9" variable="unit-price-of-goods"></slider>
-    <slider x="47" step="1" y="2131" max="28" width="196" display="days-of-rations-bought" height="50" min="1" direction="Horizontal" default="3.0" variable="days-of-rations-bought"></slider>
-    <switch x="286" y="2523" height="40" on="false" variable="government-pays-wages?" width="200" display="government-pays-wages?"></switch>
-    <slider x="286" step="0.01" y="2570" max="1" width="271" display="ratio-of-wage-paid-by-the-government" height="50" min="0" direction="Horizontal" default="0.8" variable="ratio-of-wage-paid-by-the-government"></slider>
-    <input x="286" multiline="false" y="2625" height="60" variable="government-initial-reserve-of-capital" type="number" width="199">100000.0</input>
-    <slider x="45" step="10" y="2307" max="1000" width="228" display="max-stock-of-goods-in-a-shop" height="50" min="0" direction="Horizontal" default="500.0" variable="max-stock-of-goods-in-a-shop"></slider>
-    <slider x="280" step="1" y="2095" max="100" width="270" display="starting-amount-of-capital-workers" height="50" min="0" direction="Horizontal" default="60.0" variable="starting-amount-of-capital-workers"></slider>
-    <slider x="280" step="1" y="2150" max="100" width="271" display="starting-amount-of-capital-retired" height="50" min="0" direction="Horizontal" default="50.0" variable="starting-amount-of-capital-retired"></slider>
-    <slider x="280" step="1" y="2205" max="100" width="284" display="starting-amount-of-capital-students" height="50" min="0" direction="Horizontal" default="45.0" variable="starting-amount-of-capital-students"></slider>
-    <slider x="47" step="0.5" y="2020" max="30" width="172" display="workers-wages" height="50" min="0" direction="Horizontal" default="12.5" variable="workers-wages"></slider>
-    <slider x="46" step="0.1" y="2195" max="10" width="226" display="price-of-rations-in-non-essential-shops" height="50" min="0.5" direction="Horizontal" default="4.0" variable="price-of-rations-in-non-essential-shops"></slider>
-    <slider x="280" step="0.1" y="2040" max="2" width="172" display="productivity-at-home" height="50" min="0" direction="Horizontal" default="0.5" variable="productivity-at-home"></slider>
-    <slider x="45" step="1" y="2252" max="10" width="228" display="amount-of-rations-I-buy-when-going-to-shops" height="50" min="0" direction="Horizontal" default="6.0" variable="amount-of-rations-I-buy-when-going-to-shops"></slider>
-    <note x="380" y="1975" backgroundDark="0" fontSize="11" width="462" markdown="false" height="44" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Solution for overriding the now-deprecated/unmaintained economy model.
-At the start of each tick, people with less than 20 get 20$, so they don't end-up starving.</note>
-    <input x="284" multiline="false" y="2344" height="60" variable="retirees-tick-subsidy" type="number" width="220">3.5</input>
-    <input x="284" multiline="false" y="2279" height="60" variable="students-tick-subsidy" type="number" width="220">3.0</input>
-    <input x="284" multiline="false" y="2409" height="60" variable="parent-individual-subsidy-per-child-per-tick" type="number" width="219">2.5</input>
-    <note x="45" y="2775" backgroundDark="0" fontSize="10" width="196" markdown="false" height="39" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Set to 0 to destroy goods instead of selling outside the system</note>
-    <switch x="197" y="1971" height="40" on="true" variable="OVERRIDE-ECONOMY?" width="182" display="OVERRIDE-ECONOMY?"></switch>
-    <slider x="44" step="0.01" y="2493" max="1" width="212" display="ratio-tax-on-workplaces" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-tax-on-workplaces"></slider>
-    <plot x="1803" autoPlotX="true" yMax="10.0" autoPlotY="true" y="392" xMin="0.0" height="224" legend="true" xMax="10.0" yMin="0.0" width="332" display="infection per age">
+    <plot x="1803" autoPlotX="true" yMax="10.0" autoPlotY="true" y="392" xMin="0.0" height="224" legend="true" xMax="10.0" yMin="0.0" width="332" display="infection per sex">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="R-Y" color="-8053223" legend="true">
+      <pen interval="1.0" mode="0" display="females-infected" color="-8053223" legend="true">
         <setup></setup>
-        <update>plot #cumulative-youngs-infected</update>
+        <update>plot #cumulative-females-infected</update>
       </pen>
-      <pen interval="1.0" mode="0" display="R-S" color="-7171555" legend="true">
+      <pen interval="1.0" mode="0" display="males-infected" color="-7171555" legend="true">
         <setup></setup>
-        <update>plot #cumulative-students-infected</update>
+        <update>plot #cumulative-males-infected</update>
       </pen>
-      <pen interval="1.0" mode="0" display="R-W" color="-15040220" legend="true">
+      <pen interval="1.0" mode="0" display="females-infector" color="-2139308" legend="true">
         <setup></setup>
-        <update>plot #cumulative-workers-infected</update>
+        <update>plot #cumulative-females-infector</update>
       </pen>
-      <pen interval="1.0" mode="0" display="R-R" color="-13403783" legend="true">
+      <pen interval="1.0" mode="0" display="males-infector" color="-987046" legend="true">
         <setup></setup>
-        <update>plot #cumulative-retireds-infected</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="S-Y" color="-2139308" legend="true">
-        <setup></setup>
-        <update>plot #cumulative-youngs-infector</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="S-S" color="-987046" legend="true">
-        <setup></setup>
-        <update>plot #cumulative-students-infector</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="S-W" color="-8732573" legend="true">
-        <setup></setup>
-        <update>plot #cumulative-workers-infector</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="S-R" color="-11033397" legend="true">
-        <setup></setup>
-        <update>plot #cumulative-retireds-infector</update>
+        <update>plot #cumulative-males-infector</update>
       </pen>
     </plot>
-    <button x="12" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="89" display="setup">setup</button>
+    <button x="12" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="89" display="setup">setup-ebola</button>
     <slider x="579" step="0.1" y="184" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.3" variable="trust-in-institutions"></slider>
     <slider x="578" step="0.01" y="130" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.31" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
     <plot x="1016" autoPlotX="true" yMax="1.0" autoPlotY="true" y="1645" xMin="0.0" height="219" legend="true" xMax="1.0" yMin="0.0" width="508" display="measures">
@@ -809,13 +702,61 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
         <update>plot count people with [infection-status = "safe-burial"]</update>
       </pen>
     </plot>
-    <slider x="2046" step="0.01" y="213" max="1" width="354" display="factor-reduction-probability-transmission-young" height="50" min="0" direction="Horizontal" default="0.69" variable="factor-reduction-probability-transmission-young"></slider>
-    <slider x="2050" step="0.01" y="103" max="1" width="265" display="probability-self-recovery-symptoms" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-self-recovery-symptoms"></slider>
-    <slider x="2155" step="0.01" y="433" max="1" width="263" display="probability-unavoidable-death-old" height="50" min="0" direction="Horizontal" default="0.2" variable="probability-unavoidable-death-old"></slider>
-    <slider x="2046" step="0.01" y="268" max="1" width="269" display="probability-recorvery-if-treated" height="50" min="0" direction="Horizontal" default="0.1" variable="probability-recorvery-if-treated"></slider>
-    <slider x="2155" step="0.01" y="378" max="1" width="245" display="probability-unavoidable-death" height="50" min="0" direction="Horizontal" default="0.1" variable="probability-unavoidable-death"></slider>
-    <slider x="2039" step="0.01" y="323" max="1" width="273" display="probability-recorvery-if-treated-old" height="50" min="0" direction="Horizontal" default="0.09" variable="probability-recorvery-if-treated-old"></slider>
-    <slider x="2046" step="0.01" y="158" max="1" width="353" display="probability-self-recovery-symptoms-old" height="50" min="0" direction="Horizontal" default="0.07" variable="probability-self-recovery-symptoms-old"></slider>
+    <input x="255" multiline="false" y="2762" height="60" variable="parent-individual-subsidy-per-child-per-tick" type="number" width="219">2.5</input>
+    <slider x="15" step="0.01" y="2846" max="1" width="212" display="ratio-tax-on-workplaces" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-tax-on-workplaces"></slider>
+    <switch x="168" y="2324" height="40" on="true" variable="OVERRIDE-ECONOMY?" width="182" display="OVERRIDE-ECONOMY?"></switch>
+    <note x="16" y="3128" backgroundDark="0" fontSize="10" width="196" markdown="false" height="39" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Set to 0 to destroy goods instead of selling outside the system</note>
+    <input x="255" multiline="false" y="2632" height="60" variable="students-tick-subsidy" type="number" width="220">3.0</input>
+    <input x="255" multiline="false" y="2697" height="60" variable="retirees-tick-subsidy" type="number" width="220">3.5</input>
+    <note x="351" y="2328" backgroundDark="0" fontSize="11" width="462" markdown="false" height="44" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Solution for overriding the now-deprecated/unmaintained economy model.
+At the start of each tick, people with less than 20 get 20$, so they don't end-up starving.</note>
+    <slider x="16" step="1" y="2605" max="10" width="228" display="amount-of-rations-I-buy-when-going-to-shops" height="50" min="0" direction="Horizontal" default="6.0" variable="amount-of-rations-I-buy-when-going-to-shops"></slider>
+    <slider x="251" step="0.1" y="2393" max="2" width="172" display="productivity-at-home" height="50" min="0" direction="Horizontal" default="0.5" variable="productivity-at-home"></slider>
+    <slider x="17" step="0.1" y="2548" max="10" width="226" display="price-of-rations-in-non-essential-shops" height="50" min="0.5" direction="Horizontal" default="4.0" variable="price-of-rations-in-non-essential-shops"></slider>
+    <slider x="18" step="0.5" y="2373" max="30" width="172" display="workers-wages" height="50" min="0" direction="Horizontal" default="12.5" variable="workers-wages"></slider>
+    <slider x="251" step="1" y="2558" max="100" width="284" display="starting-amount-of-capital-students" height="50" min="0" direction="Horizontal" default="45.0" variable="starting-amount-of-capital-students"></slider>
+    <slider x="251" step="1" y="2503" max="100" width="271" display="starting-amount-of-capital-retired" height="50" min="0" direction="Horizontal" default="50.0" variable="starting-amount-of-capital-retired"></slider>
+    <slider x="251" step="1" y="2448" max="100" width="270" display="starting-amount-of-capital-workers" height="50" min="0" direction="Horizontal" default="60.0" variable="starting-amount-of-capital-workers"></slider>
+    <slider x="16" step="10" y="2660" max="1000" width="228" display="max-stock-of-goods-in-a-shop" height="50" min="0" direction="Horizontal" default="500.0" variable="max-stock-of-goods-in-a-shop"></slider>
+    <input x="257" multiline="false" y="2978" height="60" variable="government-initial-reserve-of-capital" type="number" width="199">100000.0</input>
+    <slider x="257" step="0.01" y="2923" max="1" width="271" display="ratio-of-wage-paid-by-the-government" height="50" min="0" direction="Horizontal" default="0.8" variable="ratio-of-wage-paid-by-the-government"></slider>
+    <switch x="257" y="2876" height="40" on="false" variable="government-pays-wages?" width="200" display="government-pays-wages?"></switch>
+    <slider x="18" step="1" y="2484" max="28" width="196" display="days-of-rations-bought" height="50" min="1" direction="Horizontal" default="3.0" variable="days-of-rations-bought"></slider>
+    <slider x="14" step="0.1" y="3018" max="5" width="209" display="unit-price-of-goods" height="50" min="0.1" direction="Horizontal" default="2.9" variable="unit-price-of-goods"></slider>
+    <slider x="14" step="1" y="2963" max="50" width="209" display="goods-produced-by-work-performed" height="50" min="1" direction="Horizontal" default="12.0" variable="goods-produced-by-work-performed"></slider>
+    <slider x="18" step="0.1" y="2429" max="10" width="212" display="price-of-rations-in-essential-shops" height="50" min="0.5" direction="Horizontal" default="2.8" variable="price-of-rations-in-essential-shops"></slider>
+    <note x="18" y="2716" backgroundDark="0" fontSize="11" width="198" markdown="false" height="18" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Taxes charged by the government</note>
+    <slider x="15" step="0.01" y="2901" max="1" width="212" display="ratio-tax-on-workers" height="50" min="0" direction="Horizontal" default="0.42" variable="ratio-tax-on-workers"></slider>
+    <slider x="15" step="0.01" y="2790" max="1" width="212" display="ratio-tax-on-non-essential-shops" height="50" min="0" direction="Horizontal" default="0.85" variable="ratio-tax-on-non-essential-shops"></slider>
+    <slider x="15" step="0.01" y="2735" max="1" width="211" display="ratio-tax-on-essential-shops" height="50" min="0" direction="Horizontal" default="0.76" variable="ratio-tax-on-essential-shops"></slider>
+    <slider x="14" step="0.01" y="3073" max="1" width="192" display="export-value-decay-factor" height="50" min="0" direction="Horizontal" default="0.1" variable="export-value-decay-factor"></slider>
+    <note x="13" y="2331" backgroundDark="0" fontSize="16" width="150" markdown="false" height="26" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Economic Model</note>
+    <input x="1479" multiline="false" y="191" height="60" variable="#beds-in-hospital" type="number" width="195">11.0</input>
+    <monitor x="1799" precision="17" y="258" height="60" fontSize="11" width="184">#healthy-hospital-personel</monitor>
+    <monitor x="1800" precision="17" y="326" height="60" fontSize="11" width="182">#sick-hospital-personel</monitor>
+    <plot x="1490" autoPlotX="true" yMax="10.0" autoPlotY="true" y="259" xMin="0.0" height="192" legend="true" xMax="10.0" yMin="0.0" width="302" display="hospitals">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="#taken-beds" color="-2674135" legend="true">
+        <setup></setup>
+        <update>plot #taken-hospital-beds</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="#available-beds" color="-10899396" legend="true">
+        <setup></setup>
+        <update>plot #beds-available-for-admission</update>
+      </pen>
+    </plot>
+    <monitor x="941" precision="17" y="15" height="60" fontSize="11" width="118">day-of-the-week</monitor>
+    <monitor x="942" precision="17" y="83" height="60" fontSize="11" width="116">slice-of-the-day</monitor>
+    <slider x="828" step="0.01" y="1120" max="1" width="150" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-schools"></slider>
+    <slider x="925" step="0.01" y="1072" max="1" width="182" display="density-factor-mines" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-mines"></slider>
+    <slider x="1070" step="0.01" y="1115" max="1" width="204" display="density-factor-agriculture" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-agriculture"></slider>
+    <slider x="1136" step="0.01" y="1073" max="1" width="185" display="density-factor-store" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-store"></slider>
+    <slider x="1323" step="0.01" y="1111" max="1" width="219" display="density-factor-churches" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-churches"></slider>
+    <slider x="1375" step="0.1" y="1069" max="1" width="250" display="density-factor-markets" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-markets"></slider>
+    <input x="1398" multiline="false" y="1008" height="60" variable="#markets-gp" type="number" width="250">3.0</input>
+    <monitor x="1685" precision="17" y="837" height="60" fontSize="11" width="100">r0</monitor>
+    <monitor x="563" precision="17" y="1946" height="60" fontSize="11" width="105">#agriculture-workers</monitor>
   </widgets>
   <info>## WHAT IS IT?
 

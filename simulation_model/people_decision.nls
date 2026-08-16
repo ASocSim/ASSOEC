@@ -9,7 +9,7 @@ end
 
 
 to-report is-working-day-for-me?
-  if is-gathering-point? self [ ifelse is-shop? [report is-shops-open-today?] [report not (day-of-the-week = "saturday" or day-of-the-week = "sunday")]]
+  if is-gathering-point? self [ ifelse is-store? [report is-shops-open-today?] [report not (day-of-the-week = "saturday" or day-of-the-week = "sunday")]]
   
   if is-person? self 
   [

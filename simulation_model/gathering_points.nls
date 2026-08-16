@@ -1,19 +1,20 @@
 __includes ["hospitals.nls" "gathering_points/gathering_types.nls"]
 globals
 [
-  hospitals
-  workplaces
-  schools
-  homes
-  private-leisure-points
-  public-leisure-points
-  universities
-  essential-shops
-  non-essential-shops
-  burial-rites
+   hospitals
+   schools
+   homes
+  markets
+  workplace-mines
+  workplace-agriculture
+  stores
+  churches
 ]
+
 breed [gathering-points gathering-point]
-gathering-points-own [gathering-type
+
+gathering-points-own [
+  gathering-type
   available-food-rations ; rations of food that are available, this will be most useful for homes
   
   amount-of-capital
@@ -24,7 +25,6 @@ gathering-points-own [gathering-type
   
   cached-number-of-participants
   capacity
-  
 ]
 
 
@@ -48,27 +48,28 @@ to-report is-away?
 end
 
 to-report proximity-factor
+  
   if gathering-type = hospital-gathering-type [report density-factor-hospitals]
   if gathering-type = school-gathering-type[report density-factor-schools]
-  if gathering-type = university-gathering-type[report density-factor-universities]
-  if gathering-type = workplace-gathering-type [report density-factor-workplaces]
-  if gathering-type = public-leisure-gathering-type[report density-factor-public-leisure]
-  if gathering-type = private-leisure-gathering-type[report density-factor-private-leisure]
+  if gathering-type = markets-gathering-type[report density-factor-markets]
+  if gathering-type = workplace-agriculture-gathering-type [report density-factor-agriculture]
+  if gathering-type = workplace-mine-gathering-type[report density-factor-mines]
+  if gathering-type = stores-gathering-type[report density-factor-store]
   if gathering-type = home-gathering-type[report density-factor-homes]
-  if gathering-type = essential-shop-gathering-type [report density-factor-essential-shops]
-  if gathering-type = non-essential-shop-gathering-type [report density-factor-non-essential-shops]
-  
-  if gathering-type = burial-gathering-type [report density-factor-burial-rites]
+  if gathering-type = churches-gathering-type [report density-factor-churches]
+ ; if gathering-type = burial-gathering-type [report density-factor-burial-rites]
   
   error (word gathering-type " not defined")
 end
 
 ; ToDo: Update this!
 to-report is-practicable-at-home?
-  if gathering-type = "school" or gathering-type = "university" or gathering-type = "workplace" or gathering-type = "home"
-  [report true]
-  if gathering-type = "public-leisure" or gathering-type = "private-leisure" or gathering-type = "essential-shop" or gathering-type = "non-essential-shop" or gathering-type = "hospital" or gathering-type = "burial-rites"
-  [report false]
+;   if gathering-type = "school" or gathering-type = "university" or gathering-type = "workplace" or gathering-type = "home"
+;   [report true]
+;   if gathering-type = "public-leisure" or gathering-type = "private-leisure" or gathering-type = "essential-shop" or gathering-type = "non-essential-shop" or gathering-type = "hospital" or gathering-type = "burial-rites"
+;   [report false]
+  
+  report false
 end
 
 
@@ -97,7 +98,7 @@ end
 
 
 
-to-report is-burial?
+to-report is-at-burial?
   report gathering-type = "burial-rites"
 end
 
@@ -122,52 +123,76 @@ to-report is-school?
   report gathering-type = "school"
 end
 
-to-report is-essential-shop?
-  report gathering-type = "essential-shop"
+to-report is-market?
+  report gathering-type = "market"
 end
 
-to-report is-non-essential-shop?
-  report gathering-type = "non-essential-shop"
+to-report is-mine?
+  report gathering-type = "mine"
 end
 
-to-report is-private-leisure?
-  report gathering-type = "private-leisure"
+to-report is-agriculture?
+  report gathering-type = "agriculture"
 end
 
-to-report is-at-private-leisure-place?
-  report [is-private-leisure?] of current-activity
+to-report is-church?
+  report gathering-type = "church"
 end
+
+to-report is-store?
+  report gathering-type = "store"
+end
+
+to-report store
+  report gathering-points with [is-store?]
+end
+
 
 to-report is-at-public-leisure-place?
   report [is-public-leisure?] of current-activity
 end
 
-to-report is-at-university?
-  report [is-university?] of current-activity
-end
 
 to-report is-public-leisure?
   report gathering-type = "public-leisure"
 end
 
-to-report is-shop?
-  report is-essential-shop? or is-non-essential-shop?
+to-report is-leisure-point?
+  report is-public-leisure? ;or is-private-leisure?
 end
 
-to-report my-university
-  report one-of gathering-link-neighbors with [gathering-type = "university"]
+
+
+to-report my-market
+  report one-of gathering-link-neighbors with [gathering-type = "market"]
+end
+
+to-report my-mine
+  report one-of gathering-link-neighbors with [gathering-type = "workplace-mines"]
+end
+
+to-report my-field
+  report one-of gathering-link-neighbors with [gathering-type = "workplace-agriculture"]
+end
+
+to-report my-stores
+  report one-of gathering-link-neighbors with [gathering-type = "store"]
+end
+
+to-report my-church
+  report one-of gathering-link-neighbors with [gathering-type = "church"]
 end
 
 to-report my-hospital
   report one-of gathering-link-neighbors with [gathering-type = "hospital"]
 end
 
-to-report people-at-essential-shops
-  report people with [[is-essential-shop?] of current-activity]
+to-report people-at-stores
+  report people with [[is-store?] of current-activity]
 end
 
-to-report people-at-non-essential-shops
-  report people with [[is-non-essential-shop?] of current-activity]
+to-report people-at-markets
+  report people with [[is-market?] of current-activity]
 end
 
 
@@ -175,22 +200,7 @@ to-report my-school
   report one-of gathering-link-neighbors with [gathering-type = "school"]
 end
 
-to-report my-non-essential-shop
-  report one-of gathering-link-neighbors with [is-non-essential-shop?]
-end
 
-to-report my-essential-shop
-  report one-of gathering-link-neighbors with [is-essential-shop?]
-end
-
-
-to-report my-private-leisure
-  report one-of gathering-link-neighbors with [is-private-leisure?]
-end
-
-to-report my-public-leisure
-  report one-of gathering-link-neighbors with [is-public-leisure?]
-end
 
 ;might be to be revised later, if the number of people expected to show up at the gathering point lowers
 to-report expected-number-of-other-participants
@@ -199,46 +209,51 @@ to-report expected-number-of-other-participants
   if is-hospital? [report random 5 + 2]
   
   ;MOD FOR EBOLA - ESTIMATING N PEOPLE AT BURIAL RITES AROUND 30
-  if is-burial?  [report random 30 + 2]
-  
+  if is-at-burial?  [report random 30 + 2]
   
   set cached-number-of-participants count in-gathering-link-neighbors
   report cached-number-of-participants
 end
 
+
+
+
+
 to-report is-accessible?
-  if is-hard-lockdown-active? [
-    report is-open-during-lockdown?
-  ]
-  if is-workplace? and closed-workplaces? [report false]
-  if is-school? and closed-schools? [report false]  
-  if is-university? and closed-universities? [report false]
-  if is-non-essential-shop? and closed-non-essential? [report false]
-  if is-curfew-active? and (is-evening? or is-night?) [
-    report is-open-during-curfew?
-  ]
+  ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
+;   if is-hard-lockdown-active? [
+;     report is-open-during-lockdown?
+;   ]
+;   if is-workplace? and closed-workplaces? [report false]
+;   if is-school? and closed-schools? [report false]  
+;   if is-university? and closed-universities? [report false]
+;   if is-non-essential-shop? and closed-non-essential? [report false]
+;   if is-curfew-active? and (is-evening? or is-night?) [
+;     report is-open-during-curfew?
+;   ]
   report true
 end
 
 to-report is-open-during-lockdown?
-  if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-public-leisure?
-  or is-private-leisure? [report false]
-  if is-essential-shop? or is-hospital? or is-home? [report true]
+  ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
+;   if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-public-leisure?
+;   or is-private-leisure? [report false]
+;   if is-essential-shop? or is-hospital? or is-home? [report true]
   
-  report (sentence "unimplemented for:" [gathering-type] of self)
+;   report (sentence "unimplemented for:" [gathering-type] of self)
+  report true
 end
 
 to-report is-open-during-curfew?
-  if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-essential-shop? or is-private-leisure? [report false]
-  if is-hospital? or is-home? [report true]
-  if is-public-leisure? [report true] ; So the agents have somewhere to go so they can break curfew
+    ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
+;   if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-essential-shop? or is-private-leisure? [report false]
+;   if is-hospital? or is-home? [report true]
+;   if is-public-leisure? [report true] ; So the agents have somewhere to go so they can break curfew
   
-  report (sentence "unimplemented for:" [gathering-type] of self)
+;   report (sentence "unimplemented for:" [gathering-type] of self)
+  report true
 end
 
-to-report is-university?
-  report gathering-type = "university"
-end
 
 to-report gatherers
   report in-gathering-link-neighbors
@@ -263,38 +278,41 @@ to-report empty-houses
   report homes with [not any? gatherers]
 end
 
-to-report houses-hosting-retired
-  report homes with [any? gatherers with [age = "retired"]]
+; to-report houses-hosting-retired
+;   report homes with [any? gatherers with [age = "retired"]]
+; end
+
+; to-report houses-only-hosting-retired
+;   report homes with [any? gatherers and not any? gatherers with [not (age = "retired")]]
+; end
+
+; to-report houses-hosting-retired-couple
+;   report homes with [count gatherers with [age = "retired"] = 2 and count gatherers = 2]
+; end
+
+
+to-report houses-hosting-males
+  report homes with [any? gatherers with [sex = "male"]]
 end
 
-to-report houses-only-hosting-retired
-  report homes with [any? gatherers and not any? gatherers with [not (age = "retired")]]
-end
 
-to-report houses-hosting-worker
-  report homes with [any? gatherers with [age = "worker"]]
-end
 
-to-report houses-hosting-retired-couple
-  report homes with [count gatherers with [age = "retired"] = 2 and count gatherers = 2]
-end
-
-to-report houses-hosting-adults
-  report homes with [any? gatherers with [is-adult?]]
-end
+; to-report houses-hosting-adults
+;   report homes with [any? gatherers with [is-adult?]]
+; end
 
 ;;should be renamed in "houses-hosting-non-retied-adults" for instance
-to-report houses-hosting-adults2
-  report homes with [count gatherers = count gatherers with [age = "worker"] or count gatherers = count gatherers with [age = "student"]]
-end
+; to-report houses-hosting-adults2
+;   report homes with [count gatherers = count gatherers with [age = "worker"] or count gatherers = count gatherers with [age = "student"]]
+; end
 
-to-report houses-hosting-family
-  report homes with [any? gatherers with [age = "worker"] and any? gatherers with [age = "young" or age = "student"] and not any? gatherers with [age = "retired"]]
-end
+; to-report houses-hosting-family
+;   report homes with [any? gatherers with [age = "worker"] and any? gatherers with [age = "young" or age = "student"] and not any? gatherers with [age = "retired"]]
+; end
 
-to-report houses-hosting-multiple-generations
-  report homes with [any? gatherers with [age = "worker"] and any? gatherers with [age = "young" or age = "student"] and any? gatherers with [age = "retired"]]
-end
+; to-report houses-hosting-multiple-generations
+;   report homes with [any? gatherers with [age = "worker"] and any? gatherers with [age = "young" or age = "student"] and any? gatherers with [age = "retired"]]
+; end
 
 ;to-report closed-schools?
 ;  report is-closing-school-when-any-reported-case-measure? and is-someone-officially-sick? 
@@ -308,37 +326,39 @@ end
 
 
 
-to-report is-leisure-point?
-  report is-public-leisure? or is-private-leisure?
+
+;;;;;;;;WORKERS
+
+
+
+to-report #store-workers
+  report count workers with [[gathering-type] of my-work = "store"]
 end
 
-to-report shops
-  report gathering-points with [is-shop?]
+to-report #market-workers
+  report count workers with [[gathering-type] of my-work = "market"]
 end
 
-to-report #essential-shop-workers
-  report count workers with [[gathering-type] of my-work = "essential-shop"]
-end
-
-to-report #non-essential-shop-workers
-  report count workers with [[gathering-type] of my-work = "non-essential-shop"]
-end
-
-to-report #university-workers
-  report count workers with [[gathering-type] of my-work = "university"]
+to-report #church-workers
+  report count workers with [[gathering-type] of my-work = "church"]
 end
 
 to-report #hospital-workers
   report count workers with [[gathering-type] of my-work = "hospital"]
 end
 
-to-report #workplace-workers
-  report count workers with [[gathering-type] of my-work = "workplace"]
+to-report #mine-workers
+  report count workers with [[gathering-type] of my-work = "workplace-mine"]
+end
+
+to-report #agriculture-workers
+  report count workers with [[gathering-type] of my-work = "workplace-agriculture"]
 end
 
 to-report #school-workers
   report count workers with [[gathering-type] of my-work = "school"]
 end
+
 
 to-report is-family-present-in-current-gathering-point?
   report any? my-relatives with [current-activity = [current-activity] of myself]

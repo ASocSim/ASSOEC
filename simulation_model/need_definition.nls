@@ -1,3 +1,21 @@
+    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;EBOLA SURVIVAL NEEDS;;;;;;;;;;;;;;;;;;
+
+;; We model survival in its subgroups of food, sleep, financial, and health
+;; FOOD includes water and is procured as a day activity at markets or stores, getting food increases health but damages finances
+
+;; SLEEP is only replenished by sleeping (at home, at night)
+
+;; FINANCIAL survival is replenished by working (in mine, agriculture, shop, hospital, or church) not housework
+;;;;a person who is sick and getting treatment at home or hospital depleats financial survival
+
+;; HEALTH ( maybe be redundant )
+;;;;as workers in Mongbwalu are not storing large amounts of food at home and need to work for daily survival, the available rations are always NULL or the amount of capital is minimal TBD
+;;;;only procuring food replenishes Health
+;;;;food in hospital is not a given, so if a patient is being treated, their health satisfaction is also low - this links to people's desire to visit relatives in hospitals
+
+;;financial stability is not present explicitly in Ebola model
+
 to-report health-satisfaction-level
   ;;constant value set to average
   ;;survival needs often revolve around short-term temporality (e.g. stopping to breath)
@@ -9,7 +27,6 @@ to-report health-satisfaction-level
     if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0.3]
     error "undefined"
   ]
-  
   report 1
 end
 
@@ -23,17 +40,37 @@ to-report food-safety-satisfaction-level
   report min (list ([available-food-rations] of my-home / amount-of-rations-I-buy-when-going-to-essential-shops) 1)
 end
 
+; to-report health-satisfaction-level-ebola
+;   if is-currently-being-treated-at-hospital? [
+;     report random-float 0.3
+;   ]
+;   report 0.3
+; end
 
 to-report financial-survival-satisfaction-level
   report clamp-soft (my-amount-of-capital / (price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops))
 end
 
-to-report financial-stability-satisfaction-level
-  report ifelse-value my-target-amount-of-capital > 0 [clamp-soft (my-amount-of-capital / my-target-amount-of-capital)] [0]
-end
+
+; to-report financial-stability-satisfaction-level
+;   report ifelse-value my-target-amount-of-capital > 0 [clamp-soft (my-amount-of-capital / my-target-amount-of-capital)] [0]
+; end
 
 
-to-report SDE-survival [ad]
+; to-report SDE-survival [ad]
+;   let physiological-needs (list 
+;     SDE-food-safety ad 
+;     SDE-health ad
+;     SDE-sleep ad  
+;     SDE-conformity ad
+;   )
+;   if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
+;     set physiological-needs fput (SDE-financial-survival ad) physiological-needs
+;   ]
+;   report max physiological-needs
+; end
+
+to-report SDE-survival-ebola [ad]
   let physiological-needs (list 
     SDE-food-safety ad 
     SDE-health ad
@@ -45,6 +82,40 @@ to-report SDE-survival [ad]
   ]
   report max physiological-needs
 end
+
+
+    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;EBOLA BELONGING NEEDS;;;;;;;;;;;;;;;;;;
+;;; belonging is split in family and group
+;;;
+
+to-report family-belonging-satisfaction-level-ebola
+  if is-believing-to-be-infected?
+  [
+    if not (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.7]
+    if is-observing-critical-symptoms? and (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.1]
+    
+    if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0]
+    error "undefined"
+  ]
+  report 1
+end
+
+; to-report group-belonging-satisfaction-level-ebola
+;   if is-attending-sdb [report 0]
+;   ;;LOGIC TBD HERE
+;   report 1
+; end
+
+
+
+
+    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;EBOLA - SAFETY;;;;;;;;;;;;;;;;;;
+;;Safety for now is only social safety, others can be added later
+;;;;SOCIAL SAFETY is increased by attending religious gatherings(weekend) and visiting relatives (evenings)
+;;;; women's social safety decreases if they are getting treatment in a hospital
+;;;; COMPLIANCE AND RISK AVOIDANCE are not in the ebola model
 
 to-report SDE-safety [ad]
   ; Using min here the value is always zero (food can only go up when they go to the store, but that lowers compliance/risk avoidance).
@@ -58,13 +129,25 @@ to-report SDE-safety [ad]
   let importances-psychological-needs (list importance-weight-compliance importance-weight-risk-avoidance)
 
   if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
-    set psychological-needs fput (SDE-financial-stability ad) psychological-needs
+   ; set psychological-needs fput (SDE-financial-stability ad) psychological-needs
     set importances-psychological-needs fput importance-weight-financial-stability importances-psychological-needs
   ]
 
   report weighted-mean psychological-needs importances-psychological-needs
   
 end
+
+
+    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;EBOLA - SELF ESTEEM;;;;;;;;;;;;;;;;;;
+
+;; for covid these were leisure, luxury and autonomy. For Ebola, these are SOCIAL STATUS, AUTONOMY and PROVIDE FOR FAMILY (patriarcal)
+
+;; SOCIAL STATUS is also grown by working and evening leisure activities, and depleats with treatment at hospital (maybe)
+;; AUTONOMY concerns self determination through tradition and culture, it is also increased by working and decreased by SDB and getting treatment at hospital
+;;;; leisure and luxury are part of autonomy in ebola model
+;; PROVIDING is replenished by working in mine, agriculture, shop, hospital, or church, and housework
+;;;;getting treatment depleats this
 
 to-report SDE-self-esteem [ad]
   let needs (list 
@@ -76,8 +159,8 @@ to-report SDE-self-esteem [ad]
     set importances fput importance-weight-luxury importances
   ]
   report weighted-mean needs importances
-  
 end
+
 
 to-report quality-of-life-indicator
   
@@ -91,7 +174,7 @@ to-report quality-of-life-indicator
     ;Safety needs
     (compliance-satisfaction-level * importance-weight-compliance) 
     (risk-avoidance-satisfaction-level * importance-weight-risk-avoidance) 
-    (financial-stability-satisfaction-level * importance-weight-financial-stability) 
+    ;(financial-stability-satisfaction-level * importance-weight-financial-stability) 
     ;Belonging needs
     (belonging-satisfaction-level * importance-weight-belonging-subneed)
     ;Esteem needs
@@ -101,3 +184,31 @@ to-report quality-of-life-indicator
   
   report sum quality-of-life
 end
+
+
+
+
+; to-report quality-of-life-indicator-ebola
+  
+;   let quality-of-life (list 
+;       ;Survival needs
+;     (food-safety-satisfaction-level * importance-weight-food-safety) 
+;     (sleep-satisfaction-level * importance-weight-sleep) 
+;     (financial-survival-satisfaction-level * importance-weight-financial-survival)
+;     (health-satisfaction-level * importance-weight-health) 
+    
+;     (conformity-satisfaction-level * importance-weight-conformity)
+;     ;Safety needs
+;     (safety-satisfaction-level * importance-weight-safety) 
+    
+;     ;Belonging needs
+;     (group-belonging-satisfaction-level * importance-weight-group-belonging-subneed)
+;     (family-belonging-satisfaction-level * importance-weight-family-belonging-subneed)
+    
+;     ;Esteem needs
+;     (autonomy-satisfaction-level * importance-weight-autonomy) 
+;     (social-status-satisfaction-level * importance-weight-social-status) 
+;     (provide-satisfaction-level * importance-weight-provide))
+  
+;   report sum quality-of-life
+; end

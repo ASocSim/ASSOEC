@@ -1,39 +1,33 @@
-to-report burial-gathering-type
-  report "burial-rites"
-end
+;;gathering types updated for Ebola Mongbwalu
 
 to-report hospital-gathering-type
   report "hospital"
-end
-
-to-report workplace-gathering-type
-  report "workplace"
 end
 
 to-report home-gathering-type
   report "home"
 end
 
-to-report public-leisure-gathering-type
-  report "public-leisure"
+to-report markets-gathering-type
+  report "market"
 end
 
-to-report private-leisure-gathering-type
-  report "private-leisure"
+to-report stores-gathering-type
+  report "store"
 end
 
 to-report school-gathering-type
   report "school"
 end
 
-to-report university-gathering-type
-  report "university"
+to-report churches-gathering-type
+  report "church"
 end
 
-to-report essential-shop-gathering-type
-  report "essential-shop"
+to-report workplace-agriculture-gathering-type
+  report "workplace-agriculture"
 end
 
-to-report non-essential-shop-gathering-type
-  report "non-essential-shop"
+to-report workplace-mine-gathering-type
+  report "workplace-mine"
 end
