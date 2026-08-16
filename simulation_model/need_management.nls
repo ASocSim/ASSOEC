@@ -70,8 +70,12 @@ to decay-satisfaction-level
   if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
 
   let compliance-decay 0.8
-  let risk-avoidance-decay 0.95
   let conformity-decay 0.8
+  let sleep-decay 0.8
+  let risk-avoidance-decay 0.95
+  let luxury-decay 0.99
+  let leisure-decay 0.99
+
   if should-I-stay-home? [
     set compliance-decay compliance-decay - (1 - compliance-decay) ; Double the decay
     set risk-avoidance-decay risk-avoidance-decay - (1 - risk-avoidance-decay)
@@ -86,14 +90,14 @@ to decay-satisfaction-level
   set conformity-satisfaction-level conformity-satisfaction-level * conformity-decay
   if conformity-satisfaction-level < 0 [set conformity-satisfaction-level 0]
 
-  set leisure-satisfaction-level leisure-satisfaction-level * 0.99
+  set leisure-satisfaction-level leisure-satisfaction-level * leisure-decay
   if leisure-satisfaction-level < 0 [set leisure-satisfaction-level 0]
   
-  set sleep-satisfaction-level sleep-satisfaction-level * 0.8 
+  set sleep-satisfaction-level sleep-satisfaction-level * sleep-decay
   if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
 
   if age != young-age [
-  set luxury-satisfaction-level luxury-satisfaction-level * 0.99
+  set luxury-satisfaction-level luxury-satisfaction-level * luxury-decay
   if luxury-satisfaction-level < 0 [set luxury-satisfaction-level 0]
   ]
 end
@@ -488,10 +492,10 @@ to-report SUE-health [ad]
   report base * sd-bonus
 end
 
-to-report conformity-increase [ad network-action]
-  let gp location-of ad
-  let motive motive-of ad
-  let sd social-distancing-of ad
+to-report conformity-increase [an-activity-descriptor network-action]
+  let gp location-of an-activity-descriptor
+  let motive motive-of an-activity-descriptor
+  let sd social-distancing-of an-activity-descriptor
   let result 0
   
   if should-I-stay-home? [
