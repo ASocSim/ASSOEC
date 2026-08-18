@@ -94,10 +94,6 @@ to-report #sick-personel
   report count hired-workers with [has-internally-visible-symptoms?]
 end
 
-
-
-
-
 to-report is-at-burial?
   report gathering-type = "burial-rites"
 end
@@ -109,6 +105,10 @@ end
 
 to-report is-home?
   report gathering-type = "home"
+end
+
+to-report is-university?
+  report gathering-type = "university"
 end
 
 to-report is-hospital?
@@ -137,6 +137,10 @@ end
 
 to-report is-church?
   report gathering-type = "church"
+end
+
+to-report is-shop?
+  report gathering-type = "shop"
 end
 
 to-report is-store?
