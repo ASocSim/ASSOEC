@@ -570,14 +570,14 @@ to-report SUE-health [ad]
   report base * sd-bonus
 end
 
-to-report conformity-increase [ad network-action]
-  let gp location-of ad
-  let motive motive-of ad
-  let sd social-distancing-of ad
+to-report conformity-increase [an-activity-descriptor network-action]
+  let gathering-point location-of an-activity-descriptor
+  let motive motive-of an-activity-descriptor
+  let social-distancing social-distancing-of an-activity-descriptor
   let result 0
   
   if should-I-stay-home? [
-    ifelse did-my-network-quarantine? = (gp = my-home or (gp = my-hospital and work-motive != motive)) [
+    ifelse did-my-network-quarantine? = (gathering-point = my-home or (gathering-point = my-hospital and work-motive != motive)) [
       ; If my quarantine decision is the same as my networks
       set result result + 0.2
      ] [
@@ -586,10 +586,10 @@ to-report conformity-increase [ad network-action]
     ]
   ]
   
-  ifelse [gathering-type] of gp = location-of network-action and motive = motive-of network-action [
+  ifelse [gathering-type] of gathering-point = location-of network-action and motive = motive-of network-action [
     set result result + 0.4
   ] [
-    if [gathering-type] of gp = location-of network-action [
+    if [gathering-type] of gathering-point = location-of network-action [
       set result result + 0.15
     ]
     if motive = motive-of network-action [
@@ -597,7 +597,7 @@ to-report conformity-increase [ad network-action]
     ]
   ]
   
-  ifelse sd = did-my-network-socially-distance? [
+  ifelse social-distancing = did-my-network-socially-distance? [
     set result result + 0.1
   ] [
     set result result - 0.1
