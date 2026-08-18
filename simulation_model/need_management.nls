@@ -33,49 +33,29 @@ __includes ["need_definition.nls"]
 ;SDA-[Need]: The actual discounted satisfaction gain for a need after having performed an action
 
 to update-needs-for-playing [current-activity-descriptor]
-  decay-satisfaction-level
+  decay-satisfaction-level-ebo
   if not is-activity-successful? [stop]
-
-  set belonging-satisfaction-level clamp 0 1 (belonging-satisfaction-level + SDA-belonging current-activity-descriptor)
- 
-  set compliance-satisfaction-level clamp 0 1 (compliance-satisfaction-level + SDE-compliance current-activity-descriptor)
-
-  set risk-avoidance-satisfaction-level  clamp 0 1 (risk-avoidance-satisfaction-level + SDA-risk-avoidance current-activity-descriptor)
-
-  set leisure-satisfaction-level clamp 0 1 (leisure-satisfaction-level + SDE-leisure current-activity-descriptor)
+    
+  set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
+  set health-satisfaction-level clamp 0 1 (health-satisfaction-level + SDE-health current-activity-descriptor)
+  set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDA-food current-activity-descriptor)
+  set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
   
+  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDA-group-belonging current-activity-descriptor)
+   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDA-family-belonging current-activity-descriptor)
+
+  set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)  
   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
   
-  set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
+  set providing-satisfaction-level clamp 0 1 (providing-satisfaction-level + SDE-providing current-activity-descriptor)
+    
+  set physical-safety-satisfaction-level clamp 0 1 (physical-safety-satisfaction-level + SDE-physical-safety current-activity-descriptor)
+    set social-safety-satisfaction-level clamp 0 1 (social-safety-satisfaction-level + SDE-social-safety current-activity-descriptor)
   
-  if age != "young" [
-    set luxury-satisfaction-level clamp 0 1 (luxury-satisfaction-level + SDA-luxury current-activity-descriptor)
-  ]
+  
 
   set conformity-satisfaction-level clamp 0 1 (conformity-satisfaction-level + SDA-conformity current-activity-descriptor)
 end
-
-; to update-needs-for-playing-ebola [current-activity-descriptor]
-;   decay-satisfaction-level
-;   if not is-activity-successful? [stop]
-;   ;;SURVIVAL
-;   set food-safety-satisfaction-level clamp 0 1 (food-safety-satisfaction-level + SDE-food-safety current-activity-descriptor)
-;   set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
-;   set health-satisfaction-level clamp 0 1 (health-satisfaction-level + SDE-health current-activity-descriptor)
-;   set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
-  
-; ;;BELONGING
-;   set belonging-satisfaction-level clamp 0 1 (belonging-satisfaction-level + SDA-belonging current-activity-descriptor)
-
-;  ;;SAFETY
-;   set safety-satisfaction-level clamp 0 1 (safety-satisfaction-level + SDE-safety current-activity-descriptor)
-
-;;  SELF ESTEEM  
-;   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
-;   set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)
-;   set provide-satisfaction-level clamp 0 1 (provide-satisfaction-level + SDE-provide current-activity-descriptor)
-  
-; end
 
 
 ;;this procedure is a simple representation of need decay
@@ -83,89 +63,53 @@ end
 ;--need decay should decrease over time when not taken care of
 ;--special situations can lead to special decay (e.g. breaking an army-enforced lock in should hurt badly the satisfaction of safety needs)
 ;[the previous point might call for the introduction of the person's context later on]
-to decay-satisfaction-level
-  let belonging-decay 0.01
-  if any? my-relatives and days-since-seen-relatives > 0 [set belonging-decay belonging-decay * 1.5]
-  if days-since-seen-friends > 0 [set belonging-decay belonging-decay * 1.5]
 
-  set belonging-satisfaction-level belonging-satisfaction-level - belonging-decay
-  if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
-
-  let compliance-decay 0.8
-  let conformity-decay 0.8
-  let sleep-decay 0.8
-  let risk-avoidance-decay 0.95
-  let luxury-decay 0.99
-  let leisure-decay 0.99
-
-  if should-I-stay-home? [
-    set compliance-decay compliance-decay - (1 - compliance-decay) ; Double the decay
-    set risk-avoidance-decay risk-avoidance-decay - (1 - risk-avoidance-decay)
-    set conformity-decay conformity-decay - (1 - conformity-decay)
-  ]
-  set compliance-satisfaction-level compliance-satisfaction-level * compliance-decay
-  if compliance-satisfaction-level < 0 [set compliance-satisfaction-level 0]
+to decay-satisfaction-level-ebo
   
-  set risk-avoidance-satisfaction-level risk-avoidance-satisfaction-level * risk-avoidance-decay
-  if risk-avoidance-satisfaction-level < 0 [set risk-avoidance-satisfaction-level 0]
+  ;SURVIVAL
+  set financial-survival-satisfaction-level financial-survival-satisfaction-level * financial-survival-decay
+  if financial-survival-satisfaction-level < 0 [set financial-survival-satisfaction-level 0]
   
-  set conformity-satisfaction-level conformity-satisfaction-level * conformity-decay
-  if conformity-satisfaction-level < 0 [set conformity-satisfaction-level 0]
-
-  set leisure-satisfaction-level leisure-satisfaction-level * leisure-decay
-  if leisure-satisfaction-level < 0 [set leisure-satisfaction-level 0]
+  set food-satisfaction-level food-satisfaction-level * food-decay
+  if food-satisfaction-level < 0 [set food-satisfaction-level 0]
   
-  set sleep-satisfaction-level sleep-satisfaction-level * sleep-decay
+  set health-satisfaction-level health-satisfaction-level * health-decay
+  if health-satisfaction-level < 0 [set health-satisfaction-level 0]
+  
+  set sleep-satisfaction-level sleep-satisfaction-level * 0.8 
   if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
+  
+  
+  ;BELONGING
+  let group-belonging-decay 0.01
+  let family-belonging-decay 0.01
 
-  if age != young-age [
-  set luxury-satisfaction-level luxury-satisfaction-level * luxury-decay
-  if luxury-satisfaction-level < 0 [set luxury-satisfaction-level 0]
+ ; set belonging-satisfaction-level belonging-satisfaction-level - belonging-decay
+  ;if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
+  
+  ;;SAFETY
+   set social-safety-satisfaction-level social-safety-satisfaction-level * social-safety-decay
+  if social-safety-satisfaction-level < 0 [set social-safety-satisfaction-level 0]
+  
+  
+   set physical-safety-satisfaction-level physical.safety-satisfaction-level * physical-safety-decay
+  if physical-safety-satisfaction-level < 0 [set physical-safety-satisfaction-level 0]
+
+  ; SELF ESTEEM
+  set autonomy-satisfaction-level autonomy-satisfaction-level * 0.99
+  if autonomy-satisfaction-level < 0 [set autonomy-satisfaction-level 0]
+  
+  let providing-decay 0.8
+  let social-status-decay 0.8
+    if is-getting-treatment-in-hospital and is-male? [
+    set social-status-decay social-status-decay - (1 - social-status-decay) ; Double the decay
+    set provide-decay provide-decay - (1 - provide-decay)
+  ]
+
+;exclusions for age and gender here
+  
   ]
 end
-
-; to decay-satisfaction-level-ebola
-  
-;   ;SURVIVAL
-;   set financial-survival-satisfaction-level financial-survival-satisfaction-level * financial-survival-decay
-;   if financial-survival-satisfaction-level < 0 [set financial-survival-satisfaction-level 0]
-  
-;   set food-satisfaction-level food-satisfaction-level * food-decay
-;   if food-satisfaction-level < 0 [set food-satisfaction-level 0]
-  
-;   set health-satisfaction-level health-satisfaction-level * health-decay
-;   if health-satisfaction-level < 0 [set health-satisfaction-level 0]
-  
-;   set sleep-satisfaction-level sleep-satisfaction-level * 0.8 
-;   if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
-  
-  
-;   ;BELONGING
-;   let group-belonging-decay 0.01
-;   let family-belonging-decay 0.01
-
-;  ; set belonging-satisfaction-level belonging-satisfaction-level - belonging-decay
-;   ;if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
-  
-;   ;;SAFETY
-;    set safety-satisfaction-level safety-satisfaction-level * safety-decay
-;   if safety-satisfaction-level < 0 [set safety-satisfaction-level 0]
-
-;   ; SELF ESTEEM
-;   set autonomy-satisfaction-level autonomy-satisfaction-level * 0.99
-;   if autonomy-satisfaction-level < 0 [set autonomy-satisfaction-level 0]
-  
-;   let provide-decay 0.8
-;   let social-status-decay 0.8
-;     if CONDITION [
-;     set social-status-decay social-status-decay - (1 - social-status-decay) ; Double the decay
-;     set provide-decay provide-decay - (1 - provide-decay)
-;   ]
-
-; ;exclusions for age and gender here
-  
-;   ]
-; end
 
 
 

@@ -47,9 +47,9 @@ end
 ;   report 0.3
 ; end
 
-to-report financial-survival-satisfaction-level
-  report clamp-soft (my-amount-of-capital / (price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops))
-end
+; to-report financial-survival-satisfaction-level
+;   report clamp-soft (my-amount-of-capital / (price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops))
+; end
 
 
 ; to-report financial-stability-satisfaction-level
@@ -166,49 +166,21 @@ to-report quality-of-life-indicator
   
   let quality-of-life (list 
       ;Survival needs
-    (food-safety-satisfaction-level * importance-weight-food-safety) 
+    (food-satisfaction-level * importance-weight-food) 
     (financial-survival-satisfaction-level * importance-weight-financial-survival)
     (sleep-satisfaction-level * importance-weight-sleep) 
     (health-satisfaction-level * importance-weight-health) 
-    (conformity-satisfaction-level * importance-weight-conformity)
+    ;Self-Esteem needs
+    (social-status-satisfaction-level * importance-social-status)
+    (providing-satisfaction-level * providing-social-status)
+    (autonomy-satisfaction-level * autonomy-social-status)
     ;Safety needs
-    (compliance-satisfaction-level * importance-weight-compliance) 
-    (risk-avoidance-satisfaction-level * importance-weight-risk-avoidance) 
-    ;(financial-stability-satisfaction-level * importance-weight-financial-stability) 
+    (physical-safety-satisfaction-level * importance-weight-physical-safety) 
+    (social-safety-satisfaction-level * importance-weight-social-safety) 
     ;Belonging needs
-    (belonging-satisfaction-level * importance-weight-belonging-subneed)
-    ;Esteem needs
-    (autonomy-satisfaction-level * importance-weight-autonomy) 
-    (luxury-satisfaction-level * importance-weight-luxury) 
-    (leisure-satisfaction-level * importance-weight-leisure))
-  
+    (group-belonging-satisfaction-level * importance-weight-group-belonging)
+    (family-belonging-satisfaction-level * importance-weight-family-belonging)
+ 
   report sum quality-of-life
 end
 
-
-
-
-; to-report quality-of-life-indicator-ebola
-  
-;   let quality-of-life (list 
-;       ;Survival needs
-;     (food-safety-satisfaction-level * importance-weight-food-safety) 
-;     (sleep-satisfaction-level * importance-weight-sleep) 
-;     (financial-survival-satisfaction-level * importance-weight-financial-survival)
-;     (health-satisfaction-level * importance-weight-health) 
-    
-;     (conformity-satisfaction-level * importance-weight-conformity)
-;     ;Safety needs
-;     (safety-satisfaction-level * importance-weight-safety) 
-    
-;     ;Belonging needs
-;     (group-belonging-satisfaction-level * importance-weight-group-belonging-subneed)
-;     (family-belonging-satisfaction-level * importance-weight-family-belonging-subneed)
-    
-;     ;Esteem needs
-;     (autonomy-satisfaction-level * importance-weight-autonomy) 
-;     (social-status-satisfaction-level * importance-weight-social-status) 
-;     (provide-satisfaction-level * importance-weight-provide))
-  
-;   report sum quality-of-life
-; end

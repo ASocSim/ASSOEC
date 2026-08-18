@@ -95,43 +95,46 @@ people-own [
   importance-given-to-achievement-value
   
   ;IMPORTANCE of BELONGING needs
-  ;*** NOTE: the belonging only contains 1x subneed (more subneeds might be added to this category at a later stage) ***
-  importance-weight-belonging-subneed
+  importance-weight-group-belonging
+    importance-weight-family-belonging
 
   ;IMPORTANCE of SURVIVAL needs
-  importance-weight-food-safety
+  importance-weight-food
   importance-weight-financial-survival
   importance-weight-health
   importance-weight-sleep
-  importance-weight-conformity
 
   ;IMPORTANCE of SAFETY needs
-  importance-weight-financial-stability
-  importance-weight-risk-avoidance
-  importance-weight-compliance
+  importance-weight-physical-safety
+  importance-weight-social-safety
 
   ;IMPORTANCE of ESTEEM needs
-  importance-weight-luxury
-  importance-weight-leisure
+  importance-weight-social-status
+  importance-weight-providing
   importance-weight-autonomy
+ 
+
 
   ;Need satisfaction levels (i.e. level of watertanks)
-  ;The need satisfaction levels of food-safety, financial-survival, health, and financial-stability are reporters (see need_definition.nls)
+
 
   ;SURVIVAL:
   sleep-satisfaction-level
-  conformity-satisfaction-level
+;  health-satisfaction-level
+  financial-survival-satisfaction-level
+  food-satisfaction-level
 
   ;SAFETY:
-  risk-avoidance-satisfaction-level
-  compliance-satisfaction-level
+  physical-safety-satisfaction-level
+  social-safety-satisfaction-level
 
   ;BELONGING:
-  belonging-satisfaction-level
-
+  group-belonging-satisfaction-level
+  family-belonging-satisfaction-level
+  
   ;SELF-ESTEEM:
-  leisure-satisfaction-level
-  luxury-satisfaction-level
+  providing-satisfaction-level
+  social-status-satisfaction-level
   autonomy-satisfaction-level
   
   ;Variables for BELONGING needs

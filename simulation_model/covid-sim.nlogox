@@ -178,7 +178,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <slider x="2717" step="0.01" y="1158" max="1" width="354" display="ratio-omniscious-infected-that-trigger-social-distancing-measure" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-omniscious-infected-that-trigger-social-distancing-measure"></slider>
     <monitor x="2715" precision="17" y="1268" height="60" fontSize="11" width="186">is-social-distancing-measure-active?</monitor>
     <slider x="2961" step="0.01" y="542" max="1" width="225" display="mean-social-distance-profile" height="50" min="0" direction="Horizontal" default="0.5" variable="mean-social-distance-profile"></slider>
-    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">350.0</input>
+    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">5.0</input>
     <monitor x="582" precision="17" y="516" height="60" fontSize="11" width="100" display="#people">count people</monitor>
     <monitor x="549" precision="17" y="1167" height="60" fontSize="11" width="225">#people-saved-by-hospitalization</monitor>
     <monitor x="818" precision="17" y="1167" height="60" fontSize="11" width="238">#denied-requests-for-hospital-beds</monitor>
@@ -483,7 +483,6 @@ model
     <slider x="986" step="0.01" y="754" max="1" width="248" display="probability-church-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-church-personel"></slider>
     <slider x="986" step="0.01" y="809" max="1" width="245" display="probability-shopkeeper" height="50" min="0" direction="Horizontal" default="0.04" variable="probability-shopkeeper"></slider>
     <note x="990" y="591" backgroundDark="0" fontSize="11" width="282" markdown="false" height="49" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Worker distribution (relevant for economic model)</note>
-    <monitor x="858" precision="17" y="393" height="60" fontSize="11" width="100" display="#children">count children</monitor>
     <monitor x="901" precision="17" y="462" height="60" fontSize="11" width="169" display="Displaced males (#houses)">count houses-hosting-males</monitor>
     <monitor x="967" precision="17" y="394" height="60" fontSize="11" width="100" display="#females">count females</monitor>
     <monitor x="1077" precision="17" y="394" height="60" fontSize="11" width="100" display="#males">count males</monitor>
@@ -757,6 +756,7 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
     <input x="1398" multiline="false" y="1008" height="60" variable="#markets-gp" type="number" width="250">3.0</input>
     <monitor x="1685" precision="17" y="837" height="60" fontSize="11" width="100">r0</monitor>
     <monitor x="563" precision="17" y="1946" height="60" fontSize="11" width="105">#agriculture-workers</monitor>
+    <monitor x="1082" precision="17" y="464" height="60" fontSize="11" width="100" display="#children">count children</monitor>
   </widgets>
   <info>## WHAT IS IT?
 

@@ -27,8 +27,10 @@ end
 ; Create a list describing an activity based on a gathering point and a motive
 ; gathering-point is a breed
 ; Q: Why only 2 elements in the returned list when there is a function social-distancing-of that extract the third element of this list?
+
 to-report activity-descriptor [a-gathering-point a-motive]
   if not is-gathering-point? a-gathering-point [error (sentence a-gathering-point "should be a gathering point")]
+
   report (list a-gathering-point a-motive)
 end
 
@@ -153,9 +155,7 @@ to-report is-learning?
   report current-motivation = learning-motive
 end
 
-to-report learning-motive
-  report "learning"
-end
+
 
 to-report is-getting-tested?
   report current-motivation = "get-tested"
@@ -223,7 +223,7 @@ to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
   [report true]
 
   if
-  ([is-university? or is-hospital? or is-workplace? or is-shop? or is-school?] of location-of an-activity-descriptor)
+  ([ is-hospital? or is-workplace? or is-store? or is-school?] of location-of an-activity-descriptor)
   and (motive-of an-activity-descriptor = learning-motive or
     is-contractual-obligation? motive-of an-activity-descriptor)
   [report false]
