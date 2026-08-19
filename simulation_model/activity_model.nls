@@ -259,7 +259,7 @@ to perform-people-activities
     select-activity
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
 
-    if is-currently-in-sitation-of-active-dependence? and current-person-I-depend-on != nobody
+    if is-currently-in-situation-of-active-dependence? and current-person-I-depend-on != nobody
     [
       set current-activity [current-activity] of current-person-I-depend-on
       set current-motivation follow-person-in-charge-motive
