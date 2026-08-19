@@ -57,7 +57,7 @@ to-report my-available-activity-descriptors
 
 
   if any? people-that-depend-on-me with [ (current-person-I-depend-on = nobody or current-person-I-depend-on = myself)
-    and is-currently-in-sitation-of-active-dependence?]
+    and is-currently-in-situation-of-active-dependence?]
   [
 
     ask people-that-depend-on-me [ set current-person-I-depend-on myself]
