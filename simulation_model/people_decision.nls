@@ -30,7 +30,7 @@ end
 
 
 
-to-report is-currently-in-sitation-of-active-dependence?
+to-report is-currently-in-situation-of-active-dependence?
   report is-child? and closed-schools?
 end
 
