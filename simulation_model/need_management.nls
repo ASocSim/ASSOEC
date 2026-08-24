@@ -573,7 +573,7 @@ to-report global-prevalence-of [ad]
   
 ;   if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
 ;   report total-satisfaction
-  debug-global-prevalence-of [ad]
+
   report 1
 end
 
