@@ -1,33 +1,33 @@
 ;;gathering types updated for Ebola Mongbwalu
 
 to-report hospital-gathering-type
-  report "hospital"
+  report gathering-points with [gathering-type = "hospital"]
 end
 
 to-report home-gathering-type
-  report "home"
+  report gathering-points with [gathering-type = "home"]
 end
 
 to-report markets-gathering-type
-  report "market"
+  report gathering-points with [gathering-type = "market"]
 end
 
 to-report stores-gathering-type
-  report "store"
+  report gathering-points with [gathering-type = "store"]
 end
 
 to-report school-gathering-type
-  report "school"
+  report gathering-points with [gathering-type = "school"]
 end
 
 to-report churches-gathering-type
-  report "church"
+  report gathering-points with [gathering-type = "church"]
 end
 
 to-report workplace-agriculture-gathering-type
-  report "workplace-agriculture"
+  report gathering-points with [gathering-type = "workplace-agriculture"]
 end
 
 to-report workplace-mine-gathering-type
-  report "workplace-mine"
+  report gathering-points with [gathering-type = "workplace-mine"]
 end

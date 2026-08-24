@@ -148,6 +148,8 @@ to-report is-at-public-leisure-place?
 end
 
 
+
+
 to-report is-public-leisure?
   report gathering-type = "public-leisure"
 end
@@ -160,6 +162,7 @@ to-report my-market
   report one-of gathering-link-neighbors with [gathering-type = "market"]
 end
 
+
 to-report my-mine
   report one-of gathering-link-neighbors with [gathering-type = "workplace-mines"]
 end
@@ -168,9 +171,6 @@ to-report my-field
   report one-of gathering-link-neighbors with [gathering-type = "workplace-agriculture"]
 end
 
-to-report my-stores
-  report one-of gathering-link-neighbors with [gathering-type = "store"]
-end
 
 to-report my-church
   report one-of gathering-link-neighbors with [gathering-type = "church"]

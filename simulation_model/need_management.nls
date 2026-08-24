@@ -286,6 +286,7 @@ end
 to-report SUE-autonomy [ad]
   let gp location-of ad
   let motive motive-of ad
+  
   ;working increases autonomy
     if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
       ifelse motive = "work" [
@@ -297,18 +298,21 @@ to-report SUE-autonomy [ad]
 ;       [ report  0.2 ]
 ;       [ report -0.1 ]
 ;     ]
+  
   ;for the funeral rites, a SDB damages autonomy, while a traditional rite increases it (expectedly)
-  if (motive = "organize funeral") [
+  ifelse (motive = "organize funeral") [
     ;ifelse (funeral-type = "SDB") [report -0.1][
-    report 0.5]
+    report 0.5] [report 0.5]
   ;]
   
   ;getting treatment also impacts autonomy
-  ;REFACTORING NEEDED
+  ;REFACTORING NEEDED, use switch?
   if (motive = "get treatment at home") [
   report 0.2]
   if (motive = "get treatment at hospital") [
   report -0.2]
+  
+  
 
 end
 
@@ -549,26 +553,28 @@ to-report global-prevalence-of [ad]
   let total-satisfaction 0
   ;if cultural model is activated then:
   ;calculate the total-satisfaction an agent expects to gain from performing an activity as the weighted sum of all its needs
-  set total-satisfaction sum (list
-    ;Survival needs
-    (SDE-food ad * importance-weight-food) 
-    (SDE-financial-survival ad * importance-weight-financial-survival)
-    (SDE-sleep ad * importance-weight-sleep) 
-    (SDE-health ad * importance-weight-health) 
-    ;Belonging needs
-    (SDE-group-belonging ad * importance-weight-group-belonging)
-    (SDE-family-belonging ad * importance-weight-family-belonging)
-    ;Esteem needs
-    (SDE-autonomy ad * importance-weight-autonomy) 
-    (SDE-social-status ad * importance-weight-social-status) 
-    (SDE-providing ad * importance-weight-providing)
-    ;Safety needs
-    (SDE-physical-safety ad * importance-weight-physical-safety) 
-    (SDE-social-safety ad * importance-weight-social-safety)
-    )
+;   set total-satisfaction sum (list
+;     ;Survival needs
+;     (SDE-food ad * importance-weight-food) 
+;     (SDE-financial-survival ad * importance-weight-financial-survival)
+;     (SDE-sleep ad * importance-weight-sleep) 
+;     (SDE-health ad * importance-weight-health) 
+;     ;Belonging needs
+;     (SDE-group-belonging ad * importance-weight-group-belonging)
+;     (SDE-family-belonging ad * importance-weight-family-belonging)
+;     ;Esteem needs
+;     (SDE-autonomy ad * importance-weight-autonomy) 
+;     (SDE-social-status ad * importance-weight-social-status) 
+;     (SDE-providing ad * importance-weight-providing)
+;     ;Safety needs
+;     (SDE-physical-safety ad * importance-weight-physical-safety) 
+;     (SDE-social-safety ad * importance-weight-social-safety)
+;     )
   
-  if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
-  report total-satisfaction
+;   if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
+;   report total-satisfaction
+  debug-global-prevalence-of [ad]
+  report 1
 end
 
 
@@ -601,7 +607,7 @@ end
 
 
 to debug-my-preferred-available-activity-descriptor
-  if log? [
+  
     foreach my-available-activity-descriptors debug-global-prevalence-of
-  ]
+  
 end

@@ -26,7 +26,7 @@ to go
   reset-metrics
 ;  reset-economy-measurements
   ;rumor-mill ;define later how mis/information spreads  
-  spread-contagion
+ ; spread-contagion
   update-within-agent-disease-status
   update-people-mind
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)
@@ -185,7 +185,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <slider x="2717" step="0.01" y="1158" max="1" width="354" display="ratio-omniscious-infected-that-trigger-social-distancing-measure" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-omniscious-infected-that-trigger-social-distancing-measure"></slider>
     <monitor x="2715" precision="17" y="1268" height="60" fontSize="11" width="186">is-social-distancing-measure-active?</monitor>
     <slider x="2961" step="0.01" y="542" max="1" width="225" display="mean-social-distance-profile" height="50" min="0" direction="Horizontal" default="0.5" variable="mean-social-distance-profile"></slider>
-    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">5.0</input>
+    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">2.0</input>
     <monitor x="582" precision="17" y="516" height="60" fontSize="11" width="100" display="#people">count people</monitor>
     <monitor x="549" precision="17" y="1167" height="60" fontSize="11" width="225">#people-saved-by-hospitalization</monitor>
     <monitor x="818" precision="17" y="1167" height="60" fontSize="11" width="238">#denied-requests-for-hospital-beds</monitor>
@@ -248,7 +248,7 @@ while [current-day <= end-day] [ go ]]]></button>
     <button x="703" y="514" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="63" display="set">load-population-profile-based-on-current-preset-profile</button>
     <note x="2967" y="475" backgroundDark="0" fontSize="11" width="272" markdown="false" height="30" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent social distancing settings</note>
     <note x="1788" y="1623" backgroundDark="0" fontSize="11" width="168" markdown="false" height="43" textColorDark="-1" textColorLight="-13345367" backgroundLight="0">Tracing (smartphone app)</note>
-    <switch x="2963" y="495" height="40" on="true" variable="make-social-distance-profile-value-based?" width="324" display="make-social-distance-profile-value-based?"></switch>
+    <switch x="2963" y="495" height="40" on="false" variable="make-social-distance-profile-value-based?" width="324" display="make-social-distance-profile-value-based?"></switch>
     <slider x="1802" step="0.01" y="1872" max="1" width="231" display="ratio-young-with-phones" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-young-with-phones"></slider>
     <slider x="1801" step="0.01" y="1928" max="1" width="239" display="ratio-retired-with-phones" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-retired-with-phones"></slider>
     <monitor x="2066" precision="17" y="1792" height="60" fontSize="11" width="130" display="#phone-owners">count people with [has-mobile-phone?]</monitor>

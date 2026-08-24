@@ -234,30 +234,6 @@ end
 to perform-people-activities
   reset-timer
   
-;   if food-delivered-to-isolators? [
-;     let homes-to-be-delivered-food (turtle-set homes-in-isolation [my-home] of people with [is-officially-asked-to-quarantine?]) ; ToDo: Re-evaluate the secdon set
-  
-;     ask homes-to-be-delivered-food [
-;       if available-food-rations / [amount-of-rations-I-buy-when-going-to-essential-shops] of one-of gatherers >= 1 [stop]
-;       set #delivered-supply-proposed-this-tick  #delivered-supply-proposed-this-tick + 1
-;       ; Find the store with the most stocks
-;       let possible-stores reduce [[x y] -> (turtle-set x y)] [my-stores] of gatherers 
-;       let store max-one-of possible-stores [stock-of-goods]
-;       ; Find the inhabitant with the most money
-;       let buyer max-one-of gatherers [my-amount-of-capital]
-;       let old-location [current-activity] of buyer
-;       let old-motive [current-motivation] of buyer
-;       ; Fake going to the store this round (internet order?)
-;       ask buyer [ 
-;         set current-activity store
-;         set current-motivation "essential shopping"
-;   ;      update-resources-based-on-current-activity
-;         set current-activity old-location
-;         set current-motivation old-motive
-;       ]
-;     ]
-;   ]
-  
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
     select-activity
@@ -270,7 +246,7 @@ to perform-people-activities
     ]
   ]
 
-  travelling-to-activity-phase
+  ;travelling-to-activity-phase
   
   ask people with [[capacity = disabled-capacity] of current-activity or not [is-operating?] of current-activity] [
     set is-activity-successful? true
@@ -294,7 +270,7 @@ to perform-people-activities
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
     execute-activity-effect
-    update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
+   ; update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
   ]
   animate-walk-to-goal
 
