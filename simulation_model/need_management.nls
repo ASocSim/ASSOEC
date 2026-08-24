@@ -32,17 +32,25 @@ __includes ["need_definition.nls"]
 ;SUA-[Need]: The actual undiscounted satisfaction gain for a need after having performed an action
 ;SDA-[Need]: The actual discounted satisfaction gain for a need after having performed an action
 
+
+
+      if motive = "get treatment" [
+    report -0.4 ] ;what is expected, not reality
+  if motive = "visits" [report -0.1] ; there is a cost to visiting relatives, although the agents might not expect it
+  
+  
+
 to update-needs-for-playing [current-activity-descriptor]
   decay-satisfaction-level-ebo
   if not is-activity-successful? [stop]
     
   set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
   set health-satisfaction-level clamp 0 1 (health-satisfaction-level + SDE-health current-activity-descriptor)
-  set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDA-food current-activity-descriptor)
+ ; set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDA-food current-activity-descriptor)
   set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
   
-  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDA-group-belonging current-activity-descriptor)
-   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDA-family-belonging current-activity-descriptor)
+  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level +  current-activity-descriptor) ;SDA-group-belonging
+   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + current-activity-descriptor) ;SDA-family-belonging 
 
   set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)  
   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
@@ -169,6 +177,55 @@ to-report SUE-belonging [ad]
   report base * network-bonus * social-distancing-cut
 end
 
+
+to-report SUE-providing [ad]
+  let gp location-of ad
+  let motive motive-of ad
+  ;female provide by getting food (more like cooking it but we think about this later)
+  ifelse (sex = "female") [
+  if (gp = "store" or gp = "market") and (motive = "get food")[
+      report 0.7]
+  ;resolve religious gathering attending
+    
+    ;in case of sickness, getting treatment at home and at hospital reduce the satisfaction of providing
+    ;this should also depend on social networks and beliefs
+    if motive = "get treatment" [
+    report -0.4 ]
+end
+
+to-report SUE-physical-safety [ad]
+  let gp location-of ad
+  let motive motive-of ad
+  ;working in the mine decreases physical safety
+  if motive = "work" [
+    ifelse gp = "mine" 
+    [report -0.1]
+    [report 0.1]
+  ;add logic for hospital and schools (girls are in danger when going to school)
+    if gp = "hospital" and motive = "work" [report -0.2]
+   ; if is-girl and motive "school" [report -0.4]
+  ]
+end
+
+
+to-report SUE-social-safety [ad]
+  let gp location-of ad
+  let motive motive-of ad
+  if is-female?
+  [
+    if ( motive = "get food" and gp = "market") [report 0.2]
+    if ( motive = "get treatment at hospital") [report -0.2]
+  ]
+  
+  
+  ;religious gatherings increase social safety, as do visits
+  if ( motive = "religious gathering" or motive = "visits") [report 0.8]
+  
+  
+end
+
+
+
 to-report SUA-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -254,6 +311,55 @@ to-report SUA-risk-avoidance [ad]
   report risk-avoidance-increase ad count people with [current-activity = gp]
 end
 
+to-report SUE-family-belonging [ad]
+  let gp location-of ad
+  let motive motive-of ad
+  
+  ;refactor, females get family belonging by getting food and working at home
+    if (is-female? and motive = "get food") [report 0.5]
+    if (is-female? and gp = "home" and motive = "work") [report 0.5]
+  
+  ;work and religion positively effects group belonging
+  if ( motive = "religious gathering") [report 0.8]
+  if (motive = "organize funeral") [
+    ifelse (funeral-type = "SDB") [report -0.1][report 0.4]
+  ]
+  
+  if is-female?[
+   if motive = "get treatment at home" [report -0.2]
+    if motive = "get treatment at hospital" [report -0.4]
+    
+    if motive = "care for the sick" [
+      if gp = "home" [report 0.8]
+      if gp = "hospital" [report 0.3] ;this can also depend on social network and beliefs
+  ]
+  ;visits have a big effect on family belonging, especially if someone is sick(not modeled now)
+    if motive = "visits" [report 0.9]
+  
+  
+  ;
+end
+
+to-report SUE-group-belonging [ad]
+  let gp location-of ad
+  let motive motive-of ad
+  ;work and religion positively effects group belonging
+  if ( motive = "religious gathering") [report 0.8]
+  if ( motive = "work" ) [report 0.5]
+  
+  if (motive = "organize funeral") [
+    ifelse (funeral-type = "SDB") [report -0.1][report 0.4]
+  ]
+  
+  if is-female? and motive = "care for the sick" [
+    ;this splits caring at home or at an hospital, eg bringing food to sick relatives
+    ;refactor needed
+    ifelse (gp = "home") [report 0.5][report 0.2]]
+  
+  
+  if (motive = "visits") [report 1]
+end
+
 
 
 to-report SUE-compliance [ad]
@@ -326,15 +432,16 @@ to-report SUE-compliance [ad]
   report bonus-compliance-to-obligation
 end
 
-; The agents expect to get food for seven days at a time
-to-report SUE-food-safety [ad]
+; The agents expect to get food for 1 day at a time
+to-report SUE-food [ad]
   let motive motive-of ad
-  if motive = "essential shopping" [
+  if motive = "get food" [
     let available-food-days [available-food-rations] of my-home
-    if available-food-days >= 14 [
+    ;if the household has sufficient food for 2 days, the action has no expected undiscouted satisfaction
+    if available-food-days >= 2 [
       report 0
     ]
-    report max (list 0.5 (1 - (14 - available-food-days) / 14))
+    report max (list 0.5 (1 - (2 - available-food-days) / 2))
   ]
   report 0
 end
@@ -358,6 +465,7 @@ to-report SUE-sleep [ad]
   
   if motive = "rest" [
     if slice-of-the-day = "night" [
+  ;sleep quality decreases when sick
       report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
     ]
     report ifelse-value has-internally-visible-symptoms? [ 0.025 ] [ 0.05 ]
@@ -373,76 +481,75 @@ to-report SUE-sleep [ad]
 end
 
 
-to-report SUE-luxury [ad]
-  if age != "young" [
-    let gp location-of ad
-    let motive motive-of ad
-    
-    if motive = "shopping" [
-      report amount-of-rations-I-buy-when-going-to-shops * 0.06
-    ]
-    report 0
+to-report SUE-social-status [ad]
+  let gp location-of ad
+  let motive motive-of ad 
+  ;social status comes from working and shopping at store, attending religious gathering, and sending kids to school
+  ifelse (sex = "female") [
+  if (gp = "store") and (motive = "get food")[
+      report 0.7]
+  ][
+    if (gp = my-work ) and (motive = "work")[
+      report 0.9]
   ]
-  report 0
+;   if age = "young" [
+;       if (gp = my-school ) and (motive = "learn")[
+;       report 0.9]
+;   ]
+  ;social status is expected to increase more for women attending religious gatherings
+  if gp = "church" and motive = "religious gathering" [
+    ifelse is-female? [report 0.8] [report 0.6]]
+  
+  ;in the case of a male agent getting treatment at hospital, the expected social status decreases
+  if is-male? and motive = "get treatment at hospital" [report 0.2]
+
 end
 
-to-report SUA-luxury [ad]
-  let result amount-of-last-luxury-items-bought * 0.06
-  set amount-of-last-luxury-items-bought 0
-  report result
-end
+
 
 to-report SUE-autonomy [ad]
   let gp location-of ad
   let motive motive-of ad
-  let social-distancing social-distancing-of ad
-  let base 0
-  let sd-modifier 1
+  ;working increases autonomy
+    if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
+      ifelse motive = "work" [
+      if ( gp = my-work ) [report 0.9]][report 0]]
+      
+  ;so does going to school
+;   if age = "young" [
+;       ifelse [gathering-type] of gp = "school"
+;       [ report  0.2 ]
+;       [ report -0.1 ]
+;     ]
+  ;for the funeral rites, a SDB damages autonomy, while a traditional rite increases it (expectedly)
+  if (motive = "organize funeral") [
+    ifelse (funeral-type = "SDB") [report -0.1][report 0.5]
+  ]
   
-  if social-distancing [
-    set sd-modifier (1 - social-distance-profile)
-  ]
+  ;getting treatment also impacts autonomy
+  ;REFACTORING NEEDED
+  if (motive = "get treatment at home") [
+  report 0.2]
+  if (motive = "get treatment at hospital") [
+  report -0.2]
 
-  if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
-    if age = "young" [
-      ifelse [gathering-type] of gp = "school"
-      [ report  0.2 * sd-modifier ]
-      [ report -0.1 * (2 - sd-modifier) ]
-    ]
-    if age = "student" [
-      ifelse [gathering-type] of gp = "university"
-      [ report  0.2 * sd-modifier ]
-      [ report -0.1 * (2 - sd-modifier) ]
-    ]
-    if age = "worker" [
-      ifelse motive = work-motive [
-        ifelse gp != my-home
-        [ report 0.3 * sd-modifier ]
-        [ report 0.05 * sd-modifier ]
-      ]
-      [ report -0.1 * (2 - sd-modifier) ]
-    ]
-  ]
-  if slice-of-the-day = "night" and [gathering-type] of gp = "home" and motive = "rest"
-  [report 0.2 * sd-modifier ]
-  if is-hard-lockdown-active? and [gathering-type] of gp != "home"
-  [report 0.1 * sd-modifier ]
-  report 0
 end
 
 to-report SUE-financial-survival [ad]
   if age != "young" [
+    
     let gp location-of ad
     let motive motive-of ad
     let eating-costs price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops
     
     if is-I-have-contractual-obligations? [
+      ;get money from work, except work in the household
       if gp = my-work and is-working-motive? motive [
         report min (list (my-expected-income / eating-costs) 1)
       ]
       report max (list ((- my-expected-income) / eating-costs) 0)
     ]
-    if motive = "essential shopping" [
+    if motive = "get food" [
       let money-left-over my-amount-of-capital - eating-costs
       ; If we spend all our money, financial-survival will drop to 0
       if money-left-over < 0 [
@@ -450,16 +557,11 @@ to-report SUE-financial-survival [ad]
       ]
       report (- min (list (money-left-over / eating-costs) 1))
     ]
-    if motive = "shopping" [
-      let money-left-over my-amount-of-capital - amount-of-rations-I-buy-when-going-to-shops * price-of-rations-in-non-essential-shops
-      ; If we spend all our money, financial-survival will drop to 0
-      if money-left-over < 0 [
-        report (- financial-survival-satisfaction-level)
-      ]
-      report (- min (list (money-left-over / eating-costs) 1))
-    ]
     report 0
   ]
+  ;add decrease in finances for children going to school
+  ; if (age = "young" and gp = "school") [decrease financial survival]
+  
   report 0
 end
 
@@ -491,10 +593,19 @@ end
 
 to-report SUE-health [ad]
   let base 1
-  let sd-bonus 0.8
-  if social-distancing-of ad [
-    set sd-bonus 1
+  let belief-modifier 1
+  let motive motive-of ad
+  ;agent expects to get food from markets and stores 
+  if motive = "get food" [
+  report 0.5
   ]
+  ;if agent getting treatment at home, decrease health
+  if is-currently-being-treated-at-home? [
+  ;this should depend on the agent belief
+    set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
+    report base * belief-modifier
+  ]
+  
   if is-believing-to-be-infected? or has-internally-visible-symptoms?
   [
     ifelse is-observing-critical-symptoms? [
@@ -502,6 +613,7 @@ to-report SUE-health [ad]
       [set base .8]
       [set base 0]
     ] [
+      ;if not observing critical symptoms
       ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
       [set base .3]
       [ ifelse is-rest-at-home-descriptor? ad
@@ -511,7 +623,7 @@ to-report SUE-health [ad]
     ]
   ]
   ;;can be updated if agents start to be deprived from sleep, not needed at the moment
-  report base * sd-bonus
+  report base
 end
 
 to-report conformity-increase [ad network-action]
