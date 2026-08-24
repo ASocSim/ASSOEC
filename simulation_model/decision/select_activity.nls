@@ -1,7 +1,8 @@
 ;;here one should also include caring for children.
 ;;Now it's highjacking the decision process
+
 to-report my-available-activity-descriptors
-  
+  ;conditional for migration activity
   if migration? and is-away?
   [
     print "begin"
@@ -9,13 +10,15 @@ to-report my-available-activity-descriptors
       report (list (list away-gathering-point travelling-reason false))
     ]
   ]
-;; THIS NEEDS TO BE EXPANDED FOR THE PIVOTAL CHOICE OF GOING TO HOSPITAL OR NOT
- ; if has-internally-visible-symptoms? or is-believing-to-be-infected?
-;  [ set activities lput activity-descriptor my-hospital treatment-motive activities ] 
 
-  
-  ;rest is always added first?
+    ;rest is always added first?
   let activities (list (list my-home "rest"))
+
+;; THIS NEEDS TO BE EXPANDED FOR THE PIVOTAL CHOICE OF GOING TO HOSPITAL OR NOT
+  if has-internally-visible-symptoms? or is-believing-to-be-infected?
+  ;epistemic logic conditional here
+  [ set activities lput activity-descriptor my-hospital treatment-motive activities ] 
+
   
   ;on sunday we can go to religious gathering 
   if (day-of-the-week = "sunday" and slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
@@ -23,7 +26,7 @@ to-report my-available-activity-descriptors
   
   ;on saturday we can go to the market, the other days (except sunday) we can go to stores
    if ( slice-of-the-day = "afternoon" and day-of-the-week != "sunday")[
-    ifelse  day-of-the-week = "saturday" 
+    ifelse day-of-the-week = "saturday" 
     [ set activities (lput (activity-descriptor my-market "get food") activities)]
     [ set activities (lput (activity-descriptor my-stores "get food") activities)]
   ]
@@ -33,29 +36,27 @@ to-report my-available-activity-descriptors
   
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
     [
-      if is-female? [set activities (lput (activity-descriptor my-home  "working") activities)]
+      if is-female? [set activities (lput (activity-descriptor my-home  "work") activities)]
       print "i go to work"
       
-      if is-male? [set activities (lput (activity-descriptor my-mine  "providing") activities)]
+      if is-male? [set activities (lput (activity-descriptor my-mine "work") activities)]
       print "i also go to work"
-;       if is-child? [set activities (lput (activity-descriptor my-school  "learning") activities)]
+      
+;       if is-child? [set activities (lput (activity-descriptor my-school  "school") activities)]
 ;     print "i  go to school"
   ]
   
-  if slice-of-the-day = "evening" or not is-working-day-for-me?  
-  [
-      set activities lput (activity-descriptor one-of my-home "visiting") activities
-    print "i go to visit family"
-    ]
+;   if slice-of-the-day = "evening" or not is-working-day-for-me?  
+;   [
+;       set activities lput (activity-descriptor my-networks-home "visiting") activities
+;     print "i go to visit family"
+;     ]
  
-  set activities lput (list my-hospital "get-treatment") activities
+ ; set activities lput (list my-hospital "get treatment") activities
 
   let ret []
   foreach activities [ activity ->
     set ret fput (lput false activity) ret
-    if I-know-of-social-distancing? [
-      set ret fput (lput true activity) ret
-    ]
   ]
   report ret
 end
@@ -75,9 +76,9 @@ to select-activity
   select-activity-wtf? loc
   set current-activity loc
   set current-motivation motive-of c-a
-  set is-I-apply-social-distancing? social-distancing-of c-a
+
   if current-activity != away-gathering-point and current-motivation = travelling-motive [error "wrong place while travelling"]
-  if log-violating-quarantine? [ process-quarantine-violation-event]
+
 end
 
 ;;this function is the main bottleneck of the whole application!

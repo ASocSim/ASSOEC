@@ -27,7 +27,6 @@ gathering-points-own [
   capacity
 ]
 
-
 ;the head of the link are people and the tail are gathering points
 directed-link-breed [gathering-links gathering-link]
 gathering-links-own [
@@ -156,8 +155,6 @@ end
 to-report is-leisure-point?
   report is-public-leisure? ;or is-private-leisure?
 end
-
-
 
 to-report my-market
   report one-of gathering-link-neighbors with [gathering-type = "market"]

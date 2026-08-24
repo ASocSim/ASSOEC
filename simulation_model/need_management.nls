@@ -205,12 +205,13 @@ to-report SUE-health [ad]
   let base 1
   let belief-modifier 1
   let motive motive-of ad
+  let gp location-of ad
   ;agent expects to get food from markets and stores 
   if motive = "get food" [
   report 0.5
   ]
   ;if agent getting treatment at home, decrease health
-  if is-currently-being-treated-at-home? [
+  if motive = "get treatmet" and gp = my-home [
   ;this should depend on the agent belief
     set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
     report base * belief-modifier
@@ -361,7 +362,7 @@ to-report SUE-family-belonging [ad]
       if gp = "hospital" [report 0.3] ;this can also depend on social network and beliefs
   ]]
   ;visits have a big effect on family belonging, especially if someone is sick(not modeled now)
-    if motive = "visits" [report 0.9]  
+  ifelse motive = "visits" [report 0.9]  [report 0]
 end
 
 
@@ -575,7 +576,7 @@ end
 to debug-global-prevalence-of [ad]
   
  if log? [
-    debug-print (sentence [gathering-type] of (location-of ad) " " motive-of ad " " social-distancing-of ad) 
+    debug-print (sentence [gathering-type] of (location-of ad) " " motive-of ad " ") 
       ;Survival needs
     debug-print (word "  Food:" (SDE-food ad * importance-weight-food))
     debug-print (word "  Financial-survival:" (SDE-financial-survival ad * importance-weight-financial-survival))

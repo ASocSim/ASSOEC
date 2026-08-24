@@ -20,6 +20,7 @@ globals [
   import-scenario-name
 ]
 
+
 to go
   reset-timer
   reset-metrics
@@ -57,7 +58,7 @@ end
 
 ;workaround, refactor and move later
 to-report is-currently-being-treated-at-home?
-  report people with infection-status != "susceptible"
+  report people with [infection-status != "susceptible"]
 end
 
 to-report epistemic-accuracy if #infected = 0 [report 1] report count people with [is-infected? and is-believing-to-be-infected?] / #infected end

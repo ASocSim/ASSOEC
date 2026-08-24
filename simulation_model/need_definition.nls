@@ -1,14 +1,10 @@
-    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;EBOLA SURVIVAL NEEDS;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;EBOLA - cumulative SURVIVAL needs ;;;;;;;;;;;;;;;;;;
 
 ;; We model survival in its subgroups of food, sleep, financial, and health
 ;; FOOD includes water and is procured as a day activity at markets or stores, getting food increases health but damages finances
-
-;; SLEEP is only replenished by sleeping (at home, at night)
-
+;; SLEEP is only replenished by the action motive "rest"
 ;; FINANCIAL survival is replenished by working (in mine, agriculture, shop, hospital, or church) not housework
 ;;;;a person who is sick and getting treatment at home or hospital depleats financial survival
-
 ;; HEALTH ( maybe be redundant )
 ;;;;as workers in Mongbwalu are not storing large amounts of food at home and need to work for daily survival, the available rations are always NULL or the amount of capital is minimal TBD
 ;;;;only procuring food replenishes Health
@@ -16,56 +12,10 @@
 
 ;;financial stability is not present explicitly in Ebola model
 
-; to-report health-satisfaction-level
-;   ;;constant value set to average
-;   ;;survival needs often revolve around short-term temporality (e.g. stopping to breath)
-;   if is-believing-to-be-infected?
-;   [
-;     if not (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0]
-;     if is-observing-critical-symptoms? and (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.1]
-    
-;     if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0.3]
-;     error "undefined"
-;   ]
-;   report 1
-; end
 
 
-;*** food safety = survival or safety ? ***
-;;here, food-safety is rather a subaspect of safety (more cognitive, worries about the future)
-;;TBU: should be dependent on the current plan, i.e. acquiring food should be expected to lower this need
-to-report food-safety-satisfaction-level
-  if is-currently-being-treated-at-hospital? [
-    report 1
-  ]
-  report min (list ([available-food-rations] of my-home / amount-of-rations-I-buy-when-going-to-essential-shops) 1)
-end
 
-
-; to-report financial-survival-satisfaction-level
-;   report clamp-soft (my-amount-of-capital / (price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops))
-; end
-
-
-; to-report financial-stability-satisfaction-level
-;   report ifelse-value my-target-amount-of-capital > 0 [clamp-soft (my-amount-of-capital / my-target-amount-of-capital)] [0]
-; end
-
-
-; to-report SDE-survival [ad]
-;   let physiological-needs (list 
-;     SDE-food-safety ad 
-;     SDE-health ad
-;     SDE-sleep ad  
-;     SDE-conformity ad
-;   )
-;   if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
-;     set physiological-needs fput (SDE-financial-survival ad) physiological-needs
-;   ]
-;   report max physiological-needs
-; end
-
-to-report SDE-survival-ebola [ad]
+to-report SDE-survival [ad]
   let physiological-needs (list 
     SDE-food ad 
     SDE-health ad
@@ -78,34 +28,15 @@ to-report SDE-survival-ebola [ad]
 end
 
 
-    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
+
     ;;;;;;;;;;;;;;;;;;EBOLA BELONGING NEEDS;;;;;;;;;;;;;;;;;;
 ;;; belonging is split in family and group
-;;;
-
-to-report family-belonging-satisfaction-level-ebola
-  if is-believing-to-be-infected?
-  [
-    if not (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.7]
-    if is-observing-critical-symptoms? and (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.1]
-    
-    if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0]
-    error "undefined"
-  ]
-  report 1
-end
-
-; to-report group-belonging-satisfaction-level-ebola
-;   if is-attending-sdb [report 0]
-;   ;;LOGIC TBD HERE
-;   report 1
-; end
 
 
 
 
-    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;EBOLA - SAFETY;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;EBOLA SAFETY MODS;;;;;;;;;;;;;;;;;;
+
 ;;Safety for now is physical social safety, others can be added later
 ;;;;SOCIAL SAFETY is increased by attending religious gatherings(weekend) and visiting relatives (evenings)
 ;;;; women's social safety decreases if they are getting treatment in a hospital
@@ -127,9 +58,7 @@ to-report SDE-safety [ad]
 end
 
 
-    ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;EBOLA - SELF ESTEEM;;;;;;;;;;;;;;;;;;
-
+    ;;;;;;;;;;;;;;;;;;EBOLA SELF ESTEEM MODS;;;;;;;;;;;;;;;;;;
 ;; for covid these were leisure, luxury and autonomy. For Ebola, these are SOCIAL STATUS, AUTONOMY and PROVIDE FOR FAMILY (patriarcal)
 
 ;; SOCIAL STATUS is also grown by working and evening leisure activities, and depleats with treatment at hospital (maybe)
@@ -148,6 +77,8 @@ to-report SDE-self-esteem [ad]
   report weighted-mean needs importances
 end
 
+
+;###################
 
 
 to-report quality-of-life-indicator
