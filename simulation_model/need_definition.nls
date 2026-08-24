@@ -16,19 +16,20 @@
 
 ;;financial stability is not present explicitly in Ebola model
 
-to-report health-satisfaction-level
-  ;;constant value set to average
-  ;;survival needs often revolve around short-term temporality (e.g. stopping to breath)
-  if is-believing-to-be-infected?
-  [
-    if not (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0]
-    if is-observing-critical-symptoms? and (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.1]
+; to-report health-satisfaction-level
+;   ;;constant value set to average
+;   ;;survival needs often revolve around short-term temporality (e.g. stopping to breath)
+;   if is-believing-to-be-infected?
+;   [
+;     if not (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0]
+;     if is-observing-critical-symptoms? and (is-resting-at-home? or is-currently-allocated-a-bed-in-hospital?) [report 0.1]
     
-    if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0.3]
-    error "undefined"
-  ]
-  report 1
-end
+;     if is-resting-at-home? or is-currently-allocated-a-bed-in-hospital? [report 0.3]
+;     error "undefined"
+;   ]
+;   report 1
+; end
+
 
 ;*** food safety = survival or safety ? ***
 ;;here, food-safety is rather a subaspect of safety (more cognitive, worries about the future)
@@ -40,12 +41,6 @@ to-report food-safety-satisfaction-level
   report min (list ([available-food-rations] of my-home / amount-of-rations-I-buy-when-going-to-essential-shops) 1)
 end
 
-; to-report health-satisfaction-level-ebola
-;   if is-currently-being-treated-at-hospital? [
-;     report random-float 0.3
-;   ]
-;   report 0.3
-; end
 
 ; to-report financial-survival-satisfaction-level
 ;   report clamp-soft (my-amount-of-capital / (price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops))
@@ -72,10 +67,9 @@ end
 
 to-report SDE-survival-ebola [ad]
   let physiological-needs (list 
-    SDE-food-safety ad 
+    SDE-food ad 
     SDE-health ad
     SDE-sleep ad  
-    SDE-conformity ad
   )
   if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
     set physiological-needs fput (SDE-financial-survival ad) physiological-needs
@@ -112,7 +106,7 @@ end
 
     ;;;;;;;;;;;;;;;;;;EBOLA MODEL MODS;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;;;;EBOLA - SAFETY;;;;;;;;;;;;;;;;;;
-;;Safety for now is only social safety, others can be added later
+;;Safety for now is physical social safety, others can be added later
 ;;;;SOCIAL SAFETY is increased by attending religious gatherings(weekend) and visiting relatives (evenings)
 ;;;; women's social safety decreases if they are getting treatment in a hospital
 ;;;; COMPLIANCE AND RISK AVOIDANCE are not in the ebola model
@@ -123,15 +117,10 @@ to-report SDE-safety [ad]
   ;  pick the lowest one, and take the difference between that and current satisfaction
   
   let psychological-needs (list
-    (SDE-compliance ad)
-    (SDE-risk-avoidance ad)
+    (SDE-social-safety ad)
+    (SDE-physical-safety ad)
   )
-  let importances-psychological-needs (list importance-weight-compliance importance-weight-risk-avoidance)
-
-  if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
-   ; set psychological-needs fput (SDE-financial-stability ad) psychological-needs
-    set importances-psychological-needs fput importance-weight-financial-stability importances-psychological-needs
-  ]
+  let importances-psychological-needs (list importance-weight-social-safety importance-weight-physical-safety)
 
   report weighted-mean psychological-needs importances-psychological-needs
   
@@ -151,15 +140,14 @@ end
 
 to-report SDE-self-esteem [ad]
   let needs (list 
-  SDE-leisure ad
+  SDE-providing ad
+  SDE-social-status ad
   SDE-autonomy ad)
-  let importances (list importance-weight-leisure importance-weight-autonomy)
-  if age != "young" [
-    set needs fput (SDE-luxury ad) needs
-    set importances fput importance-weight-luxury importances
-  ]
+  let importances (list importance-weight-providing importance-weight-autonomy importance-weight-social-status)
+  
   report weighted-mean needs importances
 end
+
 
 
 to-report quality-of-life-indicator
@@ -171,15 +159,15 @@ to-report quality-of-life-indicator
     (sleep-satisfaction-level * importance-weight-sleep) 
     (health-satisfaction-level * importance-weight-health) 
     ;Self-Esteem needs
-    (social-status-satisfaction-level * importance-social-status)
-    (providing-satisfaction-level * providing-social-status)
-    (autonomy-satisfaction-level * autonomy-social-status)
+    (social-status-satisfaction-level * importance-weight-social-status)
+    (providing-satisfaction-level * importance-weight-providing)
+    (autonomy-satisfaction-level * importance-weight-autonomy)
     ;Safety needs
     (physical-safety-satisfaction-level * importance-weight-physical-safety) 
     (social-safety-satisfaction-level * importance-weight-social-safety) 
     ;Belonging needs
     (group-belonging-satisfaction-level * importance-weight-group-belonging)
-    (family-belonging-satisfaction-level * importance-weight-family-belonging)
+    (family-belonging-satisfaction-level * importance-weight-family-belonging))
  
   report sum quality-of-life
 end

@@ -54,6 +54,12 @@ to startup
   setup-ebola
 end
 
+
+;workaround, refactor and move later
+to-report is-currently-being-treated-at-home?
+  report people with infection-status != "susceptible"
+end
+
 to-report epistemic-accuracy if #infected = 0 [report 1] report count people with [is-infected? and is-believing-to-be-infected?] / #infected end
 
 to-report epistemic-false-positive-error-ratio report count people with [is-believing-to-be-infected? and not is-infected?] / count people end
