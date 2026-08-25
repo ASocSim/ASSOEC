@@ -1,4 +1,5 @@
 ;;gathering types updated for Ebola Mongbwalu
+;;these are agentsets
 
 to-report hospital-gathering-type
   report gathering-points with [gathering-type = "hospital"]
@@ -23,6 +24,8 @@ end
 to-report churches-gathering-type
   report gathering-points with [gathering-type = "church"]
 end
+
+
 
 to-report workplace-agriculture-gathering-type
   report gathering-points with [gathering-type = "workplace-agriculture"]

@@ -181,7 +181,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <slider x="2717" step="0.01" y="1158" max="1" width="354" display="ratio-omniscious-infected-that-trigger-social-distancing-measure" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-omniscious-infected-that-trigger-social-distancing-measure"></slider>
     <monitor x="2715" precision="17" y="1268" height="60" fontSize="11" width="186">is-social-distancing-measure-active?</monitor>
     <slider x="2961" step="0.01" y="542" max="1" width="225" display="mean-social-distance-profile" height="50" min="0" direction="Horizontal" default="0.5" variable="mean-social-distance-profile"></slider>
-    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">20.0</input>
+    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">30.0</input>
     <monitor x="582" precision="17" y="516" height="60" fontSize="11" width="100" display="#people">count people</monitor>
     <monitor x="549" precision="17" y="1167" height="60" fontSize="11" width="225">#people-saved-by-hospitalization</monitor>
     <monitor x="818" precision="17" y="1167" height="60" fontSize="11" width="238">#denied-requests-for-hospital-beds</monitor>

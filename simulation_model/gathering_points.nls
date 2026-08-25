@@ -24,6 +24,8 @@ gathering-points-own [
   
   cached-number-of-participants
   capacity
+  
+  
 ]
 
 ;the head of the link are people and the tail are gathering points

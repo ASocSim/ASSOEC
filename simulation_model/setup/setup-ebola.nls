@@ -222,48 +222,61 @@ to setup-relation-to-gathering-points1
 
   ;;;this is temporary setup to be improved
   
-  if is-worker? and is-male? [ create-gathering-link-to one-of workplace-mines [ set features (list "providing" "working")]]
-  if is-worker? and is-female? [ create-gathering-link-to one-of workplace-agriculture [ set features (list "working")]
-    ]
+;   if is-worker? and is-male? [ create-gathering-link-to one-of workplace-mines [ set features (list "providing" "working")]]
+;   if is-worker? and is-female? [ create-gathering-link-to one-of workplace-agriculture [ set features (list "working")]
+;     ]
   setup-worker-relation-to-gathering-point
 end
 
 to  setup-worker-relation-to-gathering-point
-  if is-worker? [
-; if is-male? [
+     print "setting up worker gps"
+     let target one-of gathering-points
+     
+  if is-male? [
     let hired false
-    let target one-of workplace-mines
+
     
-    ask gathering-points with [is-workplace? or is-hospital? or is-school? or is-mine? or is-store? or is-market? or is-church?]
+    ask gathering-points with [ is-hospital? or is-school? or is-mine? or is-store? or is-market? or is-church?]
     [
-      if not any? hired-workers [ set target self set hired true stop ]
+     ; if not any? hired-workers 
+    set target self set hired true stop 
+  ]]
+    
+    if is-female? [
+    let hired true
+    set target my-home
+    
+    ask gathering-points with [ is-home?]
+    [
+    set target self stop 
     ]
+  ]
   
-   if not hired [
-      let rand random-float 1
-      if rand < probability-hospital-personel [
-        set target one-of hospitals
-      ]
-      if rand >= probability-hospital-personel and rand < probability-hospital-personel + probability-school-personel
-      [
-        set target one-of schools
-      ]
+;    if not hired [
+;       let rand random-float 1
+;       if rand < probability-hospital-personel [
+;         set target one-of hospitals
+;       ]
+;       if rand >= probability-hospital-personel and rand < probability-hospital-personel + probability-school-personel
+;       [
+;         set target one-of schools
+;       ]
       
-      if rand >= probability-hospital-personel + probability-school-personel and rand < probability-hospital-personel + probability-school-personel + probability-church-personel
-      [
-        set target one-of churches
-      ]
+;       if rand >= probability-hospital-personel + probability-school-personel and rand < probability-hospital-personel + probability-school-personel + probability-church-personel
+;       [
+;         set target one-of churches
+;       ]
       
-      if rand >= probability-hospital-personel + probability-school-personel + probability-church-personel and
-      rand < probability-hospital-personel + probability-school-personel + probability-church-personel + probability-shopkeeper
-      [
-        set target one-of store
-      ]
-    ]
+;       if rand >= probability-hospital-personel + probability-school-personel + probability-church-personel and
+;       rand < probability-hospital-personel + probability-school-personel + probability-church-personel + probability-shopkeeper
+;       [
+;         set target one-of store
+;       ]
+   ; ]
     
     set my-work target
-    ask target [set hired-workers (turtle-set hired-workers myself)]
-  ]
+;    ask target [set hired-workers (turtle-set hired-workers myself)]
+  
 end
 
 
