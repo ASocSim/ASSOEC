@@ -27,7 +27,7 @@ to setup-ebola
     setup-activities-ebo
    create-all-households
    setup-gathering-point-capacities
-;   setup-person-values-and-needs
+   setup-person-values-and-needs
 ;   setup-social-networks
 
 
