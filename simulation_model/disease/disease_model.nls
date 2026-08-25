@@ -82,28 +82,28 @@ end
 
 
 
- to-report is-hospitalised-infection-state? [in]
-   if is-timed-state? in [report is-infected-infection-status? state-of-timed-state in]
-   if in = "hospitalised"
-  or in = "h-to-immune"
-  or in = hospitalised-to-dead-infectious-infection-status
+ to-report is-hospitalised-infection-state? [infection]
+   if is-timed-state? infection [report is-infected-infection-status? state-of-timed-state infection]
+   if infection = "hospitalised"
+  or infection = "h-to-immune"
+  or infection = hospitalised-to-dead-infectious-infection-status
    [report true]
   
-  if in = "immune"
-  or in = "removed"
-  or in = "non-hospitalised"
-  or in = "infected-stage-2"
-  or in = "infected-stage-1.5"
-  or in = "infected-stage-1"
-  or in = "just-contaminated"
-  or in = "removed"
-  or in = "dead-infectious"
-  or in = "dead"
-  or in = "safe-burial"
-  or in = "unsafe-burial"
+  if infection = "immune"
+  or infection = "removed"
+  or infection = "non-hospitalised"
+  or infection = "infected-stage-2"
+  or infection = "infected-stage-1.5"
+  or infection = "infected-stage-1"
+  or infection = "just-contaminated"
+  or infection = "removed"
+  or infection = "dead-infectious"
+  or infection = "dead"
+  or infection = "safe-burial"
+  or infection = "unsafe-burial"
   [report false]
   
-  error (sentence "not implemented for:" in)  
+  error (sentence "not implemented for:" infection)  
  end
 
 
