@@ -20,12 +20,13 @@ globals [
   import-scenario-name
 ]
 
+
 to go
   reset-timer
   reset-metrics
 ;  reset-economy-measurements
   ;rumor-mill ;define later how mis/information spreads  
-  spread-contagion
+ ; spread-contagion
   update-within-agent-disease-status
   update-people-mind
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)
@@ -52,6 +53,12 @@ end
 
 to startup
   setup-ebola
+end
+
+
+;workaround, refactor and move later
+to-report is-currently-being-treated-at-home?
+  report people with [infection-status != "susceptible"]
 end
 
 to-report epistemic-accuracy if #infected = 0 [report 1] report count people with [is-infected? and is-believing-to-be-infected?] / #infected end
@@ -98,21 +105,21 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <plot x="10" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="1006" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="belonging" color="-16777216" legend="true">
+      <pen interval="1.0" mode="0" display="group-belonging" color="-16777216" legend="true">
         <setup></setup>
-        <update>plot mean [belonging-satisfaction-level] of people</update>
+        <update>plot mean [group-belonging-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="risk avoidance" color="-13345367" legend="true">
+      <pen interval="1.0" mode="0" display="family-belonging" color="-13345367" legend="true">
         <setup></setup>
-        <update>plot mean [risk-avoidance-satisfaction-level] of people</update>
+        <update>plot mean [family-belonging-satisfaction-level] of people</update>
       </pen>
       <pen interval="1.0" mode="0" display="autonomy" color="-955883" legend="true">
         <setup></setup>
         <update>plot mean [autonomy-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="luxury" color="-8330359" legend="true">
+      <pen interval="1.0" mode="0" display="providing" color="-8330359" legend="true">
         <setup></setup>
-        <update>plot mean [luxury-satisfaction-level] of people with [not is-child?]</update>
+        <update>plot mean [providing-satisfaction-level] of people</update>
       </pen>
       <pen interval="1.0" mode="0" display="health" color="-2674135" legend="true">
         <setup></setup>
@@ -122,29 +129,25 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <setup></setup>
         <update>plot mean [sleep-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="compliance" color="-6459832" legend="true">
+      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
         <setup></setup>
-        <update>plot mean [compliance-satisfaction-level] of people</update>
+        <update>plot mean [financial-survival-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="financial-stability" color="-1184463" legend="true">
+      <pen interval="1.0" mode="0" display="social-status" color="-7858858" legend="true">
         <setup></setup>
-        <update>plot mean [financial-stability-satisfaction-level] of people with [not is-child?]</update>
+        <update>plot mean [social-status-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="food-safety" color="-14439633" legend="true">
+      <pen interval="1.0" mode="0" display="food" color="-6459832" legend="true">
         <setup></setup>
-        <update>plot mean [food-safety-satisfaction-level] of people</update>
+        <update>plot mean [food-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="leisure" color="-865067" legend="true">
+      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
         <setup></setup>
-        <update>plot mean [leisure-satisfaction-level] of people</update>
+        <update>plot mean [physical-safety-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="financial-survival" color="-7858858" legend="true">
+      <pen interval="1.0" mode="0" display="social-safety" color="-5825686" legend="true">
         <setup></setup>
-        <update>plot mean [financial-survival-satisfaction-level] of people with [not is-child?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="conformity" color="-12345184" legend="true">
-        <setup></setup>
-        <update>plot mean [conformity-satisfaction-level] of people</update>
+        <update>plot mean [social-safety-satisfaction-level] of people</update>
       </pen>
     </plot>
     <monitor x="1081" precision="17" y="1302" height="60" fontSize="11" width="100" display="#@leisure">count people with [member? "leisure" [gathering-type] of current-activity]</monitor>
@@ -178,7 +181,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <slider x="2717" step="0.01" y="1158" max="1" width="354" display="ratio-omniscious-infected-that-trigger-social-distancing-measure" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-omniscious-infected-that-trigger-social-distancing-measure"></slider>
     <monitor x="2715" precision="17" y="1268" height="60" fontSize="11" width="186">is-social-distancing-measure-active?</monitor>
     <slider x="2961" step="0.01" y="542" max="1" width="225" display="mean-social-distance-profile" height="50" min="0" direction="Horizontal" default="0.5" variable="mean-social-distance-profile"></slider>
-    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">350.0</input>
+    <input x="582" multiline="false" y="588" height="63" variable="#households" type="number" width="100">30.0</input>
     <monitor x="582" precision="17" y="516" height="60" fontSize="11" width="100" display="#people">count people</monitor>
     <monitor x="549" precision="17" y="1167" height="60" fontSize="11" width="225">#people-saved-by-hospitalization</monitor>
     <monitor x="818" precision="17" y="1167" height="60" fontSize="11" width="238">#denied-requests-for-hospital-beds</monitor>
@@ -241,7 +244,7 @@ while [current-day <= end-day] [ go ]]]></button>
     <button x="703" y="514" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="63" display="set">load-population-profile-based-on-current-preset-profile</button>
     <note x="2967" y="475" backgroundDark="0" fontSize="11" width="272" markdown="false" height="30" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent social distancing settings</note>
     <note x="1788" y="1623" backgroundDark="0" fontSize="11" width="168" markdown="false" height="43" textColorDark="-1" textColorLight="-13345367" backgroundLight="0">Tracing (smartphone app)</note>
-    <switch x="2963" y="495" height="40" on="true" variable="make-social-distance-profile-value-based?" width="324" display="make-social-distance-profile-value-based?"></switch>
+    <switch x="2963" y="495" height="40" on="false" variable="make-social-distance-profile-value-based?" width="324" display="make-social-distance-profile-value-based?"></switch>
     <slider x="1802" step="0.01" y="1872" max="1" width="231" display="ratio-young-with-phones" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-young-with-phones"></slider>
     <slider x="1801" step="0.01" y="1928" max="1" width="239" display="ratio-retired-with-phones" height="50" min="0" direction="Horizontal" default="1.0" variable="ratio-retired-with-phones"></slider>
     <monitor x="2066" precision="17" y="1792" height="60" fontSize="11" width="130" display="#phone-owners">count people with [has-mobile-phone?]</monitor>
@@ -483,7 +486,6 @@ model
     <slider x="986" step="0.01" y="754" max="1" width="248" display="probability-church-personel" height="50" min="0" direction="Horizontal" default="0.03" variable="probability-church-personel"></slider>
     <slider x="986" step="0.01" y="809" max="1" width="245" display="probability-shopkeeper" height="50" min="0" direction="Horizontal" default="0.04" variable="probability-shopkeeper"></slider>
     <note x="990" y="591" backgroundDark="0" fontSize="11" width="282" markdown="false" height="49" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Worker distribution (relevant for economic model)</note>
-    <monitor x="858" precision="17" y="393" height="60" fontSize="11" width="100" display="#children">count children</monitor>
     <monitor x="901" precision="17" y="462" height="60" fontSize="11" width="169" display="Displaced males (#houses)">count houses-hosting-males</monitor>
     <monitor x="967" precision="17" y="394" height="60" fontSize="11" width="100" display="#females">count females</monitor>
     <monitor x="1077" precision="17" y="394" height="60" fontSize="11" width="100" display="#males">count males</monitor>
@@ -495,33 +497,17 @@ model
         <setup></setup>
         <update>plot count people with [is-at-work?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="@Pu-Leisure" color="-2674135" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-at-public-leisure-place?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="@Pr-Leisure" color="-955883" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-at-private-leisure-place?]</update>
-      </pen>
       <pen interval="1.0" mode="0" display="@Home" color="-14439633" legend="true">
         <setup></setup>
         <update>plot count people with [is-at-home?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="@Univ" color="-4079321" legend="true">
+      <pen interval="1.0" mode="0" display="Treated at hospital" color="-6459832" legend="true">
         <setup></setup>
-        <update>plot count people with [is-at-university?]</update>
+        <update>plot count people with [current-motivation = "get treatment at hospital"]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Treated" color="-7500403" legend="true">
+      <pen interval="1.0" mode="0" display="Treated at home" color="-955883" legend="true">
         <setup></setup>
-        <update>plot count people with [current-motivation = treatment-motive]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="@E-Shop" color="-8630108" legend="true">
-        <setup></setup>
-        <update>plot count people-at-essential-shops</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="@NE-Shop" color="-5825686" legend="true">
-        <setup></setup>
-        <update>plot count people-at-non-essential-shops</update>
+        <update>plot count people with [current-motivation = "get treatment at home"]</update>
       </pen>
     </plot>
     <plot x="4" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1643" xMin="0.0" height="296" legend="true" xMax="10.0" yMin="0.0" width="511" display="contacts">
@@ -539,29 +525,9 @@ model
         <setup></setup>
         <update>plot  #contacts-in-homes</update>
       </pen>
-      <pen interval="1.0" mode="0" display="pub-lei" color="-955883" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-public-leisure</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="pri-lei" color="-6459832" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-private-leisure</update>
-      </pen>
       <pen interval="1.0" mode="0" display="schools" color="-1184463" legend="true">
         <setup></setup>
         <update>plot  #contacts-in-schools</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="univ" color="-13210332" legend="true">
-        <setup></setup>
-        <update> plot #contacts-in-universities</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="e-shops" color="-13840069" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-essential-shops</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="ne-shops" color="-8630108" legend="true">
-        <setup></setup>
-        <update> plot #contacts-in-non-essential-shops</update>
       </pen>
       <pen interval="1.0" mode="0" display="pub-trans" color="-11221820" legend="true">
         <setup></setup>
@@ -636,29 +602,9 @@ model
     <plot x="1016" autoPlotX="true" yMax="1.0" autoPlotY="true" y="1645" xMin="0.0" height="219" legend="true" xMax="1.0" yMin="0.0" width="508" display="measures">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="lockdown" color="-2674135" legend="true">
-        <setup></setup>
-        <update>plot ifelse-value is-lockdown-active? [1] [0]</update>
-      </pen>
       <pen interval="1.0" mode="0" display="@home" color="-7500403" legend="true">
         <setup></setup>
         <update>plot count people with [is-at-home?] / count people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="watched-kids" color="-955883" legend="true">
-        <setup></setup>
-        <update>plot count children with [is-currently-watched-by-an-adult?] / count children</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="workersWorking@work" color="-6459832" legend="true">
-        <setup></setup>
-        <update>plot count workers with [is-working-at-work?] / count workers</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="working@home" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot count workers with [is-working-at-home?] / count workers</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="kids@home" color="-10899396" legend="true">
-        <setup></setup>
-        <update>plot count children with [is-at-home?] / count children</update>
       </pen>
     </plot>
     <plot x="11" autoPlotX="true" yMax="1.0" autoPlotY="true" y="517" xMin="0.0" height="243" legend="true" xMax="10.0" yMin="0.0" width="531" xAxis="time" display="population status">
@@ -757,6 +703,7 @@ At the start of each tick, people with less than 20 get 20$, so they don't end-u
     <input x="1398" multiline="false" y="1008" height="60" variable="#markets-gp" type="number" width="250">3.0</input>
     <monitor x="1685" precision="17" y="837" height="60" fontSize="11" width="100">r0</monitor>
     <monitor x="563" precision="17" y="1946" height="60" fontSize="11" width="105">#agriculture-workers</monitor>
+    <monitor x="1082" precision="17" y="464" height="60" fontSize="11" width="100" display="#children">count children</monitor>
   </widgets>
   <info>## WHAT IS IT?
 

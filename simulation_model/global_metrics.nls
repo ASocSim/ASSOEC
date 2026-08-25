@@ -244,11 +244,10 @@ end
 
 to  increment-contacts-due-to-group-gathering-global-metrics [ts context]
   increment-#contacts-per-gathering-type-global-metrics ts context
-  print sex-group-to-sex-group-#contacts-table
   ask ts [
     ask other ts [
       let key (list [sex] of myself sex)
-      if sex = female-sex and [sex] of myself = female-sex [show "hey!"]
+;      if sex = female-sex and [sex] of myself = female-sex
       table:put sex-group-to-sex-group-#contacts-table key table:get sex-group-to-sex-group-#contacts-table key + 1
       if not table:has-key? sex-group-to-sex-group-cumulated-#contacts-table key [ table:put sex-group-to-sex-group-cumulated-#contacts-table key 0]
       table:put sex-group-to-sex-group-cumulated-#contacts-table key table:get sex-group-to-sex-group-cumulated-#contacts-table key + 1

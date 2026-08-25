@@ -95,44 +95,49 @@ people-own [
   importance-given-to-achievement-value
   
   ;IMPORTANCE of BELONGING needs
-  ;*** NOTE: the belonging only contains 1x subneed (more subneeds might be added to this category at a later stage) ***
-  importance-weight-belonging-subneed
+  importance-weight-group-belonging
+    importance-weight-family-belonging
 
   ;IMPORTANCE of SURVIVAL needs
-  importance-weight-food-safety
+  importance-weight-food
   importance-weight-financial-survival
   importance-weight-health
   importance-weight-sleep
-  importance-weight-conformity
 
   ;IMPORTANCE of SAFETY needs
-  importance-weight-financial-stability
-  importance-weight-risk-avoidance
-  importance-weight-compliance
+  importance-weight-physical-safety
+  importance-weight-social-safety
 
   ;IMPORTANCE of ESTEEM needs
-  importance-weight-luxury
-  importance-weight-leisure
+  importance-weight-social-status
+  importance-weight-providing
   importance-weight-autonomy
+ 
+
 
   ;Need satisfaction levels (i.e. level of watertanks)
-  ;The need satisfaction levels of food-safety, financial-survival, health, and financial-stability are reporters (see need_definition.nls)
+
 
   ;SURVIVAL:
   sleep-satisfaction-level
-  conformity-satisfaction-level
-
-  ;SAFETY:
-  risk-avoidance-satisfaction-level
-  compliance-satisfaction-level
+  health-satisfaction-level
+  financial-survival-satisfaction-level
+  food-satisfaction-level
 
   ;BELONGING:
-  belonging-satisfaction-level
-
+  group-belonging-satisfaction-level
+  family-belonging-satisfaction-level
+  
   ;SELF-ESTEEM:
-  leisure-satisfaction-level
-  luxury-satisfaction-level
+  providing-satisfaction-level
+  social-status-satisfaction-level
   autonomy-satisfaction-level
+  
+  
+  ;SAFETY:
+  physical-safety-satisfaction-level
+  social-safety-satisfaction-level
+  
   
   ;Variables for BELONGING needs
   social-distance-profile
@@ -140,9 +145,7 @@ people-own [
   days-since-seen-relatives
   days-since-seen-colleagues
   days-since-seen-friends
-  
-  ;Variables for Luxury need (ESTEEM)
-  amount-of-last-luxury-items-bought
+
 
   ;;L: this dichotomy is conceptually discussable: the evaluation of safety is BASED on these variables;
   ;;but, in principles, these variables are not there for evaluating safety and they are/can/should influence other aspects (including other needs).
@@ -166,7 +169,6 @@ end
 to-report just-learned-I-am-infected-event
   report "just-learned-I-am-infected"
 end
-
 
 
 
@@ -236,11 +238,6 @@ to-report young-average-amount-of-capital
   report (sum [my-amount-of-capital] of people with [age = "young"]) / (count people with [age = "young"])
 end
 
-
-
-to-report app-users
-  report people with [is-user-of-tracking-app?]
-end
 
 to-report might-I-be-contagious?
   report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
