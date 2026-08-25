@@ -260,6 +260,11 @@ to-report SUE-social-status [ad]
   
   ;in the case of a male agent getting treatment at hospital, the expected social status decreases
   if is-male? and motive = "get treatment at hospital" [report 0.2]
+  
+  print "default social status"
+  
+  report 0
+  
 end
 
 
@@ -279,6 +284,9 @@ to-report SUE-providing [ad]
     ;this should also depend on social networks and beliefs
     if motive = "get treatment" [
     report -0.4 ]
+  
+   print "default providing" 
+    report 0
 end
 
 
@@ -311,8 +319,9 @@ to-report SUE-autonomy [ad]
   report 0.2]
   if (motive = "get treatment at hospital") [
   report -0.2]
-  
-  
+ 
+    print "default autonomy"
+    report 0
 
 end
 
@@ -338,6 +347,10 @@ to-report SUE-group-belonging [ad]
   
   
   if (motive = "visits") [report 1]
+  
+  
+      print "default group belonging"
+    report 0
 end
 
 
@@ -366,7 +379,10 @@ to-report SUE-family-belonging [ad]
       if gp = "hospital" [report 0.3] ;this can also depend on social network and beliefs
   ]]
   ;visits have a big effect on family belonging, especially if someone is sick(not modeled now)
-  ifelse motive = "visits" [report 0.9]  [report 0]
+  if motive = "visits" [report 0.9]
+  
+      print "default family belonging"
+  report 0
 end
 
 
@@ -383,6 +399,9 @@ to-report SUE-physical-safety [ad]
     if gp = "hospital" and motive = "work" [report -0.2]
    ; if is-girl and motive "school" [report -0.4]
   ]
+  
+      print "default phys safety"
+  report 0
 end
 
 
@@ -397,6 +416,9 @@ to-report SUE-social-safety [ad]
   ]
   ;religious gatherings increase social safety, as do visits
   if ( motive = "religious gathering" or motive = "visits") [report 0.8]
+  
+      print "default social safety"
+    report 0
 end
 
 
@@ -551,30 +573,30 @@ to-report global-prevalence-of [ad]
   ;*** this procedure should be expanded with new needs as they are added ***
   reset-timer
   let total-satisfaction 0
-  ;if cultural model is activated then:
-  ;calculate the total-satisfaction an agent expects to gain from performing an activity as the weighted sum of all its needs
-;   set total-satisfaction sum (list
-;     ;Survival needs
-;     (SDE-food ad * importance-weight-food) 
-;     (SDE-financial-survival ad * importance-weight-financial-survival)
-;     (SDE-sleep ad * importance-weight-sleep) 
-;     (SDE-health ad * importance-weight-health) 
-;     ;Belonging needs
-;     (SDE-group-belonging ad * importance-weight-group-belonging)
-;     (SDE-family-belonging ad * importance-weight-family-belonging)
-;     ;Esteem needs
-;     (SDE-autonomy ad * importance-weight-autonomy) 
-;     (SDE-social-status ad * importance-weight-social-status) 
-;     (SDE-providing ad * importance-weight-providing)
-;     ;Safety needs
-;     (SDE-physical-safety ad * importance-weight-physical-safety) 
-;     (SDE-social-safety ad * importance-weight-social-safety)
-;     )
+;  if cultural model is activated then:
+ ; calculate the total-satisfaction an agent expects to gain from performing an activity as the weighted sum of all its needs
+  set total-satisfaction sum (list
+    ;Survival needs
+    (SDE-food ad * importance-weight-food) 
+    (SDE-financial-survival ad * importance-weight-financial-survival)
+    (SDE-sleep ad * importance-weight-sleep) 
+    (SDE-health ad * importance-weight-health) 
+    ;Belonging needs
+    (SDE-group-belonging ad * importance-weight-group-belonging)
+    (SDE-family-belonging ad * importance-weight-family-belonging)
+    ;Esteem needs
+    (SDE-autonomy ad * importance-weight-autonomy) 
+    (SDE-social-status ad * importance-weight-social-status) 
+    (SDE-providing ad * importance-weight-providing)
+    ;Safety needs
+    (SDE-physical-safety ad * importance-weight-physical-safety) 
+    (SDE-social-safety ad * importance-weight-social-safety)
+    )
   
-;   if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
-;   report total-satisfaction
+  if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
+  report total-satisfaction
 
-  report 1
+
 end
 
 

@@ -1,6 +1,5 @@
 __includes ["hospitals.nls" "gathering_points/gathering_types.nls"]
-globals
-[
+globals [
    hospitals
    schools
    homes
@@ -92,13 +91,11 @@ end
 
 
 
-
 to-report is-at-burial?
   report gathering-type = "burial-rites"
 end
 
 to-report is-at-work?
-  if not is-worker? [report false]
   report current-activity = my-work
 end
 
