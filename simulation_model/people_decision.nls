@@ -68,7 +68,7 @@ to update-belief-based-on-current-activity
   ]
   let friends-here count my-friends with [current-activity = [current-activity] of myself]
   if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
-  if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
+  ;if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
   
   ;update-memory
 end

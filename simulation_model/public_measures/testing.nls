@@ -1,4 +1,10 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;for ebola we need to rethink the testing procedures
+;;link them to hospital
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 globals [#tests-used-by-daily-testing]
+
 
 to perform-daily-testing-public-measure
 ;   if not is-daily-testing-public-measure-active? [stop]
@@ -44,9 +50,10 @@ to perform-daily-testing-public-measure
 end 
 
 to-report is-daily-testing-public-measure-active?
-  report is-global-condition-met? when-is-daily-testing-applied?
+  ;report is-global-condition-met? when-is-daily-testing-applied?
+  report false
 end
 
 to disable-daily-testing-measure
-  set when-is-daily-testing-applied? "never"
+ ; set when-is-daily-testing-applied? "never" 
 end

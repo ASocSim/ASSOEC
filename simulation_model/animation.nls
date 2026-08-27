@@ -11,7 +11,7 @@ to animate-walk-to-goal
   if animate? [
     let walkers people with [distance current-activity > 3]
     while [any? walkers] [
-      every 0.1 [
+      every 0.05 [
         ask walkers [
           face current-activity
           while [not allowed-move?] [
