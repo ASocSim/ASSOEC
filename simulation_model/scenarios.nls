@@ -406,7 +406,7 @@ to load-default-economic-parameters
   set productivity-at-home 0.5
   set workers-wages 12.5
   set price-of-rations-in-essential-shops 2.8
-  set days-of-rations-bought 3
+  set days-of-rations-bought 2
   set price-of-rations-in-non-essential-shops 4.0
   
   set ratio-tax-on-essential-shops 0.76

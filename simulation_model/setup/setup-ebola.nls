@@ -29,9 +29,7 @@ to setup-ebola
    setup-gathering-point-capacities
    setup-person-values-and-needs
 ;   setup-social-networks
-
-
-
+  
 ;   if with-infected? [
 ;     set first-infected-people n-of (min list 3 count people) people
 ;     ask first-infected-people [contaminate nobody ("setup")]
@@ -39,9 +37,9 @@ to setup-ebola
 ;   ]
 ;   setup-phasing-out
 
-;   update-display
+   update-display
 
-;   ask links[hide-link]
+   ask links[hide-link]
 
 ;   set is-lockdown-active? false
 ;   set list-of-buses (list)
@@ -54,6 +52,7 @@ to setup-ebola
 ;   ;;must be in the end
    setup-global-metrics
 end
+
 
 to setup-global-metrics
   
@@ -77,10 +76,79 @@ to setup-global-metrics
   
 end
 
+ to setup-activities-ebo
+   set hospitals (turtle-set)
+   set workplace-mines (turtle-set)
+   set workplace-agriculture (turtle-set)
+   set stores (turtle-set)
+   set schools (turtle-set)
+   set homes (turtle-set)
+   set workplace-homes (turtle-set)
+   set markets (turtle-set)
+  set churches (turtle-set)
+  
+ create-gathering-points #hospital-gp [
+    set hospitals (turtle-set  hospitals self)
+    set hired-workers (turtle-set)
+    set gathering-type "hospital" set shape "circle" set heading 45 set color lime set size 2 set xcor 6 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "hospital"] / (#hospital-gp + 1)]
+  
+  create-gathering-points #mines-gp [
+    set workplace-mines (turtle-set workplace-mines self)
+    set hired-workers (turtle-set)
+    set gathering-type "workplace-mine" set shape "square 2" set color brown  set xcor 7 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-mine"] / (#mines-gp + 1)]
+
+   
+  create-gathering-points #agriculture-gp [
+    set workplace-agriculture (turtle-set workplace-agriculture self)
+    set hired-workers (turtle-set)
+    set gathering-type "workplace-agriculture" set shape "square 2" set color green  set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-agriculture"] / (#agriculture-gp + 1)]  
+  
+
+  create-gathering-points #stores-gp [
+    set stores (turtle-set stores self)
+    set hired-workers (turtle-set)
+    set gathering-type "store" set shape "cow" set color yellow set xcor 9 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "store"] / (#stores-gp + 1)]
+  
+  
+  create-gathering-points #schools-gp [
+    set schools (turtle-set schools self)
+    set hired-workers (turtle-set)
+    set gathering-type "school" set shape "triangle" set color pink set xcor 3 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "school"] / (#schools-gp + 1)]
+
+  create-gathering-points #markets-gp [
+    set markets (turtle-set markets self)
+    set hired-workers (turtle-set)
+    set gathering-type "market" set shape "target" set color red set xcor 4 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "market"] / (#markets-gp + 1)]
+  
+  
+  create-gathering-points #churches-gp [
+    set churches (turtle-set churches self)
+    set hired-workers (turtle-set)
+    set gathering-type "church" set shape "pentagon" set color sky set  xcor 5 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "church"] / (#churches-gp + 1)]
+
+  
+  ask gathering-points [set hired-workers (turtle-set)] 
+  
+  setup-activity-animate-positions
+; setup-economy
+  
+  if migration?
+  [
+    create-gathering-points 1
+    [
+      set gathering-type "away"
+      set away-gathering-point self
+      set shape "airplane"
+    ]
+  ]
+  
+  ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
+end
+
 
 to create-all-households
   load-population-profile-based-on-current-preset-profile
-  
+
   let #adults-homes floor (#households * ratio-adults-homes)
   let #family-homes floor (#households * ratio-family-homes)
   let #displaced-homes #households - (#adults-homes + #family-homes) ;+ #retired-couple-homes + #multigenerational-homes
@@ -88,15 +156,28 @@ to create-all-households
   let #created-households 0
 
 ;  repeat #adults-homes [create-household "adult" #created-households  #households set #created-households  #created-households + 1]
-  repeat #family-homes [create-household "family" #created-households  #households set #created-households  #created-households + 1]
-  repeat #displaced-homes [create-household "displaced" #created-households  #households set  #created-households  #created-households + 1]
+  repeat #family-homes [
+    create-household "family" #created-households  #households
+    set #created-households  #created-households + 1
+  ]
+ repeat #displaced-homes 
+  [
+    create-household "displaced" #created-households #households 
+    set  #created-households  #created-households + 1
+  ]
   
-  ask homes [ set available-food-rations count gatherers * (random days-of-rations-bought + days-of-rations-bought) ]
+  ask homes
+  [
+    set available-food-rations count gatherers * (random days-of-rations-bought + days-of-rations-bought)
+  ]
 end
 
 to create-household [t #created-households #households-to-create]
   let current-home nobody
-  create-gathering-points 1 [set current-home self
+  create-gathering-points 1 
+  [
+    print self
+    set current-home self
     set homes (turtle-set homes self)
     set gathering-type "home"
     set shape "house"
@@ -104,15 +185,27 @@ to create-household [t #created-households #households-to-create]
     set xcor 9 * max-pxcor / 10
     set ycor max-pycor * #created-households / #households-to-create
   ]
+  
+  let current-workplace-home nobody 
+    create-gathering-points 1 
+  [
+    print self
+    set current-workplace-home self
+    set workplace-homes (turtle-set workplace-homes self)
+    set gathering-type "workplace-home"
+    set shape "house"
+    set color blue
+    set xcor ( 9 * max-pxcor / 10 ) + 2
+    set ycor max-pycor * #created-households / #households-to-create
+  ]
 
 ;;need more info on household composition, how many in a family home?
   if t = "family"
-  
   [
-    setup-person current-home female-sex
-    setup-person current-home female-sex
-    setup-person current-home male-sex
-    setup-person current-home male-sex
+    setup-person current-home current-workplace-home female-sex
+    setup-person current-home current-workplace-home female-sex
+    setup-person current-home current-workplace-home male-sex
+    setup-person current-home current-workplace-home male-sex
 ;     setup-person current-home young-age
 ;     setup-person current-home young-age
 ;     setup-person current-home young-age
@@ -123,11 +216,11 @@ to create-household [t #created-households #households-to-create]
    if t = "displaced"
   ;;we average the amount of displaced men living together to 5, this can become a slider later as some interventions on how many house together have been taken
   [
-    setup-person current-home male-sex
-    setup-person current-home male-sex
-    setup-person current-home male-sex
-    setup-person current-home male-sex
-    setup-person current-home male-sex
+    setup-person current-home current-workplace-home male-sex
+    setup-person current-home current-workplace-home male-sex
+    setup-person current-home current-workplace-home male-sex
+    setup-person current-home current-workplace-home male-sex
+    setup-person current-home current-workplace-home male-sex
     stop
   ]
 
@@ -144,15 +237,17 @@ end
 
 ; ;make new setup-person for ebola agent vars
 
-to setup-person [current-home l-sex]
+to setup-person [current-home current-workplace-home l-sex]
   create-people 1 [
     set sex l-sex
     set time-when-infected "never"
 
     set has-been-tested-infected? false
-;    set my-amount-of-capital my-starting-amount-of-capital
+    set my-amount-of-capital 100 ;my-starting-amount-of-capital
     set current-activity current-home
     set my-home current-home
+    if sex = "female" [
+      set my-work current-workplace-home]
 
     set my-target-amount-of-capital my-amount-of-capital
     set has-been-tested-immune? false
@@ -229,7 +324,6 @@ to setup-relation-to-gathering-points1
 end
 
 to  setup-worker-relation-to-gathering-point
-     print "setting up worker gps"
      let target one-of gathering-points
      
   if is-male? [
@@ -244,12 +338,7 @@ to  setup-worker-relation-to-gathering-point
     
     if is-female? [
     let hired true
-    set target my-home
-    
-    ask gathering-points with [ is-home?]
-    [
-    set target self stop 
-    ]
+    set target my-work
   ]
   
 ;    if not hired [
@@ -281,76 +370,6 @@ end
 
 
 
- to setup-activities-ebo
-   set hospitals (turtle-set)
-     set workplace-mines (turtle-set)
-     set workplace-agriculture (turtle-set)
-   set stores (turtle-set)
-   set schools (turtle-set)
-   set homes (turtle-set)
-   set markets (turtle-set)
-  set churches (turtle-set)
- ; set burial-rites (turtle-set)
-
-  
-  
- create-gathering-points #hospital-gp [
-    set hospitals (turtle-set  hospitals self)
-    set hired-workers (turtle-set)
-    set gathering-type "hospital" set shape "circle" set heading 45 set color lime set size 2 set xcor 6 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "hospital"] / (#hospital-gp + 1)]
-  
-  create-gathering-points #mines-gp [
-    set workplace-mines (turtle-set workplace-mines self)
-    set hired-workers (turtle-set)
-    set gathering-type "workplace-mine" set shape "square 2" set color brown  set xcor 7 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-mine"] / (#mines-gp + 1)]
-
-   
-  create-gathering-points #agriculture-gp [
-    set workplace-agriculture (turtle-set workplace-agriculture self)
-    set hired-workers (turtle-set)
-    set gathering-type "workplace-agriculture" set shape "square 2" set color green  set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-agriculture"] / (#agriculture-gp + 1)]  
-  
-
-  create-gathering-points #stores-gp [
-    set stores (turtle-set stores self)
-    set hired-workers (turtle-set)
-    set gathering-type "store" set shape "cow" set color yellow set xcor 9 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "store"] / (#stores-gp + 1)]
-  
-  
-  create-gathering-points #schools-gp [
-    set schools (turtle-set schools self)
-    set hired-workers (turtle-set)
-    set gathering-type "school" set shape "triangle" set color pink set xcor 3 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "school"] / (#schools-gp + 1)]
-
-  create-gathering-points #markets-gp [
-    set markets (turtle-set markets self)
-    set hired-workers (turtle-set)
-    set gathering-type "market" set shape "target" set color red set xcor 4 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "market"] / (#markets-gp + 1)]
-  
-  
-  create-gathering-points #churches-gp [
-    set churches (turtle-set churches self)
-    set hired-workers (turtle-set)
-    set gathering-type "church" set shape "pentagon" set color sky set  xcor 5 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "church"] / (#churches-gp + 1)]
-
-  
-  ask gathering-points [set hired-workers (turtle-set)] 
-  
-  setup-activity-animate-positions
-; setup-economy
-  
-  if migration?
-  [
-    create-gathering-points 1
-    [
-      set gathering-type "away"
-      set away-gathering-point self
-      set shape "airplane"
-    ]
-  ]
-  
-  ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
-end
 
 
 to setup-gathering-point-capacities

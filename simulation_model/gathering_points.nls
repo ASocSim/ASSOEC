@@ -6,6 +6,7 @@ globals [
   markets
   workplace-mines
   workplace-agriculture
+  workplace-homes
   stores
   churches
 ]

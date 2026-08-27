@@ -36,7 +36,9 @@ __includes ["need_definition.nls"]
   
 
 to update-needs-for-playing [current-activity-descriptor]
+
   decay-satisfaction-level-ebo
+
   if not is-activity-successful? [stop]
     
   set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
@@ -44,8 +46,8 @@ to update-needs-for-playing [current-activity-descriptor]
   set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDA-food current-activity-descriptor)
   set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
   
-  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level +  current-activity-descriptor) ;SDA-group-belonging
-   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + current-activity-descriptor) ;SDA-family-belonging 
+  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDA-group-belonging current-activity-descriptor) 
+   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDA-family-belonging current-activity-descriptor)  
 
   set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)  
   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
@@ -82,11 +84,14 @@ to decay-satisfaction-level-ebo
   
 
   ;BELONGING
-  let group-belonging-decay 0.01
-  let family-belonging-decay 0.01
+  let group-belonging-decay 0.8
+  let family-belonging-decay 0.8
 
- ; set belonging-satisfaction-level belonging-satisfaction-level - belonging-decay
-  ;if belonging-satisfaction-level < 0 [set belonging-satisfaction-level 0]
+  set group-belonging-satisfaction-level group-belonging-satisfaction-level - group-belonging-decay
+  if group-belonging-satisfaction-level < 0 [set group-belonging-satisfaction-level 0]
+  
+  set family-belonging-satisfaction-level family-belonging-satisfaction-level - family-belonging-decay
+  if family-belonging-satisfaction-level < 0 [set family-belonging-satisfaction-level 0]
   
   ;;SAFETY
   let social-safety-decay 0.8
@@ -103,10 +108,9 @@ to decay-satisfaction-level-ebo
   
   let providing-decay 0.8
   let social-status-decay 0.8
-    if is-currently-allocated-a-bed-in-hospital? and is-male? [
-    set social-status-decay social-status-decay - (1 - social-status-decay) ; Double the decay
     
-    
+  if is-currently-allocated-a-bed-in-hospital? and is-male? [
+    set social-status-decay social-status-decay - (1 - social-status-decay) ; Double the decay 
     set providing-decay providing-decay - (1 - providing-decay)
   ]
 
@@ -147,7 +151,7 @@ to-report SUE-leisure [ad]
 end
 
 
-;sleep: the only wau to get sleep is to rest (at home)
+;sleep: the only way to get sleep is to rest (at home)
 to-report SUE-sleep [ad]
  let gp location-of ad
   let motive motive-of ad 
@@ -171,32 +175,57 @@ end
 
 ;financial survival
 to-report SUE-financial-survival [ad]
-  if age != "young" [
-    
+ 
+  ask people [set my-expected-income 10]
+  
     let gp location-of ad
     let motive motive-of ad
     let eating-costs price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops
-    
-    if is-I-have-contractual-obligations? [
+
+;   print "rations price"
+;   print price-of-rations-in-essential-shops
+;   print "amount rations"
+;   print amount-of-rations-I-buy-when-going-to-essential-shops
+;   print "eating costs"
+;   print eating-costs
+;   print "exp income"
+;   print my-expected-income
+
+  
+    if motive = "work"
+  [
+    print "me working at"
+    print [gathering-type] of gp
+    print [gathering-type] of my-work
       ;get money from work, except work in the household
-      if gp = my-work and is-working-motive? motive [
-        report min (list (my-expected-income / eating-costs) 1)
-      ]
-      report max (list ((- my-expected-income) / eating-costs) 0)
-    ]
+      ;print min list (my-expected-income / eating-costs) 1
+      ;print "minimum"
+       report min list (my-expected-income / eating-costs) 1
+      
+;     print max (list ((- my-expected-income) / eating-costs) 0)
+;     print "maxx"
+      ; report max (list ((- my-expected-income) / eating-costs) 0)
+     ]
+  
+  
+  
     if motive = "get food" [
-      let money-left-over my-amount-of-capital - eating-costs
-      ; If we spend all our money, financial-survival will drop to 0
-      if money-left-over < 0 [
-        report (- financial-survival-satisfaction-level)
-      ]
-      report (- min (list (money-left-over / eating-costs) 1))
-    ]
-    report 0
-  ]
+;       let money-left-over my-amount-of-capital - eating-costs
+;     print my-amount-of-capital
+;     print money-left-over
+;       ; If we spend all our money, financial-survival will drop to 0
+;       if money-left-over < 0 [
+
+;         report (- financial-survival-satisfaction-level)
+;       ]
+;           print (- min (list (money-left-over / eating-costs) 1))
+;       report (- min (list (money-left-over / eating-costs) 1))
+;     ]
+    report 0 ]
+  report 0
+  
   ;add decrease in finances for children going to school
   ; if (age = "young" and gp = "school") [decrease financial survival] 
-  report 0
 end
 
 
@@ -239,29 +268,32 @@ end
 
 
 ;social status
+;this could be tied to financial survival
+;will decrease once treatment at hospital is working
+;implement social status increase for leisure activity
 to-report SUE-social-status [ad]
   let gp location-of ad
   let motive motive-of ad 
   ;social status comes from working and shopping at store, attending religious gathering, and sending kids to school
-  ifelse (sex = "female") [
-  if (gp = "store") and (motive = "get food")[
-      report 0.7]
+  ifelse is-female? [
+    if ([gathering-type] of gp = "store") and (motive = "get food")[
+      report 0.4]
   ][
-    if (gp = my-work ) and (motive = "work")[
-      report 0.9]
+    if ([gathering-type] of gp = my-work ) and (motive = "work")[report 0.4]
   ]
 ;   if age = "young" [
 ;       if (gp = my-school ) and (motive = "learn")[
 ;       report 0.9]
 ;   ]
+  
   ;social status is expected to increase more for women attending religious gatherings
-  if gp = "church" and motive = "religious gathering" [
-    ifelse is-female? [report 0.8] [report 0.6]]
+  if [gathering-type] of gp = "church" and motive = "religious gathering" [
+    ifelse is-female? [report 0.8] [report 0.4]]
   
   ;in the case of a male agent getting treatment at hospital, the expected social status decreases
-  if is-male? and motive = "get treatment at hospital" [report 0.2]
+  if is-male? and motive = "get treatment at hospital" [report -0.4]
   
-  print "default social status"
+  ; print "default social status"
   
   report 0
   
@@ -269,23 +301,30 @@ end
 
 
 ;providing (for family)
+;the getting treatment part can use some attention + might need more guard conditions as it might break e.g. locations where we are at work but not working for providing
 to-report SUE-providing [ad]
   let gp location-of ad
   let motive motive-of ad
   ;female provide by getting food (more like cooking it but we think about this later)
-  ifelse (sex = "female") [
-  if (gp = "store" or gp = "market") and (motive = "get food")[
-      report 0.7]][
-  ;religious gathering attending
-    if gp = "church" and motive = "religious gathering" [
-    ifelse is-female? [report 0.8] [report 0.4]]
+  if is-female? [
+  if ([gathering-type] of gp = "store" or [gathering-type] of gp = "market") and (motive = "get food")[
+      report 0.2]
   ]
-    ;in case of sickness, getting treatment at home and at hospital reduce the satisfaction of providing
+  
+   ;religious gathering attending provides
+    if [gathering-type] of gp = "church" and motive = "attend religious gathering" [
+    ifelse is-female? [report 0.8] [report 0.4]]
+  
+    ;in case of sickness, getting treatment at home and at hospital reduces the satisfaction of providing
     ;this should also depend on social networks and beliefs
-    if motive = "get treatment" [
+    if motive = "get treatment get at home" or motive = "get treatment get at hospital" [ 
+    ;print "i am sick"
     report -0.4 ]
   
-   print "default providing" 
+  if is-male? [
+    ifelse [gathering-type] of gp = "work" and motive = "providing" [report 0.4] [report -0.4]]
+  
+   ; print "default providing" 
     report 0
 end
 
@@ -298,7 +337,8 @@ to-report SUE-autonomy [ad]
   ;working increases autonomy
     if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
       ifelse motive = "work" [
-      if ( gp = my-work ) [report 0.9]][report 0]]
+      ;currently, not working decreases autonomy
+      if ( gp = my-work ) [report 0.9]][report -0.3]]
       
   ;so does going to school
 ;   if age = "young" [
@@ -320,7 +360,7 @@ to-report SUE-autonomy [ad]
   if (motive = "get treatment at hospital") [
   report -0.2]
  
-    print "default autonomy"
+    ; print "default autonomy"
     report 0
 
 end
@@ -336,20 +376,16 @@ to-report SUE-group-belonging [ad]
   if ( motive = "work" ) [report 0.5]
   
   if (motive = "organize funeral") [
-  ;  ifelse (funeral-type = "SDB") [report -0.1][
-    report 0.4]
-  ;]
+    report 0.5]
   
   if is-female? and motive = "care for the sick" [
     ;this splits caring at home or at an hospital, eg bringing food to sick relatives
     ;refactor needed
-    ifelse (gp = "home") [report 0.5][report 0.2]]
+    ifelse (gp = "home") [report 0.5][report 0.3]]
   
+  if (motive = "visits") [report 0.4]
   
-  if (motive = "visits") [report 1]
-  
-  
-      print "default group belonging"
+    ;  print "default group belonging"
     report 0
 end
 
@@ -381,26 +417,28 @@ to-report SUE-family-belonging [ad]
   ;visits have a big effect on family belonging, especially if someone is sick(not modeled now)
   if motive = "visits" [report 0.9]
   
-      print "default family belonging"
+    ;  print "default family belonging"
   report 0
 end
 
 
 ;physical safety
 to-report SUE-physical-safety [ad]
+  
   let gp location-of ad
   let motive motive-of ad
+  
   ;working in the mine decreases physical safety
   if motive = "work" [
-    ifelse gp = "mine" 
+    ifelse [gathering-type] of gp = "workplace-mine" 
     [report -0.1]
     [report 0.1]
   ;add logic for hospital and schools (girls are in danger when going to school)
     if gp = "hospital" and motive = "work" [report -0.2]
    ; if is-girl and motive "school" [report -0.4]
   ]
-  
-      print "default phys safety"
+  if [gathering-type] of gp = "home" [report 0.2]
+    ;  print "default phys safety"
   report 0
 end
 
@@ -409,15 +447,15 @@ end
 to-report SUE-social-safety [ad]
   let gp location-of ad
   let motive motive-of ad
+  
   if is-female?
-  [
-    if ( motive = "get food" and gp = "market") [report 0.2]
+  [ if ( motive = "get food" and [gathering-type] of gp = "store") ;this is supposed to be market, which are once a week and needs balancing with decay
+    [report 0.4]
     if ( motive = "get treatment at hospital") [report -0.2]
   ]
   ;religious gatherings increase social safety, as do visits
-  if ( motive = "religious gathering" or motive = "visits") [report 0.8]
-  
-      print "default social safety"
+  if ( motive = "attend religious gathering" or motive = "visits") [report 0.8]
+      ;print "default social safety"
     report 0
 end
 

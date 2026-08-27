@@ -27,10 +27,10 @@ to-report my-available-activity-descriptors
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
     [
       if is-female? [set activities (lput (activity-descriptor one-of home-gathering-type "work") activities)]
-      print "i go to work"
+    ;  print "i go to work"
       
       if is-male? [set activities (lput (activity-descriptor one-of workplace-mine-gathering-type "work") activities)]
-      print "i also go to work"
+    ;  print "i also go to work"
 
         ;go to school
 ;       if is-child? [set activities (lput (activity-descriptor my-school  "school") activities)]
@@ -64,7 +64,7 @@ to-report my-available-activity-descriptors
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
   ;set activities lput (activity-descriptor my-networks-home "visits") activities
-    print "i go to visit family"
+   ; print "i go to visit family"
     ]
  
   
@@ -83,9 +83,7 @@ end
 
 
 to select-activity
-  print "hello before"
   let c-a my-preferred-available-activity-descriptor
-  print "hello after"
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [
 ;       print "hello after if sats"

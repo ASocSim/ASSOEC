@@ -235,11 +235,11 @@ to increment-#contacts-per-gathering-type-global-metrics [ts context]
     if gt = churches-gathering-type [set #contacts-in-churches #contacts-in-churches + #contacts-now stop]  
   ]
   
-  if context = "bus" [set #contacts-in-pubtrans #contacts-in-pubtrans + #contacts-now stop]
-  if context = "queue-waiting-for-bus" [set #contacts-in-queuing #contacts-in-queuing + #contacts-now stop]
-  if context = "cars" [set #contacts-in-shared-cars #contacts-in-shared-cars + #contacts-now stop]
-  if context = "travelling outside" [set #contacts-in-general-travel #contacts-in-general-travel + #contacts-now stop]
-  error (sentence "unimplemented for" context)
+;   if context = "bus" [set #contacts-in-pubtrans #contacts-in-pubtrans + #contacts-now stop]
+;   if context = "queue-waiting-for-bus" [set #contacts-in-queuing #contacts-in-queuing + #contacts-now stop]
+;   if context = "cars" [set #contacts-in-shared-cars #contacts-in-shared-cars + #contacts-now stop]
+;   if context = "travelling outside" [set #contacts-in-general-travel #contacts-in-general-travel + #contacts-now stop]
+;   error (sentence "unimplemented for" context)
 end
 
 to  increment-contacts-due-to-group-gathering-global-metrics [ts context]
