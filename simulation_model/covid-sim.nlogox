@@ -27,8 +27,11 @@ to go
 ;  reset-economy-measurements
   ;rumor-mill ;define later how mis/information spreads  
   spread-contagion
+  
   update-within-agent-disease-status
+  
   update-people-mind
+  
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)
   perform-people-activities
 
@@ -53,6 +56,7 @@ end
 
 to startup
   setup-ebola
+
 end
 
 
@@ -87,14 +91,6 @@ while [current-day <= end-day] [ go ]]]></button>
     <note x="2825" y="129" backgroundDark="0" fontSize="11" width="334" markdown="false" height="27" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Hofstede dimension settings</note>
     <note x="3233" y="70" backgroundDark="0" fontSize="11" width="197" markdown="false" height="30" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent value system settings</note>
     <note x="2833" y="331" backgroundDark="0" fontSize="11" width="190" markdown="false" height="18" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent need system settings</note>
-    <chooser x="3742" y="65" height="60" variable="network-generation-method" current="1" width="202" display="network-generation-method">
-      <choice type="string" value="random"></choice>
-      <choice type="string" value="value-similarity"></choice>
-    </chooser>
-    <note x="3719" y="29" backgroundDark="0" fontSize="16" width="236" markdown="false" height="46" textColorDark="-1" textColorLight="-8630108" backgroundLight="0">Social Network Model</note>
-    <slider x="3742" step="1" y="130" max="150" width="244" display="peer-group-friend-links" height="50" min="1" direction="Horizontal" default="7.0" variable="peer-group-friend-links"></slider>
-    <slider x="3715" step="0.01" y="188" max="1" width="288" display="percentage-of-agents-with-random-link" height="50" min="0" direction="Horizontal" default="0.14" variable="percentage-of-agents-with-random-link"></slider>
-    <button x="3718" y="249" height="40" disableUntilTicks="true" forever="false" kind="Observer" width="157" display="Write network as dot">write-network-to-file user-new-file</button>
     <button x="12" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="92" display="1 Day run">if slice-of-the-day = "morning" [go]
 while [slice-of-the-day != "morning"] [go]</button>
     <slider x="3233" step="1" y="147" max="25" width="233" display="influence-of-age-on-value-system" height="50" min="0" direction="Horizontal" default="5.0" variable="influence-of-age-on-value-system"></slider>
@@ -140,7 +136,6 @@ while [slice-of-the-day != "morning"] [go]</button>
       <choice type="string" value="scenario-9-smart-testing"></choice>
       <choice type="string" value="scenario-7-cultural-model"></choice>
     </chooser>
-    <button x="4321" y="107" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="258" display="load scenario-specific parameter settings">;load-scenario-specific-parameter-settings</button>
     <button x="4066" y="172" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="66" display="import">ask-user-for-import-file
 load-scenario-from-file</button>
     <button x="4137" y="172" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="69" display="export">ask-user-for-export-file

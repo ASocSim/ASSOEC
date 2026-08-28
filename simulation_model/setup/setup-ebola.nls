@@ -24,11 +24,14 @@ to setup-ebola
   set when-has-5%-infected-threshold-first-been-met? "never"
   set start-tick-of-global-quarantine "never"
 
+  
+
+  
     setup-activities-ebo
    create-all-households
    setup-gathering-point-capacities
    setup-person-values-and-needs
-;   setup-social-networks
+   setup-social-networks
   
 ;   if with-infected? [
 ;     set first-infected-people n-of (min list 3 count people) people
@@ -39,7 +42,8 @@ to setup-ebola
 
    update-display
 
-   ask links[hide-link]
+   ask gathering-links
+  [hide-link]
 
 ;   set is-lockdown-active? false
 ;   set list-of-buses (list)

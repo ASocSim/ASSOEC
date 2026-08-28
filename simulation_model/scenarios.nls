@@ -361,9 +361,9 @@ to load-default-migration-model
 end
 
 to load-default-social-network-model
-  set network-generation-method "value-similarity"
-  set peer-group-friend-links 7
-  set percentage-of-agents-with-random-link 0.14
+ ; set network-generation-method "value-similarity"
+  ;set peer-group-friend-links 7
+  ;set percentage-of-agents-with-random-link 0.14
 end
 
 ;Is this still needed? why isn't "load-number-of-gathering-points-based-on-number-of-households" used instead of this command?

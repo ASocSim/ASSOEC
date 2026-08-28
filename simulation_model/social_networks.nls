@@ -6,27 +6,39 @@ undirected-link-breed [my-friends-links my-friends-link]
 
 ;breed [work-social-networks work-social-network]
 
+to setup-social-network-ebola
+  
+end
+
+
+
 to setup-social-networks
-  if network-generation-method = "random" 
-  [setup-social-networks-random stop]
-  if network-generation-method = "value-similarity"
-  [setup-social-networks-value-similarity stop]
-  error (sentence "Method" network-generation-method "for generating network unknown. Please select another")
+  ;if network-generation-method = "random" 
+  setup-social-networks-random
+  
+  ;if network-generation-method = "value-similarity"
+  ;[setup-social-networks-value-similarity stop]
+  ;error (sentence "Method" network-generation-method "for generating network unknown. Please select another")
 end
 
 to-report possible-friends
-  let agents-to-befriend reduce [ [x y] -> (turtle-set x y) ] ([gatherers] of (turtle-set my-church my-school))
-  report other agents-to-befriend with [not my-friends-link-neighbor? myself and age = [age] of myself]
+ ; let agents-to-befriend reduce [ [x y] -> (turtle-set x y) ] ([gatherers] of (turtle-set my-church my-school))
+  ;report other agents-to-befriend with [not my-friends-link-neighbor? myself ] ;and age = [age] of myself]
+  report other people with [not my-friends-link-neighbor? myself ]
 end
 
 to setup-social-networks-random
-  ask children with [any? [gatherers with [is-adult?]] of my-home ][create-dependable-adult-link-to one-of [gatherers with [is-adult?]] of my-home ]
+  
+  ;ask children with [any? [gatherers with [is-adult?]] of my-home ][create-dependable-adult-link-to one-of [gatherers with [is-adult?]] of my-home ]
   ;  ask workers [  create-workplace-colleague-links-to other workers with [my-workplace = [my-workplace] of myself]]
   ask people [
+    ;everyone has the same n of friends
     ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
-    create-my-friends-links-with up-to-n-of peer-group-friend-links possible-friends
+    create-my-friends-links-with up-to-n-of 3 possible-friends
   ]
 end
+
+
 
 to-report value-euclidean-distance [other-agent]
   report sqrt sum (list 
@@ -42,29 +54,30 @@ to-report value-euclidean-distance [other-agent]
 end
 
 to setup-social-networks-value-similarity
-  ; If there are less than 20 people, setup the social network randomly
-  ifelse count people > 20 [
-    ask people [
-      ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
-      create-my-friends-links-with turtle-set up-to-n-of peer-group-friend-links (sort-on [value-euclidean-distance myself] possible-friends)
-    ]
-    repeat round (percentage-of-agents-with-random-link * count people) [
-      ask one-of people with [any? possible-friends] [
-        let new-friend one-of possible-friends
-        ask one-of my-friends-links [ die ]
-        create-my-friends-link-with new-friend
-      ]
-    ]
-  ]
-  [
-    setup-social-networks-random
-  ]
+;   let peer-group-friend-links 4
+;   ; If there are less than 20 people, setup the social network randomly
+;   ifelse count people > 20 [
+;     ask people [
+;       ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
+;       create-my-friends-links-with turtle-set up-to-n-of peer-group-friend-links (sort-on [value-euclidean-distance myself] possible-friends)
+;     ]
+;     repeat round (percentage-of-agents-with-random-link * count people) [
+;       ask one-of people with [any? possible-friends] [
+;         let new-friend one-of possible-friends
+;         ask one-of my-friends-links [ die ]
+;         create-my-friends-link-with new-friend
+;       ]
+;     ]
+;   ]
+;   [
+;     setup-social-networks-random
+;   ]
   
-  ;Due to stochastic nature of this procedure, it can occur that sometimes there exists an agent that has not been linked with any other agent.
-  ;If this is the case, the agent is identified and told to link up with a randomly selected agent within the simulated environment.
-  ask people with [count link-neighbors = 0] [
-    create-link-with one-of other people
-  ]
+;   ;Due to stochastic nature of this procedure, it can occur that sometimes there exists an agent that has not been linked with any other agent.
+;   ;If this is the case, the agent is identified and told to link up with a randomly selected agent within the simulated environment.
+;   ask people with [count link-neighbors = 0] [
+;     create-link-with one-of other people
+;   ]
   
 end
 
@@ -108,7 +121,7 @@ to-report students
 end
 
 to-report is-adult?
-  report is-student? or is-worker? or is-retired?
+  report is-student? or is-worker?; or is-retired?
 end
 
 to-report is-student?
@@ -119,13 +132,6 @@ to-report is-worker?
   report age = "worker"
 end
 
-to-report is-retired?
-  report age = "retired"
-end
-
-to-report retireds ;; YOU KNOW IT'S RETIREES BUT NO WORRIES
-  report people with [is-retired?]
-end
 
 to write-network-to-file [file]
   if file-exists? file [file-delete file]
