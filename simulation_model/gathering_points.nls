@@ -6,6 +6,7 @@ globals [
   markets
   workplace-mines
   workplace-agriculture
+  workplace-homes
   stores
   churches
 ]
@@ -327,11 +328,12 @@ to-report is-family-present-in-current-gathering-point?
 end
 
 to-report home-in-isolation?
-  if not is-home? or not is-infected-and-their-families-requested-to-stay-at-home? 
-  [
-    report false
-  ]
-  report any? gatherers with [is-believing-to-be-infected?]
+;   if not is-home? or not is-infected-and-their-families-requested-to-stay-at-home? 
+;   [
+;     report false
+;   ]
+;   report any? gatherers with [is-believing-to-be-infected?]
+  report false
 end
 
 to-report homes-in-isolation

@@ -16,7 +16,7 @@ to setup-agent-inspector
     set inspected-youth one-of youngs
     set inspected-student one-of students
     set inspected-worker one-of workers
-    set inspected-retiree one-of retireds
+
     
     if file-exists? inspector-file [ file-delete inspector-file ]
     file-open inspector-file
@@ -30,7 +30,7 @@ to inspect-agents
     if inspected-youth = nobody and any? youngs [ set inspected-youth one-of youngs ]
     if inspected-student = nobody and any? students [ set inspected-student one-of students ]
     if inspected-worker = nobody and any? workers [ set inspected-worker one-of workers ]
-    if inspected-retiree = nobody and any? retireds [ set inspected-retiree one-of retireds ]
+
     file-open inspector-file
     if inspected-youth != nobody [
       ask inspected-youth   [ inspect-agent ]

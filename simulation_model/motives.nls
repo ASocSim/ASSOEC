@@ -3,7 +3,7 @@ to-report is-forced-motive? [a-motive]
 end
 
 to-report treatment-motive
-  report "treatment"
+  report "get treatment"
 end
 
 to-report work-motive
@@ -17,3 +17,5 @@ end
 to-report learning-motive
   report "learning"
 end
+
+;i am commment

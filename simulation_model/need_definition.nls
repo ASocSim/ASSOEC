@@ -20,10 +20,11 @@ to-report SDE-survival [ad]
     SDE-food ad 
     SDE-health ad
     SDE-sleep ad  
+    SDE-financial-survival ad
   )
-  if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
-    set physiological-needs fput (SDE-financial-survival ad) physiological-needs
-  ]
+;  if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
+;    set physiological-needs fput (SDE-financial-survival ad) physiological-needs
+;  ]
   report max physiological-needs
 end
 

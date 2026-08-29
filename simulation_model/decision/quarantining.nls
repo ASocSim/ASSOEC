@@ -9,9 +9,9 @@ to update-quarantining-decisions
 end
 
 to quarantining-reaction-when-being-infected
-  if random-float 1  < ratio-self-quarantining-when-symptomatic[
-    include-time-for-quarantining 7 * #ticks-per-day
-  ]
+;   if random-float 1  < ratio-self-quarantining-when-symptomatic[
+;     include-time-for-quarantining 7 * #ticks-per-day
+;   ]
 end
 
 to include-time-for-quarantining [t]
@@ -19,8 +19,8 @@ to include-time-for-quarantining [t]
 end
 
 to quarantining-reaction-when-someone-from-household-is-infected
-  if is-infected-and-their-families-requested-to-stay-at-home? and random-float 1  < ratio-self-quarantining-when-a-family-member-is-symptomatic
-  [include-time-for-quarantining 14 * #ticks-per-day]
+;   if is-infected-and-their-families-requested-to-stay-at-home? and random-float 1  < ratio-self-quarantining-when-a-family-member-is-symptomatic
+;   [include-time-for-quarantining 14 * #ticks-per-day]
 end
 
 to-report officially-quarantiners

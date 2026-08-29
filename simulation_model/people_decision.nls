@@ -3,10 +3,8 @@ __includes ["need_management.nls" "country_specific_features/cultural_model.nls"
 ;reports a string, which can be related to a gathering point and a concrete activity
 to-report my-preferred-available-activity-descriptor 
   ;if log-preferred-activity-decision? [ log-file-print (sentence "Person " who " " age)]
-  print my-available-activity-descriptors 
+  ;print my-available-activity-descriptors 
   report item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
-  ;report reduce [[x y] -> ifelse-value global-prevalence-of x > global-prevalence-of y [x] [y]] my-available-activity-descriptors
-  print "test after report"
 end
 
 
@@ -70,7 +68,7 @@ to update-belief-based-on-current-activity
   ]
   let friends-here count my-friends with [current-activity = [current-activity] of myself]
   if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
-  if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
+  ;if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
   
   ;update-memory
 end

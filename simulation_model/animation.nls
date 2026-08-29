@@ -11,7 +11,7 @@ to animate-walk-to-goal
   if animate? [
     let walkers people with [distance current-activity > 3]
     while [any? walkers] [
-      every 0.1 [
+      every 0.05 [
         ask walkers [
           face current-activity
           while [not allowed-move?] [
@@ -35,13 +35,12 @@ to update-people-display
   [set color color ]
   if infection-status = hospitalised-to-immune-infection-status
   [set color white]
-
 end
 
 to-report default-color
   if sex = "female" [report green]
   if sex = "male" [report red]
-   if age = "young" [report green]
+   if age = "young" [report blue]
 ;   if age = "student" [report orange]
 ;   if age = "worker" [report blue]
 ;   if age = "retired" [report red]

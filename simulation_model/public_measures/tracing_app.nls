@@ -4,7 +4,8 @@ globals [
   #tests-performed-by-tracking-app
 ]
 to-report is-tracing-app-active?
-  report is-global-condition-met? when-is-tracing-app-active?
+;  report is-global-condition-met? when-is-tracing-app-active?
+  report false
 end
 
 to-report people-recorded-by-my-recording-app
@@ -31,7 +32,8 @@ to update-tracing-app-public-measure
 end
 
 to-report #ticks-recorded-tracking
-  report #days-recording-tracing * #ticks-per-day
+ ; report #days-recording-tracing * #ticks-per-day
+  report 0
 end
 
 to-report tracing-app-users
@@ -39,30 +41,30 @@ to-report tracing-app-users
 end
 
 to perform-testing-from-tracing-app-public-measure
-  if not is-tracing-app-active? [stop]
+;   if not is-tracing-app-active? [stop]
   
-  let people-initiating-tests (turtle-set people-having-reported-last-round-to-tracking-app-that-they-have-been-tested-positive)
-  set people-having-reported-last-round-to-tracking-app-that-they-have-been-tested-positive (list)
+;   let people-initiating-tests (turtle-set people-having-reported-last-round-to-tracking-app-that-they-have-been-tested-positive)
+;   set people-having-reported-last-round-to-tracking-app-that-they-have-been-tested-positive (list)
   
-  let people-in-contact-with-tested-positive (turtle-set [people-recorded-by-my-recording-app with [last-test-tick < ticks and not has-been-tested-infected?]] of people-initiating-tests)
+;   let people-in-contact-with-tested-positive (turtle-set [people-recorded-by-my-recording-app with [last-test-tick < ticks and not has-been-tested-infected?]] of people-initiating-tests)
   
-  ask people-initiating-tests [ask [gatherers] of my-home [include-time-for-quarantining 14]]
+;   ask people-initiating-tests [ask [gatherers] of my-home [include-time-for-quarantining 14]]
   
-  if is-quarantining-for-14-days-people-in-contact-with-a-sick-person-track-and-trace?[
-    ask people-in-contact-with-tested-positive [include-time-for-quarantining 14]
-  ]
+;   if is-quarantining-for-14-days-people-in-contact-with-a-sick-person-track-and-trace?[
+;     ask people-in-contact-with-tested-positive [include-time-for-quarantining 14]
+;   ]
   
-  let people-to-test (turtle-set)
-  if is-tracking-app-testing-recursive? 
-  [
-    set people-to-test (turtle-set [people-recorded-by-my-recording-app with [last-test-tick < ticks and not has-been-tested-infected?]] of people-initiating-tests)
-  ]
+;   let people-to-test (turtle-set)
+;   if is-tracking-app-testing-recursive? 
+;   [
+;     set people-to-test (turtle-set [people-recorded-by-my-recording-app with [last-test-tick < ticks and not has-been-tested-infected?]] of people-initiating-tests)
+;   ]
   
-  ask people-to-test [
-    perform-test 
-    set #tests-performed-by-tracking-app #tests-performed-by-tracking-app + 1]
+;   ask people-to-test [
+;     perform-test 
+;     set #tests-performed-by-tracking-app #tests-performed-by-tracking-app + 1]
   
-  if is-tracking-app-testing-recursive? and any? people-to-test [perform-testing-from-tracing-app-public-measure]
+;   if is-tracking-app-testing-recursive? and any? people-to-test [perform-testing-from-tracing-app-public-measure]
 end
   
 
@@ -99,5 +101,5 @@ to add-to-traced-contacts-tracing-app-public-measure [t-s]
 end
 
 to disable-tracing-app-measure
-  set when-is-tracing-app-active? "never"
+ ; set when-is-tracing-app-active? "never"
 end

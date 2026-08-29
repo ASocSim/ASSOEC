@@ -8,7 +8,10 @@ to execute-activity-effect
   [
     try-acquire-a-bed-in-hospital
   ]
-  if not is-activity-successful? [stop]
+  if ( not is-activity-successful? )
+  [
+    stop
+  ]
 
 ;  update-resources-based-on-current-activity
 
@@ -270,7 +273,7 @@ to perform-people-activities
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
     execute-activity-effect
-   ; update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
+    update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
   ]
   animate-walk-to-goal
 

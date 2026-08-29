@@ -1,4 +1,5 @@
-__includes ["people_decision.nls"  "epistemic_model.nls" "social_networks.nls" "people/classes.nls"]
+__includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" "people/classes.nls" ]
+
 
 people-own [
 ;demographics
@@ -173,6 +174,9 @@ end
 
 
 to update-people-mind
+  
+  update-alive-status
+  
   update-people-epistemic-status
   
   update-quarantining-decisions
@@ -192,6 +196,19 @@ to update-people-mind
     set  events-to-process (list)
   ]
 end
+
+
+to update-alive-status
+  ;print "death enabled"
+  ;make people die by probability (needed for later death and funeral procedures)
+  if random 100 > 80
+  [ 
+    print "I have died"
+    ask one-of people [ die ]    
+  ]
+  
+end
+
 
 
 to-report has-a-work?
@@ -242,3 +259,4 @@ end
 to-report might-I-be-contagious?
   report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
 end
+
