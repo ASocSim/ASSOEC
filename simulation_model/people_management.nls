@@ -5,6 +5,7 @@ people-own [
 ;demographics
   age
   sex
+  
   ;;disease model
   time-when-infected
   epistemic-infection-status
@@ -97,7 +98,7 @@ people-own [
   
   ;IMPORTANCE of BELONGING needs
   importance-weight-group-belonging
-    importance-weight-family-belonging
+  importance-weight-family-belonging
 
   ;IMPORTANCE of SURVIVAL needs
   importance-weight-food

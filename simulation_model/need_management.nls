@@ -195,6 +195,7 @@ to-report SUE-financial-survival [ad]
     if motive = "work"
   [
     print "me working at"
+    print my-work
     print [gathering-type] of gp
     print [gathering-type] of my-work
       ;get money from work, except work in the household
