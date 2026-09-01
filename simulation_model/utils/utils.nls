@@ -1,17 +1,48 @@
-;; This file contains some random utility functions that don't have a direct impact on the model, but that might be useful in many places, such as debug functions and extra mathematical functions
+;; @file utils/utils.nls
+;; @brief Small helpers that the model itself does not depend on.
+;;
+;; Extra mathematics, string handling, a counter "datastructure", and the
+;; debugging and world-import/export commands wired to the interface buttons.
+;;
+;; @see all_utils.nls
 
+;; The mean of `values`, each weighted by the entry at the same position of `weights`.
+;;
+;; @param values   list of numbers
+;; @param weights  list of weights, the same length as `values`
+;; @return the weighted mean
+;; @example
+;; weighted-mean [1 2] [1 3]  ;; => 1.75
 to-report weighted-mean [values weights]
   report (sum (map [ [v w] -> v * w] values weights)) / sum weights
 end
 
+;; Map `val` linearly from the input range onto the output range.
+;;
+;; Values outside the input range are pinned to the nearest output bound, so the
+;; result never leaves [`min-map`, `max-map`].
+;;
+;; @param min-val  lower bound of the input range
+;; @param max-val  upper bound of the input range
+;; @param min-map  value reported for `min-val` and anything below it
+;; @param max-map  value reported for `max-val` and anything above it
+;; @param val      the value to map
+;; @return the mapped value
+;; @see clamp
 to-report bounded-linear-map [min-val max-val min-map max-map val]
   if val < min-val [report min-map]
   if val > max-val [report max-map]
   report (val - min-val) / (max-val - min-val) * (max-map - min-map) + min-map
 end
-  
 
-; Clamps a number in between 0 and 1
+
+;; Restrict `number` to the closed range [`low`, `high`].
+;;
+;; @param low     lower bound
+;; @param high    upper bound
+;; @param number  the value to restrict
+;; @return `number`, or the bound it exceeded
+;; @see clamp-soft
 to-report clamp [low high number]
   if number < low [
     report low
@@ -22,13 +53,23 @@ to-report clamp [low high number]
   report number
 end
 
-; Clamps a number between 0 and 1, but doesn't let it reach either value
-; Based on a Gompertz function
+;; Squash a number into the open interval (0, 1), never quite reaching either end.
+;;
+;; Based on a Gompertz function, so the result grows slowly for small inputs and
+;; flattens out towards 1.
+;;
+;; @param number  the value to squash
+;; @return a value strictly between 0 and 1
+;; @see clamp
 to-report clamp-soft [number]
   report exp(-5 * exp(-4 * number))
 end
 
 
+;; Stop the profiler and write its report to `report.log` next to the model.
+;;
+;; @context observer
+;; @side-effects replaces any existing `report.log`
 to export-profiling
   profiler:stop
   let _fname "report.log"
@@ -38,14 +79,31 @@ to export-profiling
   file-close
 end
 
+;; Ask the user for a file to export the world to, through a save dialog.
+;;
+;; @context observer
+;; @side-effects sets the global `import-scenario-name`
+;; @see save-world-state
 to ask-user-for-export-file
     set import-scenario-name user-new-file
 end
 
+;; Ask the user for a world file to import, through an open dialog.
+;;
+;; @context observer
+;; @side-effects sets the global `import-scenario-name`
+;; @see load-scenario-from-file
 to ask-user-for-import-file
   set import-scenario-name user-file
 end
 
+;; Export the whole world to the file named by `import-scenario-name`.
+;;
+;; Prints a message and stops when no file has been chosen yet.
+;;
+;; @context observer
+;; @side-effects writes a NetLogo world export file
+;; @see ask-user-for-export-file
 to save-world-state
   ; Need to check for = false to not throw errors on normal string output
   if import-scenario-name = false or import-scenario-name = "" [
@@ -56,6 +114,13 @@ to save-world-state
   export-world import-scenario-name
 end
 
+;; Replace the world with the one stored in `import-scenario-name`.
+;;
+;; Prints a message and stops when no file has been chosen yet.
+;;
+;; @context observer
+;; @side-effects discards the current world state
+;; @see ask-user-for-import-file
 to load-scenario-from-file
   if import-scenario-name = false or import-scenario-name = "" [
     print "No file selected"
@@ -64,6 +129,11 @@ to load-scenario-from-file
   import-world import-scenario-name
 end
 
+;; Whether `string` begins with `start` and is strictly longer than it.
+;;
+;; @param string  the string to test
+;; @param start   the prefix to look for
+;; @return true when `string` starts with `start`, false otherwise
 to-report starts-with? [string start]
    report  length string > length start and substring string 0 length start = start
 end
@@ -72,12 +142,24 @@ end
 ;;; Counter "datastructure" ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Creates a simple object counter for counting how often each object appears in a list. Should work on any object that supports =
+;; An empty counter.
+;;
+;; A counter tallies how often each object appears; it works on anything that
+;; supports `=`. It is a list of count-pairs, so it can be stored in an agent
+;; variable and exported with the world.
+;;
+;; @return a counter with nothing counted yet
+;; @see add-to-counter
+;; @see count-in-list
 to-report new-counter
   report []
 end
 
-; Counts occurances in a given list, and returns the resulting counter
+;; Tally every element of a list.
+;;
+;; @param l  the list to count
+;; @return a counter holding the occurrences of each element of `l`
+;; @see counter-get-count
 to-report count-in-list [l]
   let counter new-counter
   foreach l [ elem ->
@@ -86,15 +168,22 @@ to-report count-in-list [l]
   report counter
 end
 
-; Sort a counter based on the elements in the counter
+;; The count-pairs of `counter`, ordered by the counted object rather than by count.
+;;
+;; @param counter  the counter to sort
+;; @return a sorted list of count-pairs
 to-report counter-sort-on-element [counter]
   report sort-by [ [x y] -> item 0 x < item 0 y] counter
 end
 
-; Add the object `obj` to a given `counter` and return the new counter. 
+;; Count one more occurrence of `obj`.
+;;
+;; @param counter  the counter to add to
+;; @param obj      the object to count
+;; @return a new counter; `counter` itself is left alone
 to-report add-to-counter [counter obj]
   let index 0
-  foreach counter [count-pair -> 
+  foreach counter [count-pair ->
     if obj = (cp-object count-pair) [
       report replace-item index counter (cp-increase count-pair)
     ]
@@ -103,7 +192,11 @@ to-report add-to-counter [counter obj]
   report (lput (new-count-pair obj) counter)
 end
 
-; Report the count for a given object. -1 if the object is not counted
+;; How often `obj` has been counted.
+;;
+;; @param counter  the counter to read
+;; @param obj      the object to look up
+;; @return the count, or -1 when `obj` was never counted
 to-report counter-get-count [counter obj]
   foreach counter [count-pair ->
     if obj = (cp-object count-pair) [
@@ -113,44 +206,71 @@ to-report counter-get-count [counter obj]
   report -1
 end
 
-; Get the object with the highest count. Ties are broken in order of insertion
+;; The most frequently counted object, ties broken in order of insertion.
+;;
+;; @param counter  a non-empty counter
+;; @return the object with the highest count
+;; @see counter-min-value
 to-report counter-max-value [counter]
   report item 0 (reduce [ [x y] -> ifelse-value cp-count x >= cp-count y [x] [y] ] counter)
 end
 
-; Get the object with the lowest count. Ties are broken in order of insertion
+;; The least frequently counted object, ties broken in order of insertion.
+;;
+;; @param counter  a non-empty counter
+;; @return the object with the lowest count
+;; @see counter-max-value
 to-report counter-min-value [counter]
   report item 0 (reduce [ [x y] -> ifelse-value cp-count x < cp-count y [x] [y] ] counter)
 end
 
-; Create a new count-pair for a given object. Count-pairs are used inside of counters.
+;; A count-pair for `obj`, counted once. Count-pairs are the entries of a counter.
+;;
+;; @param obj  the object to count
+;; @return the count-pair `[obj 1]`
+;; @internal
 to-report new-count-pair [obj]
   report (list obj 1)
 end
 
-; Get the object from a count-pair
+;; The object of a count-pair.
+;;
+;; @param pair  a count-pair
+;; @return the counted object
+;; @internal
 to-report cp-object [pair]
   report item 0 pair
 end
 
-; Get the count from a given count-pair
+;; The tally of a count-pair.
+;;
+;; @param pair  a count-pair
+;; @return how often the object has been counted
+;; @internal
 to-report cp-count [pair]
   report item 1 pair
 end
 
-; Increase the count for the given count-pair, and return the new count-pair
+;; A count-pair with its tally raised by one.
+;;
+;; @param pair  a count-pair
+;; @return a new count-pair; `pair` itself is left alone
+;; @internal
 to-report cp-increase [pair]
   report (list (cp-object pair) (cp-count pair + 1))
 end
 
+;; Print every turtle's neighbours as graphviz edges, for exporting the network.
+;;
+;; @param neighbour-function  a string of NetLogo code reporting an agentset of
+;;                            neighbours, run in the context of each turtle
+;; @context observer
+;; @side-effects prints one `a->b` line per edge to the command centre
+;; @example
+;; export-to-graphviz-util "link-neighbors"
 to export-to-graphviz-util [neighbour-function]
   ask turtles [ ask run-result neighbour-function [print (word [who] of myself "->" who)]]
 end
-
-
-
-
-
 
 
 

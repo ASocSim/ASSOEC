@@ -25,7 +25,9 @@ to-report churches-gathering-type
   report gathering-points with [gathering-type = "church"]
 end
 
-
+to-report cemeteries-gathering-type
+  report gathering-points with [gathering-type = "cemetery"]
+end
 
 to-report workplace-agriculture-gathering-type
   report gathering-points with [gathering-type = "workplace-agriculture"]
@@ -33,4 +35,8 @@ end
 
 to-report workplace-mine-gathering-type
   report gathering-points with [gathering-type = "workplace-mine"]
+end
+
+to-report leisure-gathering-type
+  report gathering-points with [gathering-type = "leisure"]
 end

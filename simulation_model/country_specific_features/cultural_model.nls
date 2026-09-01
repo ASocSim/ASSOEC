@@ -17,7 +17,7 @@ to setup-person-values-and-needs
  ; load-nations-hofstede-dimension-scores
   drc-hofstede-partial
  ; calibrate-agent-value-systems
- ; calibrate-importance-weights-of-needs
+  calibrate-importance-weights-of-needs
   set-initial-need-satisfaction-levels-ebo
  ; set-social-distance-profile
 end
@@ -179,73 +179,74 @@ end
 ;   ]
 ; end
 
-; to calibrate-importance-weights-of-needs
+ to calibrate-importance-weights-of-needs
 
-;   ;For each agent: set the importance ascribed to its needs
-;   ;Importance weights ascribed to needs vary between 0 and 1
+   ;For each agent: set the importance ascribed to its needs
+   ;Importance weights ascribed to needs vary between 0 and 1
 
-;   ;IMPORTANT VARIABLES:
-;   ;maslow-multiplier = modulates the hierarchical aspect of maslow needs ...
-;   ; ... i.e. the higher the maslow-multiplier, the higher the importance ascribed to lower level needs vis-a-vis those situated at higher levels in the Maslow pyramid.
-;   ;survival-multiplier = increases the importance ascribed to biological (survival) needs vis-a-vis psychological needs (safety, belonging, esteem).
+   ;IMPORTANT VARIABLES:
+   ;maslow-multiplier = modulates the hierarchical aspect of maslow needs ...
+   ; ... i.e. the higher the maslow-multiplier, the higher the importance ascribed to lower level needs vis-a-vis those situated at higher levels in the Maslow pyramid.
+   ;survival-multiplier = increases the importance ascribed to biological (survival) needs vis-a-vis psychological needs (safety, belonging, esteem).
 
-;   ask people [
-;     ;initiate maslow-based importance weights for the maslow need categories
-;     let weight-esteem-needs-category 1
-;     let weight-belonging-needs-category weight-esteem-needs-category * (1 + maslow-multiplier)
-;     let weight-safety-needs-category weight-belonging-needs-category * (1 + maslow-multiplier)
-;     let weight-survival-needs-category weight-safety-needs-category * ((1 + maslow-multiplier) * survival-multiplier)
-
-;     ;Set importance weights of subneeds of SURVIVAL
-;     set importance-weight-food-safety (weight-survival-needs * weight-survival-needs-category)
-;     set importance-weight-financial-survival (weight-survival-needs * weight-survival-needs-category)
-;     set importance-weight-health (weight-survival-needs * weight-survival-needs-category)
-;     set importance-weight-sleep (weight-survival-needs * weight-survival-needs-category)
+   ask people [
+     ;initiate maslow-based importance weights for the maslow need categories
+     let weight-esteem-needs-category 1
+     let weight-belonging-needs-category weight-esteem-needs-category * (1 + maslow-multiplier)
+     let weight-safety-needs-category weight-belonging-needs-category * (1 + maslow-multiplier)
+     let weight-survival-needs-category weight-safety-needs-category * ((1 + maslow-multiplier) * survival-multiplier)
+    
+     ;Set importance weights of subneeds of SURVIVAL
+     set importance-weight-food (weight-survival-needs * weight-survival-needs-category)
+     set importance-weight-financial-survival (weight-survival-needs * weight-survival-needs-category)
+     set importance-weight-health (weight-survival-needs * weight-survival-needs-category)
+     set importance-weight-sleep (weight-survival-needs * weight-survival-needs-category)
     
 
-;     ;Set importance weights of subneeds of SAFETY
-;     set importance-weight-financial-stability (importance-given-to-power-value / 100) * weight-safety-needs-category
-;     set importance-weight-risk-avoidance (importance-given-to-security-value / 100) * weight-safety-needs-category
-;     set importance-weight-compliance ((importance-given-to-conformity-tradition-value + importance-given-to-security-value) / (2 * 100)) * weight-safety-needs-category
-;     set importance-weight-conformity (importance-given-to-conformity-tradition-value / 100) * weight-safety-needs-category
+     ;Set importance weights of subneeds of SAFETY
+     ;calculate wrong
+     set importance-weight-physical-safety (importance-given-to-power-value / 100) * weight-safety-needs-category
+     set importance-weight-social-safety (importance-given-to-security-value / 100) * weight-safety-needs-category
+     
+     ;not calculate correctly, review
+     set importance-weight-autonomy ((importance-given-to-conformity-tradition-value + importance-given-to-security-value) / (2 * 100)) * weight-safety-needs-category
+     ;not calculate correctly, review
+     set importance-weight-social-status (importance-given-to-conformity-tradition-value / 100) * weight-safety-needs-category
     
-;     ;Set importance weights of subneeds of BELONGING
-;     set importance-weight-belonging-subneed ((importance-given-to-benevolence-value + importance-given-to-conformity-tradition-value) / (2 * 100)) * weight-belonging-needs-category
+     ;Set importance weights of subneeds of BELONGING
+     ;group and family are calculate the same and have the same value
+     set importance-weight-family-belonging ((importance-given-to-benevolence-value + importance-given-to-conformity-tradition-value) / (2 * 100)) * weight-belonging-needs-category
+     set importance-weight-group-belonging ((importance-given-to-benevolence-value + importance-given-to-conformity-tradition-value) / (2 * 100)) * weight-belonging-needs-category
 
-;     ;Set importance weights of subneeds of ESTEEM
-;     set importance-weight-luxury ((importance-given-to-hedonism-value + importance-given-to-power-value) / (2 * 100)) * weight-esteem-needs-category
-;     set importance-weight-leisure ((importance-given-to-hedonism-value + importance-given-to-stimulation-value) / (2 * 100)) * weight-esteem-needs-category
-;     set importance-weight-autonomy ((importance-given-to-self-direction-value + importance-given-to-achievement-value) / (2 * 100)) * weight-esteem-needs-category
+     ;Set importance weights of subneeds of ESTEEM
+     set importance-weight-autonomy ((importance-given-to-self-direction-value + importance-given-to-achievement-value) / (2 * 100)) * weight-esteem-needs-category
+     set importance-weight-providing (importance-given-to-security-value / 100) * weight-safety-needs-category
 
-;     let total-sum-of-weights sum (list
-;       importance-weight-food-safety
-;       importance-weight-financial-survival
-;       importance-weight-health
-;       importance-weight-sleep
-;       importance-weight-conformity
-;       importance-weight-financial-stability
-;       importance-weight-risk-avoidance
-;       importance-weight-compliance
-;       importance-weight-belonging-subneed
-;       importance-weight-luxury
-;       importance-weight-leisure
-;       importance-weight-autonomy)
+     let total-sum-of-weights sum (list
+       importance-weight-food
+       importance-weight-financial-survival
+       importance-weight-health
+       importance-weight-sleep
+       importance-weight-social-status
+       importance-weight-physical-safety
+       importance-weight-autonomy
+       importance-weight-family-belonging
+       importance-weight-group-belonging
+       importance-weight-autonomy)
 
-;     ;Normalize all the importance weights so that they sum up to 1
-;     set importance-weight-food-safety (importance-weight-food-safety / total-sum-of-weights)
-;     set importance-weight-financial-survival (importance-weight-financial-survival / total-sum-of-weights)
-;     set importance-weight-health (importance-weight-health / total-sum-of-weights)
-;     set importance-weight-sleep (importance-weight-sleep / total-sum-of-weights)
-;     set importance-weight-conformity (importance-weight-conformity / total-sum-of-weights)
-;     set importance-weight-financial-stability (importance-weight-financial-stability / total-sum-of-weights)
-;     set importance-weight-risk-avoidance (importance-weight-risk-avoidance / total-sum-of-weights)
-;     set importance-weight-compliance (importance-weight-compliance / total-sum-of-weights)
-;     set importance-weight-belonging-subneed (importance-weight-belonging-subneed / total-sum-of-weights)
-;     set importance-weight-luxury (importance-weight-luxury / total-sum-of-weights)
-;     set importance-weight-leisure (importance-weight-leisure / total-sum-of-weights)
-;     set importance-weight-autonomy (importance-weight-autonomy / total-sum-of-weights)
-;   ]
-; end
+     ;Normalize all the importance weights so that they sum up to 1
+     set importance-weight-food (importance-weight-food / total-sum-of-weights)
+     set importance-weight-financial-survival (importance-weight-financial-survival / total-sum-of-weights)
+     set importance-weight-health (importance-weight-health / total-sum-of-weights)
+     set importance-weight-sleep (importance-weight-sleep / total-sum-of-weights)
+     set importance-weight-social-status (importance-weight-social-status / total-sum-of-weights)
+     set importance-weight-physical-safety (importance-weight-physical-safety / total-sum-of-weights)
+     set importance-weight-social-safety (importance-weight-social-safety / total-sum-of-weights)
+     set importance-weight-family-belonging (importance-weight-family-belonging / total-sum-of-weights)
+     set importance-weight-group-belonging (importance-weight-group-belonging / total-sum-of-weights)
+     set importance-weight-autonomy (importance-weight-autonomy / total-sum-of-weights)
+   ]
+ end
 
 to set-values-based-on-culture
 

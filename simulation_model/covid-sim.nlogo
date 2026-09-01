@@ -1,5 +1,5 @@
 extensions [profiler table]
-__includes ["setup/setup.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls"]
+__includes [ "setup/setup-ebola.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls" ]
 breed [people person]
 
 globals [
@@ -21,13 +21,13 @@ to go
 
   reset-timer
   reset-metrics
-  reset-economy-measurements
+  ;reset-economy-measurements
   spread-contagion
   update-within-agent-disease-status
   update-people-mind
 
   perform-people-activities
-  run-economic-cycle
+  ;run-economic-cycle
   update-display
   inspect-agents
   increment-time
@@ -49,7 +49,7 @@ end
 
 
 to startup
-  setup
+  setup-ebola
 end
 
 to-report epistemic-accuracy if #infected = 0 [report 1] report count people with [is-infected? and is-believing-to-be-infected?] / #infected end
@@ -4562,7 +4562,7 @@ NetLogo 6.1.1
 <experiments>
   <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
     <setup>load-population-profile-based-on-current-preset-profile
-setup</setup>
+setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="3"/>
     <metric>count turtles</metric>
@@ -4862,7 +4862,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="smart-testing-family-isolation" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="true">
-    <setup>setup</setup>
+    <setup>setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="1500"/>
     <metric>#infected</metric>
@@ -5460,7 +5460,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="S6" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup
+    <setup>setup-ebola
 set preset-scenario "scenario-6-default"
 load-scenario-specific-parameter-settings</setup>
     <go>go</go>
@@ -5571,7 +5571,7 @@ load-scenario-specific-parameter-settings</setup>
   </experiment>
   <experiment name="S7_1_4-no-public-measures" repetitions="10" runMetricsEveryStep="true">
     <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
     <go>go</go>
     <final>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</final>
     <timeLimit steps="500"/>
@@ -6142,7 +6142,7 @@ setup</setup>
   </experiment>
   <experiment name="S7_1_4-only-social-distancing" repetitions="10" runMetricsEveryStep="true">
     <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
     <go>go</go>
     <final>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</final>
     <timeLimit steps="500"/>
@@ -6713,7 +6713,7 @@ setup</setup>
   </experiment>
   <experiment name="S7_1_4-social-distancing-lockdown" repetitions="10" runMetricsEveryStep="true">
     <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
     <go>go</go>
     <final>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</final>
     <timeLimit steps="500"/>
@@ -7284,7 +7284,7 @@ setup</setup>
   </experiment>
   <experiment name="S7_1_4-social-distancing-tracking-tracing-testing-isolating" repetitions="10" runMetricsEveryStep="true">
     <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
     <go>go</go>
     <final>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</final>
     <timeLimit steps="500"/>
@@ -7854,7 +7854,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="AI4SG" repetitions="30" runMetricsEveryStep="true">
-    <setup>setup</setup>
+    <setup>setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="600"/>
     <metric>count people with [is-infected? and age = "worker"]</metric>
@@ -8359,7 +8359,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="smart-testing-no-family-isolation" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="true">
-    <setup>setup</setup>
+    <setup>setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="1500"/>
     <metric>#infected</metric>
@@ -8958,7 +8958,7 @@ setup</setup>
   </experiment>
   <experiment name="economy" repetitions="1" runMetricsEveryStep="true">
     <setup>load-scenario-specific-parameter-settings
-setup</setup>
+setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="400"/>
     <metric>count people with [infection-status = "healthy"]</metric>
@@ -9087,7 +9087,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="smart-testing-no-testing" repetitions="12" sequentialRunOrder="false" runMetricsEveryStep="true">
-    <setup>setup</setup>
+    <setup>setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="1500"/>
     <metric>#infected</metric>
@@ -9682,7 +9682,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="curfew-test-no-quarantine" repetitions="14" runMetricsEveryStep="true">
-    <setup>setup</setup>
+    <setup>setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="1000"/>
     <metric>#infected</metric>
@@ -10291,7 +10291,7 @@ setup</setup>
     </enumeratedValueSet>
   </experiment>
   <experiment name="curfew-test-after-quarantine" repetitions="4" runMetricsEveryStep="true">
-    <setup>setup</setup>
+    <setup>setup-ebola</setup>
     <go>go</go>
     <timeLimit steps="1000"/>
     <metric>#infected</metric>

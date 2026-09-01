@@ -41,16 +41,17 @@ end
 
 
 to-report value-euclidean-distance [other-agent]
-  report sqrt sum (list 
-    ((importance-given-to-hedonism-value - [importance-given-to-hedonism-value] of other-agent) ^ 2)
-    ((importance-given-to-stimulation-value - [importance-given-to-stimulation-value] of other-agent) ^ 2)
-    ((importance-given-to-self-direction-value - [importance-given-to-self-direction-value] of other-agent) ^ 2)
-    ((importance-given-to-universalism-value - [importance-given-to-universalism-value] of other-agent) ^ 2)
-    ((importance-given-to-benevolence-value - [importance-given-to-benevolence-value] of other-agent) ^ 2)
-    ((importance-given-to-conformity-tradition-value - [importance-given-to-conformity-tradition-value] of other-agent) ^ 2)
-    ((importance-given-to-security-value - [importance-given-to-security-value] of other-agent) ^ 2)
-    ((importance-given-to-power-value - [importance-given-to-power-value] of other-agent) ^ 2)
-    ((importance-given-to-achievement-value - [importance-given-to-achievement-value] of other-agent) ^ 2))
+ ; report sqrt sum (list 
+   ; ((importance-given-to-hedonism-value - [importance-given-to-hedonism-value] of other-agent) ^ 2)
+   ; ((importance-given-to-stimulation-value - [importance-given-to-stimulation-value] of other-agent) ^ 2)
+   ; ((importance-given-to-self-direction-value - [importance-given-to-self-direction-value] of other-agent) ^ 2)
+   ; ((importance-given-to-universalism-value - [importance-given-to-universalism-value] of other-agent) ^ 2)
+   ; ((importance-given-to-benevolence-value - [importance-given-to-benevolence-value] of other-agent) ^ 2)
+   ; ((importance-given-to-conformity-tradition-value - [importance-given-to-conformity-tradition-value] of other-agent) ^ 2)
+   ; ((importance-given-to-security-value - [importance-given-to-security-value] of other-agent) ^ 2)
+   ; ((importance-given-to-power-value - [importance-given-to-power-value] of other-agent) ^ 2)
+   ; ((importance-given-to-achievement-value - [importance-given-to-achievement-value] of other-agent) ^ 2))
+   report 0
 end
 
 to setup-social-networks-value-similarity

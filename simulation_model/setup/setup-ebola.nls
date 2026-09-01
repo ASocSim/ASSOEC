@@ -9,15 +9,15 @@ to setup-ebola
   clear-all
   reset-ticks
   
-   if clear-log-on-setup? [clear-logfile]
-   if log? [print "debug mode active; this dramatically slows down computation speed"]
+  if clear-log-on-setup? [clear-logfile]
+  if log? [print "debug mode active; this dramatically slows down computation speed"]
 ;   check-parameters
-   set-default-shape people "person"
-   if log? or static-seed?[  random-seed #random-seed ]
-   set slice-of-the-day "morning"
-   set day-of-the-week "monday"
-   set current-day 0
-   set #dead-people 0
+  set-default-shape people "person"
+  if log? or static-seed?[  random-seed #random-seed ]
+  set slice-of-the-day "morning"
+  set day-of-the-week "monday"
+  set current-day 0
+  set #dead-people 0
   
   set was-social-distancing-enforced? false
   set when-has-2%-infected-threshold-first-been-met? "never"
@@ -27,11 +27,15 @@ to setup-ebola
   
 
   
-    setup-activities-ebo
-   create-all-households
-   setup-gathering-point-capacities
-   setup-person-values-and-needs
-   setup-social-networks
+  setup-gathering-points-as-turtle-sets
+  create-all-households
+  setup-relation-to-gathering-points
+  setup-worker-relation-to-gathering-point
+
+
+  setup-gathering-point-capacities
+  setup-person-values-and-needs
+  setup-social-networks
   
 ;   if with-infected? [
 ;     set first-infected-people n-of (min list 3 count people) people
@@ -40,10 +44,10 @@ to setup-ebola
 ;   ]
 ;   setup-phasing-out
 
-   update-display
+  update-display
 
-   ask gathering-links
-  [hide-link]
+  ask gathering-links
+   [hide-link]
 
 ;   set is-lockdown-active? false
 ;   set list-of-buses (list)
@@ -80,52 +84,78 @@ to setup-global-metrics
   
 end
 
- to setup-activities-ebo
+ to setup-gathering-points-as-turtle-sets
    set hospitals (turtle-set)
    set workplace-mines (turtle-set)
    set workplace-agriculture (turtle-set)
    set stores (turtle-set)
    set schools (turtle-set)
    set homes (turtle-set)
-   set workplace-homes (turtle-set)
    set markets (turtle-set)
-  set churches (turtle-set)
+   set churches (turtle-set)
+   set cemeteries (turtle-set)
   
- create-gathering-points #hospital-gp [
+ create-gathering-points #hospital-gp 
+ [
+    set vacancies 5
     set hospitals (turtle-set  hospitals self)
     set hired-workers (turtle-set)
-    set gathering-type "hospital" set shape "circle" set heading 45 set color lime set size 2 set xcor 6 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "hospital"] / (#hospital-gp + 1)]
+    
+    set gathering-type "hospital" set shape "circle" set heading 45 set color lime set size 2 set xcor 6 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "hospital"] / (#hospital-gp + 1)
+  ]
   
-  create-gathering-points #mines-gp [
+  create-gathering-points #mines-gp 
+  [
+    set vacancies 5
     set workplace-mines (turtle-set workplace-mines self)
     set hired-workers (turtle-set)
-    set gathering-type "workplace-mine" set shape "square 2" set color brown  set xcor 7 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-mine"] / (#mines-gp + 1)]
+
+    set gathering-type "workplace-mine" set shape "square 2" set color brown  set xcor 7 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-mine"] / (#mines-gp + 1)
+  ]
 
    
-  create-gathering-points #agriculture-gp [
+  create-gathering-points #agriculture-gp 
+  [
+    set vacancies 15
     set workplace-agriculture (turtle-set workplace-agriculture self)
     set hired-workers (turtle-set)
-    set gathering-type "workplace-agriculture" set shape "square 2" set color green  set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-agriculture"] / (#agriculture-gp + 1)]  
+    set gathering-type "workplace-agriculture" set shape "square 2" set color green  set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-agriculture"] / (#agriculture-gp + 1)
+  ]  
   
 
-  create-gathering-points #stores-gp [
+  create-gathering-points #stores-gp 
+  [
+    set vacancies 1
     set stores (turtle-set stores self)
     set hired-workers (turtle-set)
-    set gathering-type "store" set shape "cow" set color yellow set xcor 9 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "store"] / (#stores-gp + 1)]
+    set gathering-type "store" set shape "cow" set color yellow set xcor 9 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "store"] / (#stores-gp + 1)
+  ]
   
   
-  create-gathering-points #schools-gp [
+  create-gathering-points #schools-gp 
+  [
+    set vacancies 5
     set schools (turtle-set schools self)
     set hired-workers (turtle-set)
-    set gathering-type "school" set shape "triangle" set color pink set xcor 3 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "school"] / (#schools-gp + 1)]
+    set gathering-type "school" set shape "triangle" set color pink set xcor 3 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "school"] / (#schools-gp + 1)
+  ]
 
   create-gathering-points #markets-gp [
+    set vacancies 5
     set markets (turtle-set markets self)
     set hired-workers (turtle-set)
     set gathering-type "market" set shape "target" set color red set xcor 4 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "market"] / (#markets-gp + 1)]
   
-  
+  create-gathering-points #cemeteries-gp
+  [
+    set vacancies 3
+    set cemeteries (turtle-set cemeteries self)
+    set hired-workers (turtle-set)
+    set gathering-type "cemetery" set shape "circle" set color gray set xcor 2 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "cemetery"] / (#cemeteries-gp + 1)
+  ]
+
   create-gathering-points #churches-gp [
+    set vacancies 3
     set churches (turtle-set churches self)
     set hired-workers (turtle-set)
     set gathering-type "church" set shape "pentagon" set color sky set  xcor 5 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "church"] / (#churches-gp + 1)]
@@ -145,7 +175,7 @@ end
       set shape "airplane"
     ]
   ]
-  
+
   ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
 end
 
@@ -169,7 +199,7 @@ to create-all-households
     create-household "displaced" #created-households #households 
     set  #created-households  #created-households + 1
   ]
-  
+
   ask homes
   [
     set available-food-rations count gatherers * (random days-of-rations-bought + days-of-rations-bought)
@@ -180,69 +210,61 @@ to create-household [t #created-households #households-to-create]
   let current-home nobody
   create-gathering-points 1 
   [
-    print self
+    ;print self
     set current-home self
     set homes (turtle-set homes self)
     set gathering-type "home"
-    set shape "house"
-    set color green
-    set xcor 9 * max-pxcor / 10
-    set ycor max-pycor * #created-households / #households-to-create
+    setup-GUI-household #created-households #households-to-create
   ]
   
-  let current-workplace-home nobody 
-    create-gathering-points 1 
-  [
-    print self
-    set current-workplace-home self
-    set workplace-homes (turtle-set workplace-homes self)
-    set gathering-type "workplace-home"
-    set shape "house"
-    set color blue
-    set xcor ( 9 * max-pxcor / 10 ) + 2
-    set ycor max-pycor * #created-households / #households-to-create
-  ]
-
 ;;need more info on household composition, how many in a family home?
+
   if t = "family"
   [
-    setup-person current-home current-workplace-home female-sex
-    setup-person current-home current-workplace-home female-sex
-    setup-person current-home current-workplace-home male-sex
-    setup-person current-home current-workplace-home male-sex
-;     setup-person current-home young-age
-;     setup-person current-home young-age
-;     setup-person current-home young-age
+    let men random 3 + 1
+    let women random 3 + 1
+
+    setup-home current-home men women
+
     stop
   ]
 
-  
    if t = "displaced"
-  ;;we average the amount of displaced men living together to 5, this can become a slider later as some interventions on how many house together have been taken
   [
-    setup-person current-home current-workplace-home male-sex
-    setup-person current-home current-workplace-home male-sex
-    setup-person current-home current-workplace-home male-sex
-    setup-person current-home current-workplace-home male-sex
-    setup-person current-home current-workplace-home male-sex
+    let men random 2 + 3
+    setup-home current-home men 0
     stop
   ]
 
   error (sentence "not implemented" t)
 end
 
-; to-report my-starting-amount-of-capital
-;   if age = worker-age [report starting-amount-of-capital-workers]
-;   if age = retired-age[report starting-amount-of-capital-retired]
-;   if age = student-age[report starting-amount-of-capital-students]
-;   if age = young-age[report 0]
-; end
+to setup-home [current-home men women]
+  if men > 0
+  [
+    repeat men [setup-person current-home male-sex] 
+  ]
 
+  if women > 0
+  [
+    repeat women [setup-person current-home female-sex]
+  ]
+end
 
+to setup-GUI-household [created-households current-household]
+
+  set shape "house"
+  set color green
+  set xcor 9 * max-pxcor / 10
+  set ycor max-pycor * created-households / current-household
+
+end
 ; ;make new setup-person for ebola agent vars
 
-to setup-person [current-home current-workplace-home l-sex]
-  create-people 1 [
+to setup-person [current-home l-sex]
+  
+  create-people 1 
+  [
     set sex l-sex
     set time-when-infected "never"
 
@@ -250,19 +272,22 @@ to setup-person [current-home current-workplace-home l-sex]
     set my-amount-of-capital 100 ;my-starting-amount-of-capital
     set current-activity current-home
     set my-home current-home
-    if sex = "female" [
-      set my-work current-workplace-home]
+    set schedule (list "hello" "its a-meeee, maaaaario")
+    
+    if (sex = "female" )
+    [
+      set my-work current-home
+    ]
 
     set my-target-amount-of-capital my-amount-of-capital
     set has-been-tested-immune? false
 
-    create-gathering-link-to current-home [set features (list "rest" "visit family")]
+    create-gathering-link-to current-home [set features (list "rest" "visits" "work" "care for the sick" "get treatment" "family belonging" "group belonging")]
+    
     set is-moving-outside-for-reaching-current-activity? false
-
 
     set is-currently-allocated-a-bed-in-hospital? false
 
-    setup-relation-to-gathering-points    
 
  ;   set can-I-perform-solo-transportation? random-float 1  <  owning-solo-transportation-probability   ;; IS THIS RELEVANT IN EBOLA?
 
@@ -272,7 +297,6 @@ to setup-person [current-home current-workplace-home l-sex]
     set infection-state susceptible-infection-status
     set epistemic-infection-status "healthy"
     set last-day-observed-symptoms nobody ;should raise an error if used before being initialized
-    set has-done-shopping false
     set stayed-out-queuing-for-bus? false
     set is-activity-successful? true
 
@@ -288,93 +312,270 @@ to setup-person [current-home current-workplace-home l-sex]
 end
 
 
-
 to setup-relation-to-gathering-points
 
+  ask people
+  [
+  
+  ;;both genders go to hospitals for the same reasons
   create-gathering-link-to one-of hospitals
   [
-    set features (list "get-tested" "get-treatment")
+    set features (list "get treatment" "care for the sick" "work")
   ]
 
-  create-gathering-link-to one-of markets
-  [  set features (list "relaxing")]
-  create-gathering-link-to one-of stores
-  [ set features (list "relaxing")]
-  
-  create-gathering-link-to one-of churches
-  [ set features (list "belonging")]
+  ;;men go to markets, stores, churches, schools, mines, agriculture and cemeteries for different reasons than women
+  if is-male?
+  [
+    create-gathering-link-to one-of markets
+    [
+        set features (list "get food" "work" "social status")
+    ]
 
-  setup-relation-to-gathering-points1
-end
+    create-gathering-link-to one-of stores
+    [ 
+      set features (list "get food" "work" "social status" "providing" )
+    ]
 
-to setup-relation-to-gathering-points1
+    create-gathering-link-to one-of churches
+    [ 
+      set features (list "group belonging" "family belonging" "work" "social status" "physical safety")
+    ]
 
-  set my-markets n-of (min list 2 (ceiling (#markets-gp * 0.2))) markets
-   create-gathering-links-to my-markets
-  [ set features (list "essential shopping" "shopping")]
-  
-  create-gathering-links-to n-of (min list 4 (ceiling (#stores-gp * 0.4))) stores
-  [ set features (list "shopping")] ;"relaxing"
+    create-gathering-link-to one-of schools
+    [ 
+      set features (list "group belonging" "work" "social status" "autonomy")
+    ]
 
-  if is-young? [
-    create-gathering-link-to one-of schools [ set features (list "mandatory")]]
+    create-gathering-link-to one-of workplace-mines
+    [ 
+      set features (list "autonomy" "work" "social status" "group belonging")
+    ]
 
-  ;;;this is temporary setup to be improved
-  
-;   if is-worker? and is-male? [ create-gathering-link-to one-of workplace-mines [ set features (list "providing" "working")]]
-;   if is-worker? and is-female? [ create-gathering-link-to one-of workplace-agriculture [ set features (list "working")]
-;     ]
-  setup-worker-relation-to-gathering-point
+    create-gathering-link-to one-of workplace-agriculture
+    [ 
+      set features (list "autonomy" "work" "social status" "group belonging")
+    ]
+
+    create-gathering-link-to one-of cemeteries
+    [ 
+      set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
+    ]
+  ]
+
+  if is-female? 
+  [
+    create-gathering-link-to one-of markets
+    [
+      set features (list "leisure" "social status" "providing" "get food" "work" "family belonging")
+    ]
+
+    create-gathering-link-to one-of stores
+    [
+      set features (list "leisure" "social status" "providing" "get food" "work" "family belonging")
+    ]
+
+    create-gathering-link-to one-of churches
+    [ 
+      set features (list "group belonging" "family belonging" "work" "social status" "physical safety")
+    ]
+
+    create-gathering-link-to one-of schools
+    [ 
+      set features (list "group belonging" "work" "social status" "autonomy")
+    ]
+
+    create-gathering-link-to one-of workplace-mines
+    [ 
+      set features (list "autonomy" "work" "social status" "group belonging")
+    ]
+
+    create-gathering-link-to one-of workplace-agriculture
+    [ 
+      set features (list "autonomy" "work" "social status" "group belonging")
+    ]
+
+    create-gathering-link-to one-of cemeteries
+    [ 
+      set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
+    ]
+  ]
+
+  ;setup-worker-relation-to-gathering-point
+  ]
+
 end
 
 to  setup-worker-relation-to-gathering-point
-     let target one-of gathering-points
-     
-  if is-male? [
-    let hired false
+  
+  ;;TODO add filter to only people of working age
 
-    
-    ask gathering-points with [ is-hospital? or is-school? or is-mine? or is-store? or is-market? or is-church?]
+  ask hospitals
+  [ 
+    ;print "I am a hospital and I am hiring"
+    let hiring-hospital self
+
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
     [
-     ; if not any? hired-workers 
-    set target self set hired true stop 
-  ]]
+      let potential-workers people with [my-work = my-home and is-female?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      ask potential-worker [set my-work hiring-hospital]
+
+     ;set hired-workers fput potential-worker hired-workers
+     set vacancies vacancies - 1
+    ]
+  ]
+
+  ;register workers with the hospitals
+  ask hospitals
+  [
+    let hiring-hospital self
+    set hired-workers (turtle-set people with [my-work = hiring-hospital])
     
-    if is-female? [
-    let hired true
-    set target my-work
+  ]
+
+  ask markets
+  [ 
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = my-home and is-female?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-market self
+      ask potential-worker [set my-work hiring-market]
+
+     ;set hired-workers fput potential-worker hired-workers
+     set vacancies vacancies - 1
+    ]
+  ]
+
+  ask markets
+  [
+    let hiring-market self
+    set hired-workers (turtle-set people with [my-work = hiring-market])
+  ]
+
+  ask stores
+  [ 
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = 0 and is-male?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-store self
+      ask potential-worker [set my-work hiring-store]
+      ;set hired-workers fput potential-worker hired-workers
+      set vacancies vacancies - 1
+    ]
+  ]
+
+  ask stores
+  [
+    let hiring-store self
+    set hired-workers (turtle-set people with [my-work = hiring-store])
   ]
   
-;    if not hired [
-;       let rand random-float 1
-;       if rand < probability-hospital-personel [
-;         set target one-of hospitals
-;       ]
-;       if rand >= probability-hospital-personel and rand < probability-hospital-personel + probability-school-personel
-;       [
-;         set target one-of schools
-;       ]
-      
-;       if rand >= probability-hospital-personel + probability-school-personel and rand < probability-hospital-personel + probability-school-personel + probability-church-personel
-;       [
-;         set target one-of churches
-;       ]
-      
-;       if rand >= probability-hospital-personel + probability-school-personel + probability-church-personel and
-;       rand < probability-hospital-personel + probability-school-personel + probability-church-personel + probability-shopkeeper
-;       [
-;         set target one-of store
-;       ]
-   ; ]
-    
-    set my-work target
-;    ask target [set hired-workers (turtle-set hired-workers myself)]
+  ask churches
+  [ 
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
+
+    [
+      let potential-workers people with [my-work = 0 and is-male?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-church self
+      ask potential-worker [set my-work hiring-church]
+      ;set hired-workers fput potential-worker hired-workers
+      set vacancies vacancies - 1
+    ]
+  ]
+  
+  ask churches
+  [
+    let hiring-church self
+    set hired-workers (turtle-set people with [my-work = hiring-church])
+  ]
+  ask cemeteries
+  [ 
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
+
+    [
+      let potential-workers people with [my-work = 0 and is-male?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-cemetery self
+      ask potential-worker [set my-work hiring-cemetery]
+      ;set hired-workers fput potential-worker hired-workers
+      set vacancies vacancies - 1
+    ]
+  ]
+
+  ask cemeteries
+  [
+    let hiring-cemetery self
+    set hired-workers (turtle-set people with [my-work = hiring-cemetery])
+  ]
+
+  ask schools
+  [ 
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = 0 and is-male?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-school self
+      ask potential-worker [set my-work hiring-school]
+      ;set hired-workers fput potential-worker hired-workers
+      set vacancies vacancies - 1
+    ]
+  ]
+
+  ask schools
+  [
+    let hiring-school self
+    set hired-workers (turtle-set people with [my-work = hiring-school])
+  ]   
+  
+  ask workplace-agriculture
+  [ 
+    ;;TODO declare vacancies where it makes sense, this is just a hack for now
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = 0 and is-male?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-agriculture self
+      ask potential-worker [set my-work hiring-agriculture]
+      ;set hired-workers fput potential-worker hired-workers
+      set vacancies vacancies - 1
+    ]
+  ]
+  
+  ask workplace-agriculture
+  [
+    let hiring-agriculture self
+    set hired-workers (turtle-set people with [my-work = hiring-agriculture])
+  ]
+
+  ask people with [my-work = 0 and is-male?]
+  [
+    let mine one-of workplace-mines
+    set my-work mine
+  ]
+
+  ask workplace-mines
+  [
+    let hiring-mine self
+    set hired-workers (turtle-set people with [my-work = hiring-mine])
+  ]
   
 end
-
-
-
-
 
 to setup-gathering-point-capacities
   ask gathering-points [

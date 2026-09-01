@@ -3,12 +3,14 @@ globals [
    hospitals
    schools
    homes
-  markets
-  workplace-mines
-  workplace-agriculture
-  workplace-homes
-  stores
-  churches
+   markets
+   workplace-mines
+   workplace-agriculture
+   workplace-homes
+   stores
+   churches
+   cemeteries
+   leisure
 ]
 
 breed [gathering-points gathering-point]
@@ -18,21 +20,20 @@ gathering-points-own [
   available-food-rations ; rations of food that are available, this will be most useful for homes
   
   amount-of-capital
-  current-profit
   
   hired-workers
   stock-of-goods
   
+  vacancies
   cached-number-of-participants
   capacity
-  
-  
 ]
 
 ;the head of the link are people and the tail are gathering points
 directed-link-breed [gathering-links gathering-link]
+
 gathering-links-own [
-  features ;stores whatever is useful for decision-making, useful for including factors appealing to e.g. needs and values
+  features            ;stores whatever is useful for decision-making, useful for including factors appealing to e.g. needs and values
 ]
 
 to-report ratio-personnel-here
@@ -48,6 +49,7 @@ to-report is-away?
   report current-activity = away-gathering-point
 end
 
+
 to-report proximity-factor
   
   if gathering-type = hospital-gathering-type [report density-factor-hospitals]
@@ -58,7 +60,8 @@ to-report proximity-factor
   if gathering-type = stores-gathering-type[report density-factor-store]
   if gathering-type = home-gathering-type[report density-factor-homes]
   if gathering-type = churches-gathering-type [report density-factor-churches]
- ; if gathering-type = burial-gathering-type [report density-factor-burial-rites]
+  if gathering-type = cemeteries-gathering-type [report density-factor-cemeteries]
+  if gathering-type = leisure-gathering-type [report density-factor-leisure]
   
   error (word gathering-type " not defined")
 end
@@ -91,11 +94,8 @@ to-report #sick-personel
   report count hired-workers with [has-internally-visible-symptoms?]
 end
 
-
-
-
 to-report is-at-burial?
-  report gathering-type = "burial-rites"
+  report gathering-type = "cemetery"
 end
 
 to-report is-at-work?
@@ -127,65 +127,19 @@ to-report is-market?
 end
 
 to-report is-mine?
-  report gathering-type = "mine"
+  report gathering-type = "workplace-mine"
 end
 
 to-report is-agriculture?
-  report gathering-type = "agriculture"
+  report gathering-type = "workplace-agriculture"
 end
 
 to-report is-church?
   report gathering-type = "church"
 end
 
-to-report is-shop?
-  report gathering-type = "shop"
-end
-
 to-report is-store?
   report gathering-type = "store"
-end
-
-to-report store
-  report gathering-points with [is-store?]
-end
-
-
-to-report is-at-public-leisure-place?
-  report [is-public-leisure?] of current-activity
-end
-
-
-
-
-to-report is-public-leisure?
-  report gathering-type = "public-leisure"
-end
-
-to-report is-leisure-point?
-  report is-public-leisure? ;or is-private-leisure?
-end
-
-to-report my-market
-  report one-of gathering-link-neighbors with [gathering-type = "market"]
-end
-
-
-to-report my-mine
-  report one-of gathering-link-neighbors with [gathering-type = "workplace-mines"]
-end
-
-to-report my-field
-  report one-of gathering-link-neighbors with [gathering-type = "workplace-agriculture"]
-end
-
-
-to-report my-church
-  report one-of gathering-link-neighbors with [gathering-type = "church"]
-end
-
-to-report my-hospital
-  report one-of gathering-link-neighbors with [gathering-type = "hospital"]
 end
 
 to-report people-at-stores
@@ -195,13 +149,6 @@ end
 to-report people-at-markets
   report people with [[is-market?] of current-activity]
 end
-
-
-to-report my-school
-  report one-of gathering-link-neighbors with [gathering-type = "school"]
-end
-
-
 
 ;might be to be revised later, if the number of people expected to show up at the gathering point lowers
 to-report expected-number-of-other-participants
@@ -215,10 +162,8 @@ to-report expected-number-of-other-participants
   report cached-number-of-participants
 end
 
-
-
-
-
+;;;TODO : accessibility is different in this model, related to affordability, distance and beliefs 
+;;;(i can't go places if i'm contagious, i can't go places if someone contagious is there)
 to-report is-accessible?
   ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
 ;   if is-hard-lockdown-active? [
@@ -253,7 +198,6 @@ to-report is-open-during-curfew?
 ;   report (sentence "unimplemented for:" [gathering-type] of self)
   report true
 end
-
 
 to-report gatherers
   report in-gathering-link-neighbors

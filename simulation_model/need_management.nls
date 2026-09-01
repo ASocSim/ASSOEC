@@ -194,9 +194,10 @@ to-report SUE-financial-survival [ad]
   
     if motive = "work"
   [
-    print "me working at"
-    print [gathering-type] of gp
-    print [gathering-type] of my-work
+    ;print "me working at"
+    ;print my-work
+    ;print [gathering-type] of gp
+    ;print [gathering-type] of my-work
       ;get money from work, except work in the household
       ;print min list (my-expected-income / eating-costs) 1
       ;print "minimum"
@@ -619,18 +620,23 @@ to-report global-prevalence-of [ad]
     (SDE-financial-survival ad * importance-weight-financial-survival)
     (SDE-sleep ad * importance-weight-sleep) 
     (SDE-health ad * importance-weight-health) 
+
     ;Belonging needs
     (SDE-group-belonging ad * importance-weight-group-belonging)
     (SDE-family-belonging ad * importance-weight-family-belonging)
+    
     ;Esteem needs
     (SDE-autonomy ad * importance-weight-autonomy) 
     (SDE-social-status ad * importance-weight-social-status) 
     (SDE-providing ad * importance-weight-providing)
+    
     ;Safety needs
     (SDE-physical-safety ad * importance-weight-physical-safety) 
     (SDE-social-safety ad * importance-weight-social-safety)
     )
   
+  ;print (word "total satisfaction:" total-satisfaction)
+
   if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
   report total-satisfaction
 

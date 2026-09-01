@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -d \"C:/Users/cezarap/.vscode/extensions/\"* 2>/dev/null | head -100; echo \"---vscode-insiders---\"; ls -d \"C:/Users/cezarap/.vscode-insiders/extensions/\"* 2>/dev/null | head -50)",
+      "Read(//c/Users/cezarap/.vscode/extensions/**)",
+      "Read(//c/Users/cezarap/.vscode-insiders/**)",
+      "PowerShell($root=\"C:\\\\Users\\\\cezarap\\\\AppData\\\\Local\\\\Programs\\\\Microsoft VS Code\"; Get-ChildItem $root | Select-Object Mode, Name, Length; \"--- resources ---\"; Get-ChildItem \"$root\\\\resources\" -ErrorAction SilentlyContinue | Select-Object Mode, Name, Length)",
+      "PowerShell($root=\"C:\\\\Users\\\\cezarap\\\\AppData\\\\Local\\\\Programs\\\\Microsoft VS Code\\\\08d4889f9e\"; Get-ChildItem $root | Select-Object Mode, Name; \"--- deeper ---\"; Get-ChildItem \"$root\\\\resources\\\\app\\\\extensions\" -Directory -ErrorAction SilentlyContinue | Where-Object {$_.Name -match 'typescript|npm'} | Select-Object Name)"
+    ]
+  }
+}

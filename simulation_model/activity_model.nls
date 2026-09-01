@@ -236,7 +236,7 @@ end
 
 to perform-people-activities
   reset-timer
-  
+  print (sentence "performing activities for" count people "people")
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
     select-activity
