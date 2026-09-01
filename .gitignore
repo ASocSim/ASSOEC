@@ -12,3 +12,4 @@ tmp_*.csv
 *.csv
 *.pdf
 *.RData
+simulation_model/docs/api/

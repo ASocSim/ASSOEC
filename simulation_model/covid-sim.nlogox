@@ -1555,7 +1555,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
   <experiments>
     <experiment name="experiment" repetitions="1" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="3">
       <setup>load-population-profile-based-on-current-preset-profile
-setup</setup>
+setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>count turtles</metric>
@@ -1858,7 +1858,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="smart-testing-family-isolation" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="true" timeLimit="1500">
-      <setup>setup</setup>
+      <setup>setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>#infected</metric>
@@ -2459,7 +2459,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="S6" repetitions="1" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="1500">
-      <setup>setup
+      <setup>setup-ebola
 set preset-scenario "scenario-6-default"
 load-scenario-specific-parameter-settings</setup>
       <go>go</go>
@@ -2573,7 +2573,7 @@ load-scenario-specific-parameter-settings</setup>
     </experiment>
     <experiment name="S7_1_4-no-public-measures" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="500">
       <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
       <go>go</go>
       <postRun>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</postRun>
       <metrics>
@@ -3147,7 +3147,7 @@ setup</setup>
     </experiment>
     <experiment name="S7_1_4-only-social-distancing" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="500">
       <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
       <go>go</go>
       <postRun>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</postRun>
       <metrics>
@@ -3721,7 +3721,7 @@ setup</setup>
     </experiment>
     <experiment name="S7_1_4-social-distancing-lockdown" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="500">
       <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
       <go>go</go>
       <postRun>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</postRun>
       <metrics>
@@ -4295,7 +4295,7 @@ setup</setup>
     </experiment>
     <experiment name="S7_1_4-social-distancing-tracking-tracing-testing-isolating" repetitions="10" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="500">
       <setup>load-scenario-7-cultural-model
-setup</setup>
+setup-ebola</setup>
       <go>go</go>
       <postRun>output-print (word "Execution of run " behaviorspace-run-number " finished in " timer " seconds")</postRun>
       <metrics>
@@ -4868,7 +4868,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="AI4SG" repetitions="30" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="600">
-      <setup>setup</setup>
+      <setup>setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>count people with [is-infected? and age = "worker"]</metric>
@@ -5376,7 +5376,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="smart-testing-no-family-isolation" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="true" timeLimit="1500">
-      <setup>setup</setup>
+      <setup>setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>#infected</metric>
@@ -5978,7 +5978,7 @@ setup</setup>
     </experiment>
     <experiment name="economy" repetitions="1" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="400">
       <setup>load-scenario-specific-parameter-settings
-setup</setup>
+setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>count people with [infection-status = "healthy"]</metric>
@@ -6110,7 +6110,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="smart-testing-no-testing" repetitions="12" sequentialRunOrder="false" runMetricsEveryStep="true" timeLimit="1500">
-      <setup>setup</setup>
+      <setup>setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>#infected</metric>
@@ -6708,7 +6708,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="curfew-test-no-quarantine" repetitions="14" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="1000">
-      <setup>setup</setup>
+      <setup>setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>#infected</metric>
@@ -7320,7 +7320,7 @@ setup</setup>
       </constants>
     </experiment>
     <experiment name="curfew-test-after-quarantine" repetitions="4" sequentialRunOrder="true" runMetricsEveryStep="true" timeLimit="1000">
-      <setup>setup</setup>
+      <setup>setup-ebola</setup>
       <go>go</go>
       <metrics>
         <metric>#infected</metric>

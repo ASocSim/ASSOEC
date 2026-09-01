@@ -79,24 +79,26 @@ to-report my-available-activity-descriptors
   report ret
 end
 
-
-
-
 to select-activity
   let c-a my-preferred-available-activity-descriptor
+
+  let loc location-of c-a
+  let motive motive-of c-a
+  let schedule-entry (list loc motive slice-of-the-day day-of-the-week)
+  set schedule lput schedule-entry schedule
+  ;print (sentence "my preferred activity is" c-a)
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [
 ;       print "hello after if sats"
 ;     set c-a (list away-gathering-point travelling-motive false)
 ;   ]
-  
-  let loc location-of c-a
+
   select-activity-wtf? loc
   set current-activity loc
   set current-motivation motive-of c-a
 
  ; if current-activity != away-gathering-point and current-motivation = travelling-motive [error "wrong place while travelling"]
-
+  
 end
 
 ;;this function is the main bottleneck of the whole application!

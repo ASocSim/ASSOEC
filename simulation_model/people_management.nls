@@ -2,58 +2,61 @@ __includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" 
 
 
 people-own [
-;demographics
+  ;demographics
   age
   sex
-  
+
+  ;debug var
+  schedule 
   ;;disease model
   time-when-infected
   epistemic-infection-status
-  is-activity-successful?
-  current-activity
-  is-moving-outside-for-reaching-current-activity?
-  current-motivation
   last-day-observed-symptoms
+  am-I-experiencing-fake-symptoms?
+  infection-state
 
-  has-done-shopping
-  purpose-of-the-current-gathering
+  ;;intervention model
+  is-currently-allocated-a-bed-in-hospital?
+  has-been-tested-infected?
+  last-test-tick
+  has-been-tested-immune?
+  I-know-of-social-distancing?
+  I-know-of-working-from-home?
+  
+  ;;decision-making model
+  current-activity
+  current-motivation
+  is-activity-successful?
+  did-my-network-socially-distance?
+  did-my-network-quarantine?
+
+  ; The memory is a list with a max lenght of 28 (for all the ticks in a week). New events get added to the end, so the first event should always be what most people in your network did one week ago
+  what-my-network-did-week-day
+  what-my-network-did-weekend
+
+  ;;assorted internal state
   my-home
   my-work
-  my-markets
-  
+  current-person-I-depend-on
+
   ;;transportation model
   my-means-of-transportation-I-currently-use
   can-I-perform-solo-transportation?
   stayed-out-queuing-for-bus?
   #people-in-my-transport
-  
-  is-currently-allocated-a-bed-in-hospital?
-  
+  is-moving-outside-for-reaching-current-activity?
+
+  ;;assorted garbage for refactoring
   list-of-people-met-per-day-as-recorded-by-the-tracking-app
   is-user-of-tracking-app?
   has-mobile-phone?
-  
-  has-been-tested-infected?
-  last-test-tick
-
-  ;;infection model
-  infection-state
-
-  current-person-I-depend-on
-
-  has-been-tested-immune?
-  
-  am-I-experiencing-fake-symptoms?
+    
   
   ; Optional measures information
-  I-know-of-social-distancing?
-  I-know-of-working-from-home?
+
   ; Memory of the network's actions
-  ; The memory is a list with a max lenght of 28 (for all the ticks in a week). New events get added to the end, so the first event should always be what most people in your network did one week ago
-  what-my-network-did-week-day
-  what-my-network-did-weekend
-  did-my-network-socially-distance?
-  did-my-network-quarantine?
+
+
   
   ;"needs" are a central driver in decision-making (e.g. eating, belonging to groups, physical security).
   ;"needs" are a relevant concept for accounting for the reasons that can push an agent for violating guidelines, in spite of generally complying to them
@@ -95,6 +98,7 @@ people-own [
   importance-given-to-security-value
   importance-given-to-power-value
   importance-given-to-achievement-value
+  
   
   ;IMPORTANCE of BELONGING needs
   importance-weight-group-belonging
@@ -176,6 +180,7 @@ end
 
 to update-people-mind
   
+ ; print (sentence "updating people mind for" count people "people")
   update-alive-status
   
   update-people-epistemic-status
@@ -261,3 +266,31 @@ to-report might-I-be-contagious?
   report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
 end
 
+to-report my-hospital
+  report one-of gathering-link-neighbors with [gathering-type = "hospital"]
+end
+
+to-report my-market
+  report one-of gathering-link-neighbors with [gathering-type = "market"]
+end
+
+to-report my-church
+  report one-of gathering-link-neighbors  with [gathering-type = "church"]
+end
+
+to-report my-store
+  let my-stores gathering-link-neighbors with [gathering-type = "store"]
+  report one-of my-stores with [self != my-work]
+end
+
+to-report my-school
+  report one-of gathering-link-neighbors with [gathering-type = "school"]
+end
+
+to-report my-workplace
+  report my-work
+end
+
+to-report my-workplace-type
+  report [gathering-type] of my-work
+end

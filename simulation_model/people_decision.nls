@@ -1,10 +1,18 @@
 __includes ["need_management.nls" "country_specific_features/cultural_model.nls" "decision/quarantining.nls" "decision/select_activity.nls"]
 
-;reports a string, which can be related to a gathering point and a concrete activity
+;;reports a string, which can be related to a gathering point and a concrete activity
 to-report my-preferred-available-activity-descriptor 
   ;if log-preferred-activity-decision? [ log-file-print (sentence "Person " who " " age)]
-  ;print my-available-activity-descriptors 
-  report item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
+
+  let preferred-activity-descriptor item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
+  
+  let activity-place location-of preferred-activity-descriptor
+  let place-type [gathering-type] of activity-place
+  print (sentence "my preferred available activity descriptor is" place-type " " motive-of preferred-activity-descriptor)
+
+  report preferred-activity-descriptor
+  ;print (sentence "my preferred available activity descriptor is" item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors))
+  ;report item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
 end
 
 
@@ -27,8 +35,6 @@ end
 to-report travelling-reason
   report travelling-motive
 end
-
-
 
 to-report is-currently-in-situation-of-active-dependence?
   report is-child? and closed-schools?
@@ -66,6 +72,7 @@ to update-belief-based-on-current-activity
     if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]
     if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
   ]
+
   let friends-here count my-friends with [current-activity = [current-activity] of myself]
   if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
   ;if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
