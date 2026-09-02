@@ -1,4 +1,29 @@
+;; @file social_networks.nls
+;; @brief The three social circles a person has, and the link breeds behind them.
+;;
+;; A person's network is the union of three groups: relatives (whoever else lives
+;; in their home), colleagues (whoever else is hired by their workplace) and
+;; friends (an explicit `my-friends-links` network built at setup). Only the
+;; friends network is stored as links; the other two are derived on demand from
+;; the gathering links.
+;;
+;; The file also holds the age-class predicates, which sit here for historical
+;; reasons rather than because they belong to the network model.
+;;
+;; @see people_management.nls
+;; @see docs/WIP_ISSUES.md
+
+;; A child's link to the adult responsible for them, directed from the child.
+;;
+;; Read the other way round with `people-that-depend-on-me`. Created only by the
+;; commented-out branch of `setup-social-networks-random`, so no such links exist
+;; in the current build.
 directed-link-breed [dependable-adult-links dependable-adult-link]
+
+;; A friendship, symmetric between the two people it joins.
+;;
+;; The only social tie stored as links: relatives and colleagues are derived on
+;; demand from the gathering links instead.
 undirected-link-breed [my-friends-links my-friends-link]
 
 ;;this representation works as long as the workplace network does not become too large
@@ -6,12 +31,27 @@ undirected-link-breed [my-friends-links my-friends-link]
 
 ;breed [work-social-networks work-social-network]
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @todo Empty body and no callers; what it is meant to replace is undecided. See
+;; docs/WIP_ISSUES.md#setup-social-network-ebola.
 to setup-social-network-ebola
   
 end
 
 
 
+;; Build the friendship network for the whole population.
+;;
+;; A single strategy is wired up at the moment; the value-similarity alternative
+;; is kept alongside it but commented out.
+;;
+;; @context observer
+;; @side-effects creates `my-friends-links`
+;; @see setup-social-networks-random
 to setup-social-networks
   ;if network-generation-method = "random" 
   setup-social-networks-random
@@ -21,12 +61,27 @@ to setup-social-networks
   ;error (sentence "Method" network-generation-method "for generating network unknown. Please select another")
 end
 
+;; Everyone this person could still befriend.
+;;
+;; Anyone in the world who is not already a friend, and not the person themselves.
+;; The commented-out body above restricts candidates to people met at church or
+;; school, which is the intended version once those places are populated.
+;;
+;; @context person
+;; @return agentset of people not yet linked by `my-friends-links`
 to-report possible-friends
  ; let agents-to-befriend reduce [ [x y] -> (turtle-set x y) ] ([gatherers] of (turtle-set my-church my-school))
   ;report other agents-to-befriend with [not my-friends-link-neighbor? myself ] ;and age = [age] of myself]
   report other people with [not my-friends-link-neighbor? myself ]
 end
 
+;; Give every person up to three friends drawn at random from the whole population.
+;;
+;; `up-to-n-of` rather than `n-of`, so a population smaller than the requested
+;; number of friends does not raise an error.
+;;
+;; @context observer
+;; @side-effects creates `my-friends-links`
 to setup-social-networks-random
   
   ;ask children with [any? [gatherers with [is-adult?]] of my-home ][create-dependable-adult-link-to one-of [gatherers with [is-adult?]] of my-home ]
@@ -40,6 +95,14 @@ end
 
 
 
+;; Distance between this person's value system and `other-agent`'s.
+;;
+;; @param other-agent  the person to compare against
+;; @return 0
+;; @context person
+;; @note Stub. The real body - the Euclidean distance over the nine Schwartz value
+;; variables - is present but commented out, because its only caller
+;; `setup-social-networks-value-similarity` is itself dormant.
 to-report value-euclidean-distance [other-agent]
  ; report sqrt sum (list 
    ; ((importance-given-to-hedonism-value - [importance-given-to-hedonism-value] of other-agent) ^ 2)
@@ -54,6 +117,16 @@ to-report value-euclidean-distance [other-agent]
    report 0
 end
 
+;; Build the friendship network by value similarity rather than at random.
+;;
+;; Each person would befriend the four people whose value systems are closest to
+;; their own, a share of links would then be rewired at random, and anyone left
+;; isolated would be linked to someone.
+;;
+;; @context observer
+;; @note Stub: the whole body is commented out and nothing calls it.
+;; @see setup-social-networks-random
+;; @see value-euclidean-distance
 to setup-social-networks-value-similarity
 ;   let peer-group-friend-links 4
 ;   ; If there are less than 20 people, setup the social network randomly
@@ -82,10 +155,20 @@ to setup-social-networks-value-similarity
   
 end
 
+;; The other people living in this person's home.
+;;
+;; @context person
+;; @return agentset of people, excluding self
 to-report my-relatives
   report other [gatherers] of my-home
 end
 
+;; The other people hired by this person's workplace.
+;;
+;; @context person
+;; @return agentset of people, excluding self; empty for anyone who is not a worker
+;; @note Gated on `is-worker?`, which tests `age = "worker"`. Nothing in the Ebola
+;; setup assigns `age`, so this currently always reports an empty set.
 to-report my-colleagues
   if not is-worker? [report (turtle-set)]
   report other [hired-workers] of my-work
@@ -97,43 +180,99 @@ to-report my-colleagues
   ; report (turtle-set nobody)
 end
 
+;; The people this person is linked to by `my-friends-links`.
+;;
+;; @context person
+;; @return agentset of people
 to-report my-friends
   report my-friends-link-neighbors
 end
 
+;; Everyone this person knows: relatives, colleagues and friends together.
+;;
+;; @context person
+;; @return agentset of people, with duplicates across the three groups collapsed
+;; @see my-relatives
+;; @see my-colleagues
+;; @see my-friends
 to-report my-network
   report (turtle-set my-relatives my-colleagues my-friends)
 end
 
+;; The people who depend on this person, through `dependable-adult-links`.
+;;
+;; @context person
+;; @return agentset of people
 to-report people-that-depend-on-me
   report in-dependable-adult-link-neighbors
 end
 
+;; Everyone of working age.
+;;
+;; @return agentset of people
+;; @note Empty in the current build: nothing assigns `age`.
 to-report workers
   report people with [is-worker?]
 end
 
+;; True when this person is of the "young" age class.
+;;
+;; @context person
+;; @return true if `age` is "young"
+;; @note Never true in the current build: nothing assigns `age`.
 to-report is-child?
   report age = "young"
 end
 
+;; Everyone of student age.
+;;
+;; @return agentset of people
+;; @note Empty in the current build: nothing assigns `age`.
 to-report students
   report people with [ is-student?]
 end
 
+;; True when this person is a student or a worker.
+;;
+;; Retirees were part of this test in the COVID model and are commented out.
+;;
+;; @context person
+;; @return true if `age` is "student" or "worker"
+;; @note Never true in the current build: nothing assigns `age`.
 to-report is-adult?
   report is-student? or is-worker?; or is-retired?
 end
 
+;; True when this person is of the "student" age class.
+;;
+;; @context person
+;; @return true if `age` is "student"
+;; @note Never true in the current build: nothing assigns `age`.
 to-report is-student?
   report age = "student"
 end
 
+;; True when this person is of the "worker" age class.
+;;
+;; @context person
+;; @return true if `age` is "worker"
+;; @note Never true in the current build: nothing assigns `age`, and `worker-age`
+;; is commented out in people/classes.nls.
 to-report is-worker?
   report age = "worker"
 end
 
 
+;; Export the friendship network to `file` as a Graphviz undirected graph.
+;;
+;; Each link is written once, ordered by `who` so the output is stable between
+;; runs with the same seed.
+;;
+;; @param file  path of the file to write
+;; @context observer
+;; @side-effects deletes `file` if it already exists, then rewrites it
+;; @example
+;; write-network-to-file "friends.dot"
 to write-network-to-file [file]
   if file-exists? file [file-delete file]
   file-open file

@@ -1,10 +1,37 @@
-; EBOLA SETUP LOGIC
+;; @file setup/setup-ebola.nls
+;; @brief Builds the world: places, households, people, jobs and social networks.
+;;
+;; Run once from the interface Setup button. The order matters and is roughly:
+;; create the gathering points, fill them with households and people, wire people
+;; to the places they may use, hire them, size the places, give people their
+;; values and needs, and finally build the friendship network and the metrics
+;; tables.
+;;
+;; Much of the COVID setup survives here commented out - infecting a first
+;; generation, phasing out measures, buses and shared cars - and is left in place
+;; as the reference for what the Ebola equivalents will need to do.
+;;
+;; @see gathering_points.nls
+;; @see people_management.nls
+;; @see country_specific_features/cultural_model.nls
+;; @see docs/WIP_ISSUES.md
 
 __includes ["scenarios.nls" "setup/household-configuration.nls"]
 
 
 globals[]
 
+;; Build a whole world from the current interface settings.
+;;
+;; Clears everything, resets the clock to Monday morning of day 0, then runs the
+;; setup chain in dependency order. The metrics tables are built last, once the
+;; population they count exists.
+;;
+;; @context observer
+;; @side-effects clears the world and creates every turtle and link in it
+;; @note Nobody is infected at setup: the COVID block that seeded the first
+;; infections is commented out, so a run stays disease-free until something else
+;; introduces a case.
 to setup-ebola
   clear-all
   reset-ticks
@@ -62,6 +89,14 @@ to setup-ebola
 end
 
 
+;; Create the tables and counters the metrics reporters accumulate into.
+;;
+;; Sets up the per-sex contact and infection tables, records the starting
+;; population by sex, and clears the per-tick series.
+;;
+;; @context observer
+;; @side-effects replaces the global metrics tables and lists
+;; @see reset-metrics
 to setup-global-metrics
   
   set number-of-people-per-sex-having-ever-reached-severe-table table:make
@@ -84,6 +119,19 @@ to setup-global-metrics
   
 end
 
+;; Create every place in the world and collect each kind into its own turtle-set.
+;;
+;; One pass per kind of place: create the configured number of them, give each its
+;; `gathering-type`, its vacancy count, and the shape, colour and position it will
+;; have on the view. Places of the same kind are spread vertically so they can be
+;; told apart. The abroad placeholder is created only when migration is enabled.
+;;
+;; @context observer
+;; @side-effects creates gathering points and fills the `hospitals`, `schools`,
+;; `stores`, `markets`, `churches`, `cemeteries`, `workplace-mines` and
+;; `workplace-agriculture` globals
+;; @side-effects raises an error if any place ends up without a `gathering-type`
+;; @note Homes are not created here - `create-all-households` makes them.
  to setup-gathering-points-as-turtle-sets
    set hospitals (turtle-set)
    set workplace-mines (turtle-set)
@@ -180,6 +228,17 @@ end
 end
 
 
+;; Create every household, and stock the homes with food.
+;;
+;; The configured household ratios decide how many are family homes and how many
+;; are homes of displaced people; anything left over after the family homes are
+;; taken becomes a displaced home. Each home then starts with between one and two
+;; full buying cycles of rations per resident.
+;;
+;; @context observer
+;; @side-effects creates home gathering points and the people who live in them
+;; @note The adult-only household type is implemented but commented out of the
+;; loop, so no adult homes are created.
 to create-all-households
   load-population-profile-based-on-current-preset-profile
 
@@ -206,6 +265,20 @@ to create-all-households
   ]
 end
 
+;; Create one household of type `t` and the people in it.
+;;
+;; A family home gets one to three men and one to three women. A displaced home
+;; gets three to four men and no women. Any other type raises an error rather than
+;; producing an empty house.
+;;
+;; @param t                      household type, "family" or "displaced"
+;; @param #created-households    how many households exist already, used to place
+;;                               this one on the view
+;; @param #households-to-create  the total being created, used for the same
+;; @context observer
+;; @side-effects creates one home gathering point and its residents
+;; @todo Household composition is a guess: how many people a family home should
+;; hold needs a source.
 to create-household [t #created-households #households-to-create]
   let current-home nobody
   create-gathering-points 1 
@@ -239,6 +312,13 @@ to create-household [t #created-households #households-to-create]
   error (sentence "not implemented" t)
 end
 
+;; Create `men` men and `women` women living at `current-home`.
+;;
+;; @param current-home  the home they live in
+;; @param men           how many men to create
+;; @param women         how many women to create
+;; @context observer
+;; @side-effects creates people
 to setup-home [current-home men women]
   if men > 0
   [
@@ -251,6 +331,15 @@ to setup-home [current-home men women]
   ]
 end
 
+;; Give this home its appearance and position on the view.
+;;
+;; Homes are stacked down the right-hand edge, spread over the full height so that
+;; any number of households stays visible.
+;;
+;; @param created-households  index of this household
+;; @param current-household   how many households there will be
+;; @context gathering-point
+;; @side-effects sets `shape`, `color`, `xcor` and `ycor`
 to setup-GUI-household [created-households current-household]
 
   set shape "house"
@@ -261,6 +350,22 @@ to setup-GUI-household [created-households current-household]
 end
 ; ;make new setup-person for ebola agent vars
 
+;; Create one person living at `current-home`.
+;;
+;; Sets the starting state a person needs before the first tick: susceptible,
+;; never infected, believing themselves healthy, at home, with 100 units of
+;; capital. Women are given their home as their workplace, which the hiring pass
+;; may later replace; men are left unemployed for that pass to fill.
+;;
+;; The link to the home carries the reasons a person has for being there - rest,
+;; visits, work, care, treatment and both kinds of belonging.
+;;
+;; @param current-home  the home this person lives in
+;; @param l-sex         `female-sex` or `male-sex`
+;; @context observer
+;; @side-effects creates one person and their gathering link to the home
+;; @note `age` is never set here, or anywhere else, so every age predicate in the
+;; model is false for everyone.
 to setup-person [current-home l-sex]
   
   create-people 1 
@@ -312,6 +417,17 @@ to setup-person [current-home l-sex]
 end
 
 
+;; Attach every person to the places they may use, and record why they would go.
+;;
+;; Everyone gets one hospital, and one of each of market, store, church, school,
+;; mine, farm and cemetery. The choice of place is random; what differs by sex is
+;; the list of reasons on the link, which is what makes men and women value the
+;; same place differently later.
+;;
+;; @context observer
+;; @side-effects creates gathering links from every person
+;; @note The two branches differ only for markets and stores; the remaining five
+;; place types carry identical feature lists for both sexes.
 to setup-relation-to-gathering-points
 
   ask people
@@ -405,6 +521,18 @@ to setup-relation-to-gathering-points
 
 end
 
+;; Fill each workplace's vacancies, then record who ended up working where.
+;;
+;; Hospitals and markets hire women who have no job other than their own home;
+;; stores, churches, cemeteries, schools and farms hire men, who start with no
+;; workplace at all. Every man still unemployed afterwards is sent to a mine, so
+;; the mines absorb whatever is left. Each place then rebuilds `hired-workers`
+;; from the people who name it as their workplace.
+;;
+;; @context observer
+;; @side-effects sets `my-work` on people and `hired-workers` on places
+;; @todo Vacancies are hardcoded per place type at creation, and there is no
+;; filter for working age.
 to  setup-worker-relation-to-gathering-point
   
   ;;TODO add filter to only people of working age
@@ -577,6 +705,15 @@ to  setup-worker-relation-to-gathering-point
   
 end
 
+;; Decide how many people each place can hold at once.
+;;
+;; Everywhere is uncapped by default. Markets, stores and churches are then capped
+;; at the size of their own attached population, which is the cap
+;; `perform-people-activities` enforces.
+;;
+;; @context observer
+;; @side-effects sets `capacity` on every gathering point
+;; @see disabled-capacity
 to setup-gathering-point-capacities
   ask gathering-points [
     set capacity disabled-capacity
@@ -596,6 +733,18 @@ to setup-gathering-point-capacities
   ;]
 end
 
+;; Scatter the gathering points across the view without overlapping them.
+;;
+;; Only runs when animation is on. Places are positioned in batches: while many
+;; remain, up to four of the same kind are dropped together onto the neighbours of
+;; a free patch, so places of a kind cluster; once few remain they are placed one
+;; at a time. Candidate patches are rejected if they are too close to something
+;; already placed or against the world edge.
+;;
+;; @context observer
+;; @side-effects moves every gathering point
+;; @side-effects raises "cannot find a spot!" after 10000 failed attempts, which
+;; is what happens when there are more places than the world can separate
 to setup-activity-animate-positions
   if animate? [
     let endless-loop 0

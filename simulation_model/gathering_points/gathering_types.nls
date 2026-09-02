@@ -1,42 +1,88 @@
-;;gathering types updated for Ebola Mongbwalu
-;;these are agentsets
+;; @file gathering_points/gathering_types.nls
+;; @brief One agentset lookup per kind of gathering point.
+;;
+;; Each reporter here answers "every gathering point of this kind", selected on the
+;; `gathering-type` string that `setup-gathering-points-as-turtle-sets` assigns when
+;; the place is created. They are computed on demand, so unlike the turtle-set
+;; globals in gathering_points.nls - which are snapshots taken during setup - they
+;; stay correct if places are created or die later in the run.
+;;
+;; @note The names are inconsistent about plurals: `home-gathering-type` and
+;; `school-gathering-type` are singular where `stores-gathering-type` and
+;; `markets-gathering-type` are plural. Every one of them reports an agentset.
+;; @see gathering_points.nls
 
+;; Every hospital.
+;;
+;; @return agentset of gathering points with `gathering-type` "hospital"
 to-report hospital-gathering-type
   report gathering-points with [gathering-type = "hospital"]
 end
 
+;; Every home.
+;;
+;; Homes are created one per household by `create-household`, so this is also the
+;; set of households.
+;;
+;; @return agentset of gathering points with `gathering-type` "home"
 to-report home-gathering-type
   report gathering-points with [gathering-type = "home"]
 end
 
+;; Every market.
+;;
+;; @return agentset of gathering points with `gathering-type` "market"
 to-report markets-gathering-type
   report gathering-points with [gathering-type = "market"]
 end
 
+;; Every store.
+;;
+;; @return agentset of gathering points with `gathering-type` "store"
 to-report stores-gathering-type
   report gathering-points with [gathering-type = "store"]
 end
 
+;; Every school.
+;;
+;; @return agentset of gathering points with `gathering-type` "school"
 to-report school-gathering-type
   report gathering-points with [gathering-type = "school"]
 end
 
+;; Every church.
+;;
+;; @return agentset of gathering points with `gathering-type` "church"
 to-report churches-gathering-type
   report gathering-points with [gathering-type = "church"]
 end
 
+;; Every cemetery.
+;;
+;; @return agentset of gathering points with `gathering-type` "cemetery"
 to-report cemeteries-gathering-type
   report gathering-points with [gathering-type = "cemetery"]
 end
 
+;; Every agricultural workplace.
+;;
+;; @return agentset of gathering points with `gathering-type` "workplace-agriculture"
 to-report workplace-agriculture-gathering-type
   report gathering-points with [gathering-type = "workplace-agriculture"]
 end
 
+;; Every mine.
+;;
+;; @return agentset of gathering points with `gathering-type` "workplace-mine"
 to-report workplace-mine-gathering-type
   report gathering-points with [gathering-type = "workplace-mine"]
 end
 
+;; Every leisure venue.
+;;
+;; @return agentset of gathering points with `gathering-type` "leisure"
+;; @note The Ebola setup never creates a leisure gathering point, so this reports
+;; an empty agentset in every current scenario.
 to-report leisure-gathering-type
   report gathering-points with [gathering-type = "leisure"]
 end
