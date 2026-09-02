@@ -1,55 +1,75 @@
+;; @file people_management.nls
+;; @brief The `people` breed: everything a person is made of, plus the per-tick
+;; update of their mind.
+;;
+;; The `people-own` block below is the centre of the model. It carries the
+;; demographic and disease state, the decision-making state, the Schwartz value
+;; system and the Maslow-style need satisfaction levels that drive activity
+;; choice, and a residue of COVID-era variables that the Ebola adaptation has not
+;; yet removed.
+;;
+;; The needs machinery is explained at length in the comments inside the block and
+;; in need_management.nls; the short version is that each need holds a
+;; satisfaction level in [0, 1] which decays every tick and is topped up by the
+;; activity the person chooses, and that the choice is the one maximising the
+;; weighted sum of expected satisfaction gains.
+;;
+;; @see need_management.nls
+;; @see country_specific_features/cultural_model.nls
+;; @see docs/WIP_ISSUES.md
+
 __includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" "people/classes.nls" ]
 
 
 people-own [
-  ;demographics
-  age
-  sex
+;; @group Demographics
+  age                         ;;< age class, "young"/"student"/"worker"; never assigned in the Ebola build, so every age predicate is false
+  sex                         ;;< "female" or "male", see people/classes.nls
 
-  ;debug var
-  schedule 
-  ;;disease model
-  time-when-infected
-  epistemic-infection-status
-  last-day-observed-symptoms
-  am-I-experiencing-fake-symptoms?
-  infection-state
+;; @group Debugging
+  schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
+;; @group Disease model
+  time-when-infected          ;;< tick at which this person was infected, or the string "never"
+  epistemic-infection-status  ;;< what this person believes about their own infection, as opposed to `infection-state`
+  last-day-observed-symptoms  ;;< day symptoms were last noticed; `nobody` until then, so that reading it too early raises an error
+  am-I-experiencing-fake-symptoms? ;;< true when the symptoms shown are from something other than the modelled disease
+  infection-state             ;;< the true disease state, independent of what the person believes
 
-  ;;intervention model
-  is-currently-allocated-a-bed-in-hospital?
-  has-been-tested-infected?
-  last-test-tick
-  has-been-tested-immune?
-  I-know-of-social-distancing?
-  I-know-of-working-from-home?
+;; @group Intervention model
+  is-currently-allocated-a-bed-in-hospital? ;;< true while this person occupies one of the hospital's beds
+  has-been-tested-infected?   ;;< true once a test has come back positive
+  last-test-tick              ;;< tick of the most recent test
+  has-been-tested-immune?     ;;< true once a test has shown immunity
+  I-know-of-social-distancing? ;;< true once this person has learned that social distancing is advised
+  I-know-of-working-from-home? ;;< true once this person has learned that working from home is possible
   
-  ;;decision-making model
-  current-activity
-  current-motivation
-  is-activity-successful?
-  did-my-network-socially-distance?
-  did-my-network-quarantine?
+;; @group Decision-making model
+  current-activity            ;;< the gathering point this person is at on this tick
+  current-motivation          ;;< the motive string behind `current-activity`, see motives.nls
+  is-activity-successful?     ;;< false when the chosen place turned the person away, e.g. over capacity
+  did-my-network-socially-distance? ;;< true when more than half this person's network distanced last tick
+  did-my-network-quarantine?  ;;< true when more than half the network that was asked to quarantine complied
 
-  ; The memory is a list with a max lenght of 28 (for all the ticks in a week). New events get added to the end, so the first event should always be what most people in your network did one week ago
-  what-my-network-did-week-day
-  what-my-network-did-weekend
+;; @group Network memory
+  what-my-network-did-week-day ;;< the most common (place type, motive) among this person's network, one entry per weekday tick, oldest first
+  what-my-network-did-weekend ;;< the same for weekend ticks
 
-  ;;assorted internal state
-  my-home
-  my-work
-  current-person-I-depend-on
+;; @group Attachments
+  my-home                     ;;< the gathering point this person lives at
+  my-work                     ;;< the gathering point this person is employed at; equal to `my-home` for unemployed women at setup
+  current-person-I-depend-on  ;;< the person this one is currently following, or `nobody`
 
-  ;;transportation model
-  my-means-of-transportation-I-currently-use
-  can-I-perform-solo-transportation?
-  stayed-out-queuing-for-bus?
-  #people-in-my-transport
-  is-moving-outside-for-reaching-current-activity?
+;; @group Transport model (dormant)
+  my-means-of-transportation-I-currently-use ;;< COVID-era transport mode; the Ebola model does not move people by vehicle
+  can-I-perform-solo-transportation? ;;< COVID era: whether this person owns private transport
+  stayed-out-queuing-for-bus? ;;< COVID era: whether this person was left behind at a bus stop
+  #people-in-my-transport     ;;< COVID era: how many shared the vehicle, used for contagion
+  is-moving-outside-for-reaching-current-activity? ;;< true when this tick's activity is somewhere other than where the person already was
 
-  ;;assorted garbage for refactoring
-  list-of-people-met-per-day-as-recorded-by-the-tracking-app
-  is-user-of-tracking-app?
-  has-mobile-phone?
+;; @group Contact-tracing app (dormant)
+  list-of-people-met-per-day-as-recorded-by-the-tracking-app ;;< COVID era: contacts recorded by the tracing app
+  is-user-of-tracking-app?    ;;< COVID era: whether this person runs the tracing app
+  has-mobile-phone?           ;;< COVID era: whether this person owns a phone at all
     
   
   ; Optional measures information
@@ -88,96 +108,126 @@ people-own [
   
   ;;;;;;;; CULTURAL MODEL VARIABLES (by Amineh, Bart, Kurt) ;;;;;;;;
 
-  ;SCHWARTZ VALUE VARIABLES
-  importance-given-to-hedonism-value
-  importance-given-to-stimulation-value
-  importance-given-to-self-direction-value
-  importance-given-to-universalism-value
-  importance-given-to-benevolence-value
-  importance-given-to-conformity-tradition-value
-  importance-given-to-security-value
-  importance-given-to-power-value
-  importance-given-to-achievement-value
+;; @group Schwartz values
+;;
+;; Nine value priorities, each in [0, 100], drawn per person from distributions
+;; derived from the country's Hofstede scores by `set-values-based-on-culture`.
+;; They feed `calibrate-importance-weights-of-needs`, which turns them into the
+;; importance weights below.
+  importance-given-to-hedonism-value ;;< importance of hedonism, in [0, 100]
+  importance-given-to-stimulation-value ;;< importance of stimulation, in [0, 100]
+  importance-given-to-self-direction-value ;;< importance of self-direction, in [0, 100]
+  importance-given-to-universalism-value ;;< importance of universalism, in [0, 100]
+  importance-given-to-benevolence-value ;;< importance of benevolence, in [0, 100]
+  importance-given-to-conformity-tradition-value ;;< importance of conformity and tradition, in [0, 100]
+  importance-given-to-security-value ;;< importance of security, in [0, 100]
+  importance-given-to-power-value ;;< importance of power, in [0, 100]
+  importance-given-to-achievement-value ;;< importance of achievement, in [0, 100]
   
   
-  ;IMPORTANCE of BELONGING needs
-  importance-weight-group-belonging
-  importance-weight-family-belonging
+;; @group Need importance weights
+;;
+;; How much each need counts when comparing candidate activities. Set once at
+;; setup by `calibrate-importance-weights-of-needs` and normalised to sum to 1.
+  importance-weight-group-belonging ;;< weight of the group-belonging need
+  importance-weight-family-belonging ;;< weight of the family-belonging need
 
-  ;IMPORTANCE of SURVIVAL needs
-  importance-weight-food
-  importance-weight-financial-survival
-  importance-weight-health
-  importance-weight-sleep
+  importance-weight-food      ;;< weight of the food need
+  importance-weight-financial-survival ;;< weight of the financial-survival need
+  importance-weight-health    ;;< weight of the health need
+  importance-weight-sleep     ;;< weight of the sleep need
 
-  ;IMPORTANCE of SAFETY needs
-  importance-weight-physical-safety
-  importance-weight-social-safety
+  importance-weight-physical-safety ;;< weight of the physical-safety need
+  importance-weight-social-safety ;;< weight of the social-safety need
 
-  ;IMPORTANCE of ESTEEM needs
-  importance-weight-social-status
-  importance-weight-providing
-  importance-weight-autonomy
+  importance-weight-social-status ;;< weight of the social-status need
+  importance-weight-providing ;;< weight of the providing need
+  importance-weight-autonomy  ;;< weight of the autonomy need
  
 
 
   ;Need satisfaction levels (i.e. level of watertanks)
 
 
-  ;SURVIVAL:
-  sleep-satisfaction-level
-  health-satisfaction-level
-  financial-survival-satisfaction-level
-  food-satisfaction-level
+;; @group Need satisfaction levels
+;;
+;; The "water tanks": how satisfied each need currently is, in [0, 1]. Every tick
+;; they decay in `decay-satisfaction-level-ebo` and are topped up by the chosen
+;; activity in `update-needs-for-playing`. Low levels make a need urgent, which
+;; raises the pull of activities that would satisfy it.
+  sleep-satisfaction-level    ;;< satisfaction of the sleep need, in [0, 1]
+  health-satisfaction-level   ;;< satisfaction of the health need, in [0, 1]
+  financial-survival-satisfaction-level ;;< satisfaction of the financial-survival need, in [0, 1]
+  food-satisfaction-level     ;;< satisfaction of the food need, in [0, 1]
 
   ;BELONGING:
-  group-belonging-satisfaction-level
-  family-belonging-satisfaction-level
+  group-belonging-satisfaction-level ;;< satisfaction of the group-belonging need, in [0, 1]
+  family-belonging-satisfaction-level ;;< satisfaction of the family-belonging need, in [0, 1]
   
   ;SELF-ESTEEM:
-  providing-satisfaction-level
-  social-status-satisfaction-level
-  autonomy-satisfaction-level
+  providing-satisfaction-level ;;< satisfaction of the providing need, in [0, 1]
+  social-status-satisfaction-level ;;< satisfaction of the social-status need, in [0, 1]
+  autonomy-satisfaction-level ;;< satisfaction of the autonomy need, in [0, 1]
   
   
   ;SAFETY:
-  physical-safety-satisfaction-level
-  social-safety-satisfaction-level
+  physical-safety-satisfaction-level ;;< satisfaction of the physical-safety need, in [0, 1]
+  social-safety-satisfaction-level ;;< satisfaction of the social-safety need, in [0, 1]
   
   
-  ;Variables for BELONGING needs
-  social-distance-profile
-  is-I-apply-social-distancing?
-  days-since-seen-relatives
-  days-since-seen-colleagues
-  days-since-seen-friends
+;; @group Social contact
+  social-distance-profile     ;;< willingness to keep distance, in [0, 1]; only ever set by `set-social-distance-profile`, which is commented out
+  is-I-apply-social-distancing? ;;< whether this person is distancing on this tick
+  days-since-seen-relatives   ;;< ticks since more than half this person's relatives were in the same place
+  days-since-seen-colleagues  ;;< ticks since more than half this person's colleagues were in the same place
+  days-since-seen-friends     ;;< ticks since more than half this person's friends were in the same place
 
 
   ;;L: this dichotomy is conceptually discussable: the evaluation of safety is BASED on these variables;
   ;;but, in principles, these variables are not there for evaluating safety and they are/can/should influence other aspects (including other needs).
   ;;same for all variables
-  ;Variables for Financial Safety need (SAFETY)
-  my-amount-of-capital
-  my-target-amount-of-capital
-  my-current-income
-  my-expected-income
+;; @group Money
+  my-amount-of-capital        ;;< money this person holds, in currency units; starts at 100
+  my-target-amount-of-capital ;;< the balance this person is trying to hold
+  my-current-income           ;;< income received this tick; part of the dormant COVID economy
+  my-expected-income          ;;< income this person expects from working, used by `SUE-financial-survival`
   
-  ;Other variables
-  number-of-people-I-infected
-  #days-I-should-remain-in-self-quarantining
-  events-to-process
+;; @group Other
+  number-of-people-I-infected ;;< how many people this person has infected so far
+  #days-I-should-remain-in-self-quarantining ;;< remaining self-quarantine countdown; 0 when not quarantining
+  events-to-process           ;;< queue of event strings raised this tick and drained by `update-people-mind`
 ]
 
+;; Refresh what every person believes about their own infection.
+;;
+;; @context observer
+;; @side-effects updates `epistemic-infection-status` on every person
+;; @see epistemic_model.nls
 to update-people-epistemic-status
   ask people [update-epistemic-status]
 end
 
+;; The event string queued when a person finds out they are infected.
+;;
+;; @return the string "just-learned-I-am-infected"
+;; @see update-people-mind
 to-report just-learned-I-am-infected-event
   report "just-learned-I-am-infected"
 end
 
 
 
+;; Advance everyone's beliefs and decisions by one tick.
+;;
+;; Deaths first, then beliefs, then quarantine countdowns, and finally the event
+;; queue each person has accumulated: learning you are infected makes you react,
+;; and makes everyone in your household react too. The queue is emptied afterwards.
+;;
+;; @context observer
+;; @side-effects drains `events-to-process` on every person
+;; @note `update-people-epistemic-status` is called once up front and again inside
+;; the per-person event loop, so beliefs are recomputed for the whole population
+;; once per queued event.
 to update-people-mind
   
  ; print (sentence "updating people mind for" count people "people")
@@ -204,6 +254,15 @@ to update-people-mind
 end
 
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Placeholder: kills one random person on roughly one tick in five,
+;; independently of infection, age or anything else. See
+;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status
   ;print "death enabled"
   ;make people die by probability (needed for later death and funeral procedures)
@@ -217,80 +276,161 @@ end
 
 
 
+;; True when this person has a gathering link that lists work among its features.
+;;
+;; @context person
+;; @return true if any outgoing gathering link offers `work-motive`
 to-report has-a-work?
   report any? my-gathering-links with  [member? work-motive features]
  end
 
+;; Everyone with no home.
+;;
+;; @return agentset of people with no outgoing gathering link to a home
 to-report homeless-people
   report people with [not any? out-link-neighbors with [gathering-type = "home"]]
 end
 
+;; Everyone of the "young" age class.
+;;
+;; @return agentset of people
+;; @note Empty in the current build: nothing assigns `age`.
 to-report children
   report people with [is-young?]
 end
 
+;; True when this person is female.
+;;
+;; @context person
+;; @return true if `sex` is `female-sex`
 to-report is-female?
   report sex = female-sex
 end
 
+;; True when this person is male.
+;;
+;; @context person
+;; @return true if `sex` is `male-sex`
 to-report is-male?
   report sex = male-sex
 end
 
+;; True when this person is of the "young" age class.
+;;
+;; @context person
+;; @return true if `age` is `young-age`
+;; @note Never true in the current build: nothing assigns `age`.
 to-report is-young?
   report age = young-age
 end
 
+;; All the money held by the population.
+;;
+;; @return the sum of `my-amount-of-capital` over every person
 to-report total-amount-of-capital
   report sum [my-amount-of-capital] of people
 end
 
+;; Mean money held by retired people.
+;;
+;; @return an amount of capital
+;; @note Divides by zero when nobody is retired, which is always in the Ebola
+;; build: nothing assigns `age`. The same holds for the student, young and worker
+;; variants below.
 to-report retirees-average-amount-of-capital
   report (sum [my-amount-of-capital] of people with [age = "retired"]) / (count people with [age = "retired"])
 end
 
+;; Mean money held by working-age people.
+;;
+;; @return an amount of capital
+;; @see retirees-average-amount-of-capital
 to-report workers-average-amount-of-capital
   report mean [my-amount-of-capital] of workers
 end
 
+;; Mean money held by students.
+;;
+;; @return an amount of capital
+;; @see retirees-average-amount-of-capital
 to-report students-average-amount-of-capital
   report (sum [my-amount-of-capital] of people with [age = "student"]) / (count people with [age = "student"])
 end
 
+;; Mean money held by young people.
+;;
+;; @return an amount of capital
+;; @see retirees-average-amount-of-capital
 to-report young-average-amount-of-capital
   report (sum [my-amount-of-capital] of people with [age = "young"]) / (count people with [age = "young"])
 end
 
 
+;; True when anyone in this person's household believes themselves to be infected.
+;;
+;; The test is about the household rather than the person, because this is what a
+;; person can reasonably suspect about themselves.
+;;
+;; @context person
+;; @return true if any housemate believes they are infected
 to-report might-I-be-contagious?
   report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
 end
 
+;; The hospital this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked
 to-report my-hospital
   report one-of gathering-link-neighbors with [gathering-type = "hospital"]
 end
 
+;; The market this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked
 to-report my-market
   report one-of gathering-link-neighbors with [gathering-type = "market"]
 end
 
+;; The church this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked
 to-report my-church
   report one-of gathering-link-neighbors  with [gathering-type = "church"]
 end
 
+;; The store this person shops at, excluding the one they work at.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if the only linked store is their workplace
 to-report my-store
   let my-stores gathering-link-neighbors with [gathering-type = "store"]
   report one-of my-stores with [self != my-work]
 end
 
+;; The school this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked
 to-report my-school
   report one-of gathering-link-neighbors with [gathering-type = "school"]
 end
 
+;; Where this person works.
+;;
+;; @context person
+;; @return a gathering point
+;; @note An alias for `my-work`, kept because both names are used across the model.
 to-report my-workplace
   report my-work
 end
 
+;; The kind of place this person works at.
+;;
+;; @context person
+;; @return the `gathering-type` string of `my-work`
 to-report my-workplace-type
   report [gathering-type] of my-work
 end

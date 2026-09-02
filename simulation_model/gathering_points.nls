@@ -1,55 +1,107 @@
+;; @file gathering_points.nls
+;; @brief Places people go to, and everything the model asks about a place.
+;;
+;; A gathering point is a home, hospital, school, mine, farm, store, market,
+;; church or cemetery. People are attached to the places they may use by
+;; `gathering-links`, and the link carries the list of reasons that person has for
+;; going there. Where a person is right now is held on the person, in
+;; `current-activity`, so "who is here" is a query over the links.
+;;
+;; The file is mostly small predicates over `gathering-type`, plus the occupancy
+;; and capacity reporters used by `perform-people-activities`.
+;;
+;; @see gathering_points/gathering_types.nls
+;; @see activity_model.nls
+;; @see docs/WIP_ISSUES.md
+
 __includes ["hospitals.nls" "gathering_points/gathering_types.nls"]
 globals [
-   hospitals
-   schools
-   homes
-   markets
-   workplace-mines
-   workplace-agriculture
-   workplace-homes
-   stores
-   churches
-   cemeteries
-   leisure
+   hospitals                   ;;< every hospital, as a turtle-set fixed at setup
+   schools                     ;;< every school, as a turtle-set fixed at setup
+   homes                       ;;< every home, one per household, as a turtle-set fixed at setup
+   markets                     ;;< every market, as a turtle-set fixed at setup
+   workplace-mines             ;;< every mine, as a turtle-set fixed at setup
+   workplace-agriculture       ;;< every agricultural workplace, as a turtle-set fixed at setup
+   workplace-homes             ;;< declared but never assigned; homes double as workplaces instead
+   stores                      ;;< every store, as a turtle-set fixed at setup
+   churches                    ;;< every church, as a turtle-set fixed at setup
+   cemeteries                  ;;< every cemetery, as a turtle-set fixed at setup
+   leisure                     ;;< declared but never assigned; the Ebola setup creates no leisure venues
 ]
 
+;; A place people can go to: a home, hospital, school, mine, farm, store, market,
+;; church or cemetery. The kind is held as a string in `gathering-type`.
 breed [gathering-points gathering-point]
 
 gathering-points-own [
-  gathering-type
-  available-food-rations ; rations of food that are available, this will be most useful for homes
+  gathering-type              ;;< which kind of place this is, as a string; see gathering_points/gathering_types.nls
+  available-food-rations      ;;< rations of food held here, in person-days; mostly relevant for homes
+
+  amount-of-capital           ;;< money the place holds, in currency units
   
-  amount-of-capital
+  hired-workers               ;;< turtle-set of the people employed here, rebuilt by `setup-worker-relation-to-gathering-point`
+  stock-of-goods              ;;< goods available to sell; part of the dormant COVID economy
   
-  hired-workers
-  stock-of-goods
-  
-  vacancies
-  cached-number-of-participants
-  capacity
+  vacancies                   ;;< jobs still unfilled, counted down during setup hiring
+  cached-number-of-participants ;;< memoised result of `expected-number-of-other-participants`, 0 until first computed
+  capacity                    ;;< how many people may be here at once, or `disabled-capacity` for no limit
 ]
 
-;the head of the link are people and the tail are gathering points
+;; A person's attachment to a place they may use, carrying the reasons they have
+;; for going there.
+;;
+;; Directed from the person to the gathering point, so a place reads its people
+;; with `in-gathering-link-neighbors` and a person reads their places with
+;; `gathering-link-neighbors`.
 directed-link-breed [gathering-links gathering-link]
 
 gathering-links-own [
-  features            ;stores whatever is useful for decision-making, useful for including factors appealing to e.g. needs and values
+  features                    ;;< the reasons this person has for coming to this place, as a list of motive strings
 ]
 
+;; The share of this place's staff who are here and working right now.
+;;
+;; @context gathering-point
+;; @return a number in [0, 1]
+;; @note Two current caveats: it divides by zero where nobody is hired, and the
+;; motive it tests for is `work-motive` ("contractual obligation") while
+;; `select-activity` records the motive as "work", so the numerator stays 0.
 to-report ratio-personnel-here
   report count hired-workers with [current-activity = myself and current-motivation = work-motive] / count hired-workers
 end
 
 ;keep enough cash to pay people for 2 ticks
+;; How much cash this place should keep on hand: two ticks of wages for its staff.
+;;
+;; @context gathering-point
+;; @return an amount of capital
+;; @unit currency units
 to-report max-amount-of-capital-to-retain
   report count hired-workers * workers-wages * 2
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Reads person variables from the gathering-points file; the agent context
+;; it is meant for is undecided. See docs/WIP_ISSUES.md#is-away--and-is-at-work-.
 to-report is-away?
   report current-activity = away-gathering-point
 end
 
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Compares a `gathering-type` string against agentset reporters, so no
+;; branch can match and every call falls through to the error. Live in the
+;; contagion path. See docs/WIP_ISSUES.md#proximity-factor.
 to-report proximity-factor
   
   if gathering-type = hospital-gathering-type [report density-factor-hospitals]
@@ -67,6 +119,13 @@ to-report proximity-factor
 end
 
 ; ToDo: Update this!
+;; Whether the activity this place offers could be done from home instead.
+;;
+;; @context gathering-point
+;; @return false, always
+;; @todo Stub. The COVID version answered per gathering type - school, university,
+;; workplace and home were practicable at home, shops and hospitals were not - and
+;; that body is still here, commented out.
 to-report is-practicable-at-home?
 ;   if gathering-type = "school" or gathering-type = "university" or gathering-type = "workplace" or gathering-type = "home"
 ;   [report true]
@@ -78,79 +137,179 @@ end
 
 
 ;might be to be revised later as "to-be-expected-to-be-alone-at" based on whether people show(ed) up at the gathering point.
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param gp  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Reports true when somebody else is there, which is the opposite of the
+;; name. See docs/WIP_ISSUES.md#is-alone-at-.
 to-report is-alone-at? [gp]
   report any? other [in-gathering-link-neighbors] of gp
 end 
 
+;; The share of this place's staff showing symptoms.
+;;
+;; @context gathering-point
+;; @return a number in [0, 1]
+;; @note Divides by zero where nobody is hired.
 to-report ratio-sick-personnel
   report count hired-workers with [has-internally-visible-symptoms?] / count hired-workers
 end
 
+;; How many of this place's staff show no symptoms.
+;;
+;; @context gathering-point
+;; @return a count of people
+;; @note The name is missing an `n` - "personel" - in both this and `#sick-personel`.
 to-report #healthy-personel
   report count hired-workers with [not has-internally-visible-symptoms?]
 end
 
+;; How many of this place's staff show symptoms.
+;;
+;; @context gathering-point
+;; @return a count of people
 to-report #sick-personel
   report count hired-workers with [has-internally-visible-symptoms?]
 end
 
+;; True when this place is a cemetery.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "cemetery"
+;; @note Named for the activity rather than the place, because burial rites are
+;; the only reason to be at a cemetery. A person-side reporter of the same name is
+;; sketched and commented out in activity_model.nls.
 to-report is-at-burial?
   report gathering-type = "cemetery"
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Reads person variables from the gathering-points file; the agent context
+;; it is meant for is undecided. See docs/WIP_ISSUES.md#is-away--and-is-at-work-.
 to-report is-at-work?
   report current-activity = my-work
 end
 
+;; True when this place is a home.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "home"
 to-report is-home?
   report gathering-type = "home"
 end
 
+;; True when this place is a university.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "university"
+;; @note Never true: the Ebola setup creates no universities.
 to-report is-university?
   report gathering-type = "university"
 end
 
+;; True when this place is a hospital.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "hospital"
 to-report is-hospital?
   report gathering-type = "hospital"
 end
 
+;; True when this place is a generic workplace.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "workplace"
+;; @note Never true: the Ebola setup creates "workplace-mine" and
+;; "workplace-agriculture", never a bare "workplace". Use `is-mine?` or
+;; `is-agriculture?` instead.
+;; @see is-mine?
+;; @see is-agriculture?
 to-report is-workplace?
   report gathering-type = "workplace"
 end
 
+;; True when this place is a school.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "school"
 to-report is-school?
   report gathering-type = "school"
 end
 
+;; True when this place is a market.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "market"
 to-report is-market?
   report gathering-type = "market"
 end
 
+;; True when this place is a mine.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "workplace-mine"
 to-report is-mine?
   report gathering-type = "workplace-mine"
 end
 
+;; True when this place is an agricultural workplace.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "workplace-agriculture"
 to-report is-agriculture?
   report gathering-type = "workplace-agriculture"
 end
 
+;; True when this place is a church.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "church"
 to-report is-church?
   report gathering-type = "church"
 end
 
+;; True when this place is a store.
+;;
+;; @context gathering-point
+;; @return true if `gathering-type` is "store"
 to-report is-store?
   report gathering-type = "store"
 end
 
+;; Everyone whose current activity is at a store.
+;;
+;; @return agentset of people
 to-report people-at-stores
   report people with [[is-store?] of current-activity]
 end
 
+;; Everyone whose current activity is at a market.
+;;
+;; @return agentset of people
 to-report people-at-markets
   report people with [[is-market?] of current-activity]
 end
 
 ;might be to be revised later, if the number of people expected to show up at the gathering point lowers
+;; How many other people this place is expected to draw, used when judging exposure.
+;;
+;; Hospitals report a fresh random guess each time. Every other place reports the
+;; number of people linked to it, computed once and then memoised in
+;; `cached-number-of-participants`.
+;;
+;; @context gathering-point
+;; @return a count of people
+;; @note The estimate counts everyone attached to the place, not everyone expected
+;; to turn up on this tick.
 to-report expected-number-of-other-participants
   if cached-number-of-participants > 0 [report cached-number-of-participants]
   if is-hospital? [report random 5 + 2]
@@ -162,8 +321,15 @@ to-report expected-number-of-other-participants
   report cached-number-of-participants
 end
 
-;;;TODO : accessibility is different in this model, related to affordability, distance and beliefs 
-;;;(i can't go places if i'm contagious, i can't go places if someone contagious is there)
+;; Whether people are allowed to come here at all.
+;;
+;; @context gathering-point
+;; @return true, always
+;; @todo Stub. The COVID version consulted lockdown and curfew state, and that body
+;; is still here commented out. There are no lockdowns in the Ebola model yet, so
+;; every place is open. Accessibility in this model should instead turn on
+;; affordability, distance and belief: you cannot go places while contagious, and
+;; you avoid places where someone contagious is.
 to-report is-accessible?
   ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
 ;   if is-hard-lockdown-active? [
@@ -179,6 +345,11 @@ to-report is-accessible?
   report true
 end
 
+;; Whether this kind of place stays open under a hard lockdown.
+;;
+;; @context gathering-point
+;; @return true, always
+;; @todo Stub, as `is-accessible?`. No lockdowns exist in the Ebola model.
 to-report is-open-during-lockdown?
   ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
 ;   if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-public-leisure?
@@ -189,6 +360,11 @@ to-report is-open-during-lockdown?
   report true
 end
 
+;; Whether this kind of place stays open during curfew hours.
+;;
+;; @context gathering-point
+;; @return true, always
+;; @todo Stub, as `is-accessible?`. No curfews exist in the Ebola model.
 to-report is-open-during-curfew?
     ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
 ;   if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-essential-shop? or is-private-leisure? [report false]
@@ -199,34 +375,74 @@ to-report is-open-during-curfew?
   report true
 end
 
+;; Everyone attached to this place, whether or not they are here now.
+;;
+;; These are the people at the far end of this place's gathering links - the people
+;; for whom this is their home, their hospital, their church, and so on.
+;;
+;; @context gathering-point
+;; @return agentset of people
+;; @see current-gatherers
 to-report gatherers
   report in-gathering-link-neighbors
 end
 
+;; Everyone actually here on this tick.
+;;
+;; The people attached to this place plus its hired staff, narrowed to those whose
+;; `current-activity` is this place. Staff are included explicitly because a
+;; person is not necessarily gathering-linked to their workplace.
+;;
+;; @context gathering-point
+;; @return agentset of people
+;; @see gatherers
 to-report current-gatherers
   let w hired-workers
   if not is-turtle-set? w [set w (turtle-set)]
   report (turtle-set in-gathering-link-neighbors w) with [current-activity = myself]
 end
 
+;; The sentinel `capacity` value meaning "no limit on how many people fit here".
+;;
+;; @return the string "disabled-capacity"
+;; @see current-capacity
 to-report disabled-capacity
   report "disabled-capacity"
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Both branches of the guard report the same thing, so what
+;; `disabled-capacity` should mean here is undecided. See
+;; docs/WIP_ISSUES.md#current-capacity.
 to-report current-capacity
   if capacity = disabled-capacity [report capacity]
   report capacity
 end
 
+;; Every home nobody lives in.
+;;
+;; @return agentset of gathering points
 to-report empty-houses
   report homes with [not any? gatherers]
 end
 
+;; Every home with at least one male resident.
+;;
+;; @return agentset of gathering points
 to-report houses-hosting-males
   report homes with [any? gatherers with [sex = "male"]]
 end
 
-;;might be to be refined if people have a reporting system, or with hospital care
+;; True when anyone in the population believes themselves to be infected.
+;;
+;; @return true if at least one person believes they are infected
+;; @todo Should be refined once there is a reporting system, or once hospital care
+;; determines who counts as officially sick.
 to-report  is-someone-officially-sick? 
   report any? people with [is-believing-to-be-infected?]   
 end
@@ -238,39 +454,79 @@ end
 
 
 
+;; How many people are employed at a store.
+;;
+;; @return a count of people
+;; @note Counts `workers`, which is gated on `age`. Nothing assigns `age` in the
+;; Ebola build, so every reporter in this group currently returns 0.
 to-report #store-workers
   report count workers with [[gathering-type] of my-work = "store"]
 end
 
+;; How many people are employed at a market.
+;;
+;; @return a count of people
+;; @see #store-workers
 to-report #market-workers
   report count workers with [[gathering-type] of my-work = "market"]
 end
 
+;; How many people are employed at a church.
+;;
+;; @return a count of people
+;; @see #store-workers
 to-report #church-workers
   report count workers with [[gathering-type] of my-work = "church"]
 end
 
+;; How many people are employed at a hospital.
+;;
+;; @return a count of people
+;; @see #store-workers
 to-report #hospital-workers
   report count workers with [[gathering-type] of my-work = "hospital"]
 end
 
+;; How many people are employed at a mine.
+;;
+;; @return a count of people
+;; @see #store-workers
 to-report #mine-workers
   report count workers with [[gathering-type] of my-work = "workplace-mine"]
 end
 
+;; How many people are employed at an agricultural workplace.
+;;
+;; @return a count of people
+;; @see #store-workers
 to-report #agriculture-workers
   report count workers with [[gathering-type] of my-work = "workplace-agriculture"]
 end
 
+;; How many people are employed at a school.
+;;
+;; @return a count of people
+;; @see #store-workers
 to-report #school-workers
   report count workers with [[gathering-type] of my-work = "school"]
 end
 
 
+;; True when at least one of this person's relatives is where they are.
+;;
+;; @context person
+;; @return true if any relative shares this person's `current-activity`
 to-report is-family-present-in-current-gathering-point?
   report any? my-relatives with [current-activity = [current-activity] of myself]
 end
 
+;; Whether this home is isolating because someone in it is believed to be infected.
+;;
+;; @context gathering-point
+;; @return false, always
+;; @todo Stub. The body that tested the household is commented out, so household
+;; isolation never triggers and `is-officially-asked-to-quarantine?` loses one of
+;; its three routes.
 to-report home-in-isolation?
 ;   if not is-home? or not is-infected-and-their-families-requested-to-stay-at-home? 
 ;   [
@@ -280,10 +536,20 @@ to-report home-in-isolation?
   report false
 end
 
+;; Every home currently isolating.
+;;
+;; @return agentset of gathering points, always empty while `home-in-isolation?` is a stub
+;; @see home-in-isolation?
 to-report homes-in-isolation
   report homes with [home-in-isolation?]
 end
 
+;; Everyone who lives in this person's home, including the person themselves.
+;;
+;; @context person
+;; @return agentset of people
+;; @note Unlike `my-relatives`, this does not exclude self.
+;; @see my-relatives
 to-report my-housemates
   report [gatherers] of my-home
 end

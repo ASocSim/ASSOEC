@@ -1,4 +1,24 @@
+;; @file validation/sanity.nls
+;; @brief Checks that the model behaves the way theory says it should.
+;;
+;; Two kinds of check live here. The `behaviourspace-*` reporters read results
+;; that a BehaviorSpace experiment has already written out and score them between
+;; 0 and 1, so a whole run can be graded automatically. The `check-*` reporters
+;; instead run the model themselves and raise an error when an expectation fails.
+;;
+;; @note Written for the COVID model. Most of the checks here refer to
+;; experiments, globals and interventions the Ebola build no longer has - see
+;; docs/WIP_ISSUES.md before relying on any of them.
+;; @see validation/behaviourspace_utils.nls
+;; @see docs/WIP_ISSUES.md
 
+
+;; The overall sanity score for a completed set of experiments.
+;;
+;; The weakest of the individual checks, so that one failure cannot be averaged
+;; away by the others.
+;;
+;; @return a score in [0, 1], 1 being fully consistent with expectations
 to-report sanity-checks
   report 
   min (list
@@ -7,24 +27,52 @@ to-report sanity-checks
     )
 end
 
+;; Check that hospital beds run short when nothing is done about the epidemic.
+;;
+;; @return the peak share of hospital beds taken in the no-measures experiment
+;; @todo Should be refined: what matters is whether there was a point at which
+;; beds ran short, not the raw peak.
 to-report hospital-gets-overloaded-when-no-measures
   ;;when no measure is taken, then beds should be overloaded
   ;;might be to be refined (e.g. "if there is a point where some shortage was needed")
   report behaviourspace-load-variable no-measures-behaviourspace-experiment-name #max-hospital-beds-taken-behaviourspace-variable-name
 end 
 
-;;the ratio of casualties when closed shools & uni should be ideally twice larger as when everything is closed
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Reads a COVID-era BehaviorSpace experiment. The intended criterion - the
+;; casualty ratio with schools and universities closed should be about twice the
+;; ratio with everything closed - is not what the body computes. See
+;; docs/WIP_ISSUES.md#the-behaviourspace-checks.
 to-report behaviourspace-satisfaction-casualties
   report bounded-linear-map 0 0.1 0 1 behaviourspace-load-variable no-measures-behaviourspace-experiment-name ratio-casualties-behaviourspace-variable-name
 end
 
-; If people are recommended to work from homw, there should be more people working from home
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Reads two COVID-era BehaviorSpace experiments, and there is no
+;; work-from-home measure in the Ebola build. See
+;; docs/WIP_ISSUES.md#the-behaviourspace-checks.
 to-report behaviourspace-soft-working-from-home-check
   let no-measures-workers behaviourspace-load-variable no-measures-behaviourspace-experiment-name ratio-working-at-work-behaviourspace-variable-name
   let soft-home-workers behaviourspace-load-variable soft-working-from-home-behaviourspace-experiment-name ratio-working-at-work-behaviourspace-variable-name
   report bounded-linear-map 1 2 0 1 (no-measures-workers / soft-home-workers)
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param setup-params  work in progress
+;; @return work in progress
+;; @todo Sets COVID-era globals and assumes a run starts with infected people. See
+;; docs/WIP_ISSUES.md#the-check-reporters.
 to-report check-infection-works [setup-params]
   run setup-params
   set all-self-isolate-for-35-days-when-first-hitting-2%-infected? false
@@ -33,6 +81,14 @@ to-report check-infection-works [setup-params]
   report 1
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param setup-params  work in progress
+;; @return work in progress
+;; @todo Depends on the global quarantine intervention, which the Ebola build does
+;; not run. See docs/WIP_ISSUES.md#the-check-reporters.
 to-report check-quarantine-stops-the-propagation [setup-params]
   run setup-params
   set all-self-isolate-for-35-days-when-first-hitting-2%-infected? true
@@ -41,6 +97,13 @@ to-report check-quarantine-stops-the-propagation [setup-params]
   if peak-number-of-infected * 0.95 < count people with [is-infected?] [error "the quarantine failed to stop the disease to keep growing"]
   report 1
 end
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Depends on `propagation-risk` and the COVID scenario presets. See
+;; docs/WIP_ISSUES.md#the-check-reporters.
 to-report check-r0-works
   set preset-scenario "default-scenario" load-scenario-specific-parameter-settings
   set propagation-risk 0
@@ -60,6 +123,13 @@ to-report check-r0-works
   [report 0]
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Depends on `rescale-households-and-gathering-points-based-on-the-number-of-households`
+;; and `set-immune`. See docs/WIP_ISSUES.md#the-check-reporters.
 to-report check-linear-growth-of-contacts-when-size-increase-no-infection
   set preset-scenario "default-scenario" load-scenario-specific-parameter-settings
   set #random-seed 0

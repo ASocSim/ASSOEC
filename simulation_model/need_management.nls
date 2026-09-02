@@ -1,3 +1,34 @@
+;; @file need_management.nls
+;; @brief How an activity is scored against a person's needs.
+;;
+;; Every need holds a satisfaction level in [0, 1] - a "water tank" - which decays
+;; each tick and is refilled by whatever the person does. Deciding what to do is
+;; deciding which tank to fill: each candidate activity is scored for every need,
+;; the scores are weighted by how much this person cares about that need, and the
+;; highest total wins.
+;;
+;; Four quantities appear throughout, in two dimensions. *Undiscounted* versus
+;; *discounted* is whether the raw gain has been multiplied by the need's urgency
+;; (`1 - satisfaction-level`), so that a need already satisfied pulls less.
+;; *Expected* versus *actual* is whether it was computed before or after doing the
+;; activity:
+;;
+;; - `SUE-<need>` expected, undiscounted - the raw gain the activity promises
+;; - `SDE-<need>` expected, discounted - `SUE` scaled by urgency; this is what the
+;;   decision uses
+;; - `SUA-<need>` actual, undiscounted - what the activity really gave
+;; - `SDA-<need>` actual, discounted - `SUA` scaled by urgency; this is what the
+;;   tank is topped up with
+;;
+;; Expectations are currently perfect: every `SUA` simply reports its `SUE`.
+;;
+;; @note The `SUE` reporters are mid-migration from COVID to Ebola and several of
+;; them test motive strings this model no longer produces. See docs/WIP_ISSUES.md
+;; before trusting one.
+;; @see need_definition.nls
+;; @see country_specific_features/cultural_model.nls
+;; @see docs/WIP_ISSUES.md
+
 __includes ["need_definition.nls"]
 ;might need to be updated later on, as need satisfaction depends on the consequences of your action rather than on your intent
 ;e.g. visiting a shop should not satisfy one's safety needs if this shop is empty
@@ -35,6 +66,20 @@ __includes ["need_definition.nls"]
 
   
 
+;; Decay every need, then top the tanks up for the activity just performed.
+;;
+;; Decay happens first and unconditionally, so a person loses ground even on a
+;; tick where their activity failed. An activity the person was turned away from
+;; grants nothing. Every level is clamped back into [0, 1] after the gain.
+;;
+;; @param current-activity-descriptor  the activity that was performed
+;; @context person
+;; @side-effects updates all eleven satisfaction levels
+;; @note Food and the two belonging needs are topped up from their `SDA`
+;; reporters, the other eight from `SDE`. That is the difference between "what it
+;; actually gave" and "what it was expected to give", and while expectations stay
+;; perfect the two agree.
+;; @see decay-satisfaction-level-ebo
 to update-needs-for-playing [current-activity-descriptor]
 
   decay-satisfaction-level-ebo
@@ -65,6 +110,15 @@ end
 ;--special situations can lead to special decay (e.g. breaking an army-enforced lock in should hurt badly the satisfaction of safety needs)
 ;[the previous point might call for the introduction of the person's context later on]
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Belonging decays by subtraction where every other need decays by
+;; multiplication, and the social-status and providing decay factors are computed
+;; but never applied. See docs/WIP_ISSUES.md#decay-satisfaction-level-ebo.
 to decay-satisfaction-level-ebo
   ;SURVIVAL
   let financial-survival-decay 0.8
@@ -124,7 +178,16 @@ end
 ;************************************************************
 
 
-;food: The agents expect to get food for 1 or two day at a time
+;; Expected food satisfaction from an activity, before discounting.
+;;
+;; Only fetching food counts. A household already holding two days of rations
+;; gains nothing; below that the gain rises as the larder empties, and never falls
+;; below 0.5 once the trip is worth making at all.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return a gain in [0, 1]
+;; @see SDE-food
 to-report SUE-food [ad]
   let motive motive-of ad
   
@@ -137,6 +200,16 @@ report max (list 0.5 (1 - (2 - available-food-days) / 2))
   report 0
 end
 
+;; Expected leisure satisfaction from an activity, before discounting.
+;;
+;; Relaxing is worth much more than resting at home.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return a gain in [0, 1]
+;; @note There is no leisure need among the eleven satisfaction levels and nothing
+;; calls this, so it is currently inert. The Ebola build also never offers a
+;; "relaxing" activity.
 to-report SUE-leisure [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -151,7 +224,16 @@ to-report SUE-leisure [ad]
 end
 
 
-;sleep: the only way to get sleep is to rest (at home)
+;; Expected sleep satisfaction from an activity, before discounting.
+;;
+;; Resting is worth an order of magnitude more at night than during the day, and
+;; is worth less while symptomatic. Being treated in hospital counts as rest too,
+;; at a slightly lower rate.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return a gain in [0, 1]
+;; @see SDE-sleep
 to-report SUE-sleep [ad]
  let gp location-of ad
   let motive motive-of ad 
@@ -174,6 +256,15 @@ end
 
 
 ;financial survival
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo A reporter that writes: it sets `my-expected-income` on every person in
+;; the world on each call. See docs/WIP_ISSUES.md#sue-financial-survival.
 to-report SUE-financial-survival [ad]
  
   ask people [set my-expected-income 10]
@@ -231,6 +322,14 @@ end
 
 
 ;health
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Tests the motive "get treatmet". See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-health [ad]
   let base 1
   let belief-modifier 1
@@ -272,6 +371,15 @@ end
 ;this could be tied to financial survival
 ;will decrease once treatment at hospital is working
 ;implement social status increase for leisure activity
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Compares a gathering-type string against `my-work`, an agent. See
+;; docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-social-status [ad]
   let gp location-of ad
   let motive motive-of ad 
@@ -303,6 +411,16 @@ end
 
 ;providing (for family)
 ;the getting treatment part can use some attention + might need more guard conditions as it might break e.g. locations where we are at work but not working for providing
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Tests motive strings the model does not produce, and the male branch
+;; reports -0.4 for every activity that is not work. See
+;; docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-providing [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -331,6 +449,15 @@ end
 
 
 ;autonomy
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Both branches of the funeral test report 0.5, so everything after it is
+;; unreachable. See docs/WIP_ISSUES.md#sue-autonomy.
 to-report SUE-autonomy [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -369,6 +496,15 @@ end
 
 
 ;group belonging
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Compares the gathering point `gp` against the string "home". See
+;; docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-group-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -392,6 +528,15 @@ end
 
 
 ;family belonging
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Compares the gathering point `gp` against the strings "home" and
+;; "hospital". See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-family-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -424,6 +569,15 @@ end
 
 
 ;physical safety
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo The hospital and school lines sit after a complete `ifelse`, so they are
+;; unreachable. See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-physical-safety [ad]
   
   let gp location-of ad
@@ -445,6 +599,15 @@ end
 
 
 ;social-safety
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param ad  work in progress
+;; @context work in progress
+;; @return work in progress
+;; @todo Tests motive strings the model does not produce. See
+;; docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-social-safety [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -467,24 +630,45 @@ end
 
 ;SURVVAL NEEDS
 
+;; Expected food satisfaction, discounted by how hungry this person already is.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return `SUE-food` scaled by `1 - food-satisfaction-level`
+;; @see SUE-food
 to-report SDE-food [ad]
   let expected-increase SUE-food ad
   let discounted-increase expected-increase * (1 - food-satisfaction-level)
   report discounted-increase
 end
 
+;; Expected financial-survival satisfaction, discounted by urgency.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return `SUE-financial-survival` scaled by `1 - financial-survival-satisfaction-level`
 to-report SDE-financial-survival [ad]
   let expected-increase SUE-financial-survival ad
   let discounted-increase expected-increase * (1 - financial-survival-satisfaction-level)
   report discounted-increase
 end
 
+;; Expected sleep satisfaction, discounted by urgency.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return `SUE-sleep` scaled by `1 - sleep-satisfaction-level`
 to-report SDE-sleep [ad]
   let expected-increase SUE-sleep ad
   let discounted-increase expected-increase * (1 - sleep-satisfaction-level)
   report discounted-increase
 end
 
+;; Expected health satisfaction, discounted by urgency.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return `SUE-health` scaled by `1 - health-satisfaction-level`
 to-report SDE-health [ad]
   let expected-increase SUE-health ad
   let discounted-increase expected-increase * (1 - health-satisfaction-level)
@@ -494,12 +678,22 @@ end
 
 ; BELONGING NEEDS
 
+;; Expected group-belonging satisfaction, discounted by urgency.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return `SUE-group-belonging` scaled by `1 - group-belonging-satisfaction-level`
 to-report SDE-group-belonging [ad]
   let expected-increase SUE-group-belonging ad
   let discounted-increase expected-increase * (1 - group-belonging-satisfaction-level)
   report discounted-increase
 end
 
+;; Expected family-belonging satisfaction, discounted by urgency.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return `SUE-family-belonging` scaled by `1 - family-belonging-satisfaction-level`
 to-report SDE-family-belonging [ad]
   let expected-increase SUE-family-belonging ad
   let discounted-increase expected-increase * (1 - family-belonging-satisfaction-level)
@@ -508,6 +702,17 @@ end
 
 ;;; SELF-ESTEEM NEEDS
 
+;; Expected autonomy satisfaction, discounted by urgency where it is a gain.
+;;
+;; Losses pass through undiscounted: an activity that costs you autonomy costs the
+;; same whether or not the tank is full.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return the discounted gain, or the raw value if it is negative
+;; @note The four survival needs discount unconditionally; this reporter and the
+;; four below it discount only positive values. Whether that asymmetry is intended
+;; is open - see docs/WIP_ISSUES.md.
 to-report SDE-autonomy [ad]
   let expected-increase SUE-autonomy ad
   let discounted-increase expected-increase
@@ -516,6 +721,12 @@ to-report SDE-autonomy [ad]
 end
 
 
+;; Expected social-status satisfaction, discounted by urgency where it is a gain.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return the discounted gain, or the raw value if it is negative
+;; @see SDE-autonomy
 to-report SDE-social-status [ad]
   let expected-increase SUE-social-status ad
   let discounted-increase expected-increase
@@ -524,6 +735,12 @@ to-report SDE-social-status [ad]
 end
 
 
+;; Expected providing satisfaction, discounted by urgency where it is a gain.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return the discounted gain, or the raw value if it is negative
+;; @see SDE-autonomy
 to-report SDE-providing [ad]
   let expected-increase SUE-providing ad
   let discounted-increase expected-increase
@@ -534,6 +751,12 @@ end
 ;; SAFETY NEEDS
 
 
+;; Expected social-safety satisfaction, discounted by urgency where it is a gain.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return the discounted gain, or the raw value if it is negative
+;; @see SDE-autonomy
 to-report SDE-social-safety [ad]
   let expected-increase SUE-social-safety ad
   let discounted-increase expected-increase
@@ -542,6 +765,12 @@ to-report SDE-social-safety [ad]
 end
 
 
+;; Expected physical-safety satisfaction, discounted by urgency where it is a gain.
+;;
+;; @param ad  the activity descriptor being considered
+;; @context person
+;; @return the discounted gain, or the raw value if it is negative
+;; @see SDE-autonomy
 to-report SDE-physical-safety [ad]
   let expected-increase SUE-physical-safety ad
   let discounted-increase expected-increase
@@ -557,6 +786,12 @@ end
 ;************************************************************
 
 
+;; Actual food satisfaction gained, discounted by urgency.
+;;
+;; @param ad  the activity that was performed
+;; @context person
+;; @return `SUA-food` scaled by `1 - food-satisfaction-level`
+;; @see SUA-food
 to-report  SDA-food [ad]
   let expected-increase SUA-food ad
   let discounted-increase expected-increase * (1 - food-satisfaction-level)
@@ -564,12 +799,22 @@ to-report  SDA-food [ad]
 end
 
 
+;; Actual group-belonging satisfaction gained, discounted by urgency.
+;;
+;; @param ad  the activity that was performed
+;; @context person
+;; @return `SUA-group-belonging` scaled by `1 - group-belonging-satisfaction-level`
 to-report  SDA-group-belonging [ad]
   let expected-increase SUA-group-belonging ad
   let discounted-increase expected-increase * (1 - group-belonging-satisfaction-level)
   report discounted-increase
 end
 
+;; Actual family-belonging satisfaction gained, discounted by urgency.
+;;
+;; @param ad  the activity that was performed
+;; @context person
+;; @return `SUA-family-belonging` scaled by `1 - family-belonging-satisfaction-level`
 to-report  SDA-family-belonging [ad]
   let expected-increase SUA-family-belonging ad
   let discounted-increase expected-increase * (1 - family-belonging-satisfaction-level)
@@ -584,18 +829,33 @@ end
 ;*************** SUA ALL CALCULATIONS ***********************
 ;************************************************************
 
+;; Actual food satisfaction gained, before discounting.
+;;
+;; @param ad  the activity that was performed
+;; @context person
+;; @return the same as `SUE-food`: expectations are perfect for now
 to-report SUA-food [ad] 
   ;perfect expectations for now
   report SUE-food ad
 end
 
 
+;; Actual group-belonging satisfaction gained, before discounting.
+;;
+;; @param ad  the activity that was performed
+;; @context person
+;; @return the same as `SUE-group-belonging`: expectations are perfect for now
 to-report SUA-group-belonging [ad]
     ;perfect expectations for now
   report SUE-group-belonging ad
 end
 
 
+;; Actual family-belonging satisfaction gained, before discounting.
+;;
+;; @param ad  the activity that was performed
+;; @context person
+;; @return the same as `SUE-family-belonging`: expectations are perfect for now
 to-report SUA-family-belonging [ad]
     ;perfect expectations for now
   report SUE-family-belonging ad
@@ -608,6 +868,21 @@ end
 ;*************** global prevalence ***********************
 ;************************************************************
 
+;; How attractive an activity is to this person, across all eleven needs.
+;;
+;; The weighted sum of the discounted expected gains: each need's `SDE` times the
+;; importance this person gives that need. This single number is what
+;; `my-preferred-available-activity-descriptor` maximises, so it is the whole of
+;; the decision rule.
+;;
+;; @param ad  the activity descriptor being scored
+;; @context person
+;; @return the total expected satisfaction, higher being more attractive
+;; @side-effects writes one line to the log when
+;; `log-preferred-activity-decision?` is on; also calls `reset-timer`, which is
+;; left over from profiling
+;; @see my-preferred-available-activity-descriptor
+;; @see debug-global-prevalence-of
 to-report global-prevalence-of [ad]
   ;*** this procedure should be expanded with new needs as they are added ***
   reset-timer
@@ -645,6 +920,12 @@ end
 
 
 
+;; Print the per-need breakdown behind `global-prevalence-of` for one activity.
+;;
+;; @param ad  the activity descriptor to explain
+;; @context person
+;; @side-effects prints one line per need, and nothing at all unless `log?` is on
+;; @see global-prevalence-of
 to debug-global-prevalence-of [ad]
   
  if log? [
@@ -672,6 +953,14 @@ end
 
 
 
+;; Print the per-need breakdown for every activity currently open to this person.
+;;
+;; The companion to `my-preferred-available-activity-descriptor`: it shows the
+;; scores that the choice was made from.
+;;
+;; @context person
+;; @side-effects prints, and nothing at all unless `log?` is on
+;; @see debug-global-prevalence-of
 to debug-my-preferred-available-activity-descriptor
   
     foreach my-available-activity-descriptors debug-global-prevalence-of
