@@ -275,8 +275,8 @@ to perform-people-activities
     execute-activity-effect
     update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
   ]
-  animate-walk-to-goal
-
+  ; people are moved onto the place they picked by `update-display`, which `go`
+  ; runs straight after this
 end
 
 to-report is-get-healed-to-hospital-descriptor? [an-activity-descriptor]

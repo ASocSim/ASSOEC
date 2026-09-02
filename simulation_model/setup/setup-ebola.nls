@@ -29,6 +29,7 @@ to setup-ebola
   
   setup-gathering-points-as-turtle-sets
   create-all-households
+  layout-gathering-points
   setup-relation-to-gathering-points
   setup-worker-relation-to-gathering-point
 
@@ -84,6 +85,25 @@ to setup-global-metrics
   
 end
 
+<<<<<<< Updated upstream
+=======
+;; Create every place in the world and collect each kind into its own turtle-set.
+;;
+;; One pass per kind of place: create the configured number of them, give each its
+;; `gathering-type`, its vacancy count, and the shape and colour it will have on the
+;; view. The abroad placeholder is created only when migration is enabled.
+;;
+;; Nothing here sets a position: `layout-gathering-points` places every kind of
+;; place at once, once the homes exist too.
+;;
+;; @context observer
+;; @side-effects creates gathering points and fills the `hospitals`, `schools`,
+;; `stores`, `markets`, `churches`, `cemeteries`, `workplace-mines` and
+;; `workplace-agriculture` globals
+;; @side-effects raises an error if any place ends up without a `gathering-type`
+;; @note Homes are not created here - `create-all-households` makes them.
+;; @see layout-gathering-points
+>>>>>>> Stashed changes
  to setup-gathering-points-as-turtle-sets
    set hospitals (turtle-set)
    set workplace-mines (turtle-set)
@@ -101,7 +121,7 @@ end
     set hospitals (turtle-set  hospitals self)
     set hired-workers (turtle-set)
     
-    set gathering-type "hospital" set shape "circle" set heading 45 set color lime set size 2 set xcor 6 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "hospital"] / (#hospital-gp + 1)
+    set gathering-type "hospital" set shape "circle" set color lime set size 2
   ]
   
   create-gathering-points #mines-gp 
@@ -110,7 +130,7 @@ end
     set workplace-mines (turtle-set workplace-mines self)
     set hired-workers (turtle-set)
 
-    set gathering-type "workplace-mine" set shape "square 2" set color brown  set xcor 7 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-mine"] / (#mines-gp + 1)
+    set gathering-type "workplace-mine" set shape "square 2" set color brown
   ]
 
    
@@ -119,8 +139,8 @@ end
     set vacancies 15
     set workplace-agriculture (turtle-set workplace-agriculture self)
     set hired-workers (turtle-set)
-    set gathering-type "workplace-agriculture" set shape "square 2" set color green  set xcor 8 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "workplace-agriculture"] / (#agriculture-gp + 1)
-  ]  
+    set gathering-type "workplace-agriculture" set shape "square 2" set color green
+  ]
   
 
   create-gathering-points #stores-gp 
@@ -128,7 +148,7 @@ end
     set vacancies 1
     set stores (turtle-set stores self)
     set hired-workers (turtle-set)
-    set gathering-type "store" set shape "cow" set color yellow set xcor 9 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "store"] / (#stores-gp + 1)
+    set gathering-type "store" set shape "cow" set color yellow
   ]
   
   
@@ -137,35 +157,34 @@ end
     set vacancies 5
     set schools (turtle-set schools self)
     set hired-workers (turtle-set)
-    set gathering-type "school" set shape "triangle" set color pink set xcor 3 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "school"] / (#schools-gp + 1)
+    set gathering-type "school" set shape "triangle" set color pink
   ]
 
   create-gathering-points #markets-gp [
     set vacancies 5
     set markets (turtle-set markets self)
     set hired-workers (turtle-set)
-    set gathering-type "market" set shape "target" set color red set xcor 4 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "market"] / (#markets-gp + 1)]
+    set gathering-type "market" set shape "target" set color red]
   
   create-gathering-points #cemeteries-gp
   [
     set vacancies 3
     set cemeteries (turtle-set cemeteries self)
     set hired-workers (turtle-set)
-    set gathering-type "cemetery" set shape "circle" set color gray set xcor 2 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "cemetery"] / (#cemeteries-gp + 1)
+    set gathering-type "cemetery" set shape "circle" set color gray
   ]
 
   create-gathering-points #churches-gp [
     set vacancies 3
     set churches (turtle-set churches self)
     set hired-workers (turtle-set)
-    set gathering-type "church" set shape "pentagon" set color sky set  xcor 5 * max-pxcor / 10 set ycor max-pycor * count gathering-points with [gathering-type = "church"] / (#churches-gp + 1)]
+    set gathering-type "church" set shape "pentagon" set color sky]
 
   
-  ask gathering-points [set hired-workers (turtle-set)] 
-  
-  setup-activity-animate-positions
+  ask gathering-points [set hired-workers (turtle-set)]
+
 ; setup-economy
-  
+
   if migration?
   [
     create-gathering-points 1
@@ -187,18 +206,9 @@ to create-all-households
   let #family-homes floor (#households * ratio-family-homes)
   let #displaced-homes #households - (#adults-homes + #family-homes) ;+ #retired-couple-homes + #multigenerational-homes
 
-  let #created-households 0
-
-;  repeat #adults-homes [create-household "adult" #created-households  #households set #created-households  #created-households + 1]
-  repeat #family-homes [
-    create-household "family" #created-households  #households
-    set #created-households  #created-households + 1
-  ]
- repeat #displaced-homes 
-  [
-    create-household "displaced" #created-households #households 
-    set  #created-households  #created-households + 1
-  ]
+;  repeat #adults-homes [create-household "adult"]
+  repeat #family-homes [create-household "family"]
+  repeat #displaced-homes [create-household "displaced"]
 
   ask homes
   [
@@ -206,15 +216,30 @@ to create-all-households
   ]
 end
 
+<<<<<<< Updated upstream
 to create-household [t #created-households #households-to-create]
+=======
+;; Create one household of type `t` and the people in it.
+;;
+;; A family home gets one to three men and one to three women. A displaced home
+;; gets three to four men and no women. Any other type raises an error rather than
+;; producing an empty house.
+;;
+;; @param t  household type, "family" or "displaced"
+;; @context observer
+;; @side-effects creates one home gathering point and its residents
+;; @todo Household composition is a guess: how many people a family home should
+;; hold needs a source.
+to create-household [t]
+>>>>>>> Stashed changes
   let current-home nobody
-  create-gathering-points 1 
+  create-gathering-points 1
   [
     ;print self
     set current-home self
     set homes (turtle-set homes self)
     set gathering-type "home"
-    setup-GUI-household #created-households #households-to-create
+    setup-GUI-household
   ]
   
 ;;need more info on household composition, how many in a family home?
@@ -251,13 +276,22 @@ to setup-home [current-home men women]
   ]
 end
 
+<<<<<<< Updated upstream
 to setup-GUI-household [created-households current-household]
 
+=======
+;; Give this home its appearance on the view.
+;;
+;; Where it ends up is not decided here: `layout-gathering-points` arranges the
+;; homes over the residential quarter once they all exist.
+;;
+;; @context gathering-point
+;; @side-effects sets `shape` and `color`
+;; @see layout-gathering-points
+to setup-GUI-household
+>>>>>>> Stashed changes
   set shape "house"
   set color green
-  set xcor 9 * max-pxcor / 10
-  set ycor max-pycor * created-households / current-household
-
 end
 ; ;make new setup-person for ebola agent vars
 
@@ -596,6 +630,7 @@ to setup-gathering-point-capacities
   ;]
 end
 
+<<<<<<< Updated upstream
 to setup-activity-animate-positions
   if animate? [
     let endless-loop 0
@@ -633,4 +668,6 @@ to setup-activity-animate-positions
 end
 
 
+=======
+>>>>>>> Stashed changes
 

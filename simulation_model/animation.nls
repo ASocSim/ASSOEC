@@ -1,32 +1,45 @@
+;; @file animation.nls
+;; @brief Everything the view shows: where the places are, and where the people
+;; standing at them are drawn.
+;;
+;; Coordinates carry no meaning for the model - no decision anywhere reads an
+;; `xcor` - so this file is free to arrange the world for legibility. It does two
+;; things:
+;;
+;; 1. `layout-gathering-points`, once at the end of setup, cuts the world into one
+;;    district per kind of place, tints and labels each district, and arranges that
+;;    kind's places on an even grid inside it. Nothing is placed at random, so the
+;;    same world always looks the same and a place can be found by where it is.
+;; 2. `update-display`, at the end of every tick, colours people by disease state
+;;    and puts each of them on the place their `current-activity` names, packed into
+;;    rings around it. A crowd therefore reads as a crowd and still sits on top of
+;;    its place rather than beside it.
+;;
+;; With `animate?` on, step 2 walks people across the world a patch at a time and
+;; refreshes the view between steps; with it off they are moved straight there.
+;;
+;; @see setup/setup-ebola.nls
+;; @see gathering_points.nls
+
+;#region Per-tick display
+
+;; Refresh everything the view shows: how people look, and where they stand.
+;;
+;; @context observer
+;; @side-effects sets `color` on every person, and moves every person onto their
+;; `current-activity`
+;; @see update-people-display
+;; @see move-people-to-their-activities
 to update-display
   ask people [update-people-display]
-end
- 
-
-to-report allowed-move?
-  report can-move? 1; and (member? current-activity gathering-points-on patch-ahead 1)
+  move-people-to-their-activities
 end
 
-to animate-walk-to-goal
-  if animate? [
-    let walkers people with [distance current-activity > 3]
-    while [any? walkers] [
-      every 0.05 [
-        ask walkers [
-          face current-activity
-          while [not allowed-move?] [
-            ifelse subtract-headings towards current-activity heading + 10 < subtract-headings towards current-activity heading - 10
-              [ right 10 ]
-              [ left 10 ]
-          ]
-          forward min (list 1 distance current-activity)
-        ]
-        set walkers people with [distance current-activity > 3]
-      ]
-    ]
-  ]
-end
-
+;; Colour this person by sex, lightened while they are still susceptible.
+;;
+;; @context person
+;; @side-effects sets `color`
+;; @see default-color
 to update-people-display
   set color default-color
   if infection-status = susceptible-infection-status
@@ -37,6 +50,10 @@ to update-people-display
   [set color white]
 end
 
+;; The colour this person is drawn in before disease state is taken into account.
+;;
+;; @context person
+;; @return green for women, red for men
 to-report default-color
   if sex = "female" [report green]
   if sex = "male" [report red]
@@ -44,4 +61,344 @@ to-report default-color
 ;   if age = "student" [report orange]
 ;   if age = "worker" [report blue]
 ;   if age = "retired" [report red]
+end
+
+;#endregion
+
+;#region Moving people onto their gathering point
+
+;; Put every person on the place they are currently at.
+;;
+;; Each person is given a slot in the crowd standing at their `current-activity`,
+;; which fixes the exact spot they belong on; they then either walk there or are
+;; moved straight there, depending on `animate?`.
+;;
+;; @context observer
+;; @side-effects moves every person, and sets their display target
+;; @see assign-crowd-positions
+;; @see walk-people-to-their-positions
+to move-people-to-their-activities
+  assign-crowd-positions
+  ifelse animate?
+  [ walk-people-to-their-positions ]
+  [ ask people [setxy display-target-xcor display-target-ycor] ]
+end
+
+;; Work out the exact spot each person belongs on, and record it on them.
+;;
+;; People are handed their slot in the order they sort in, so that somebody keeps
+;; the same spot from one tick to the next for as long as the same crowd is around
+;; them and the view does not reshuffle for nothing.
+;;
+;; A person whose activity is not a place - which should not happen, but does not
+;; deserve a crash in display code - is left where they already are.
+;;
+;; @context observer
+;; @side-effects sets `display-target-xcor` and `display-target-ycor` on every
+;; person, and resets `crowd-slots-taken` on every gathering point
+;; @see crowd-offset
+to assign-crowd-positions
+  ask gathering-points [set crowd-slots-taken 0]
+
+  foreach sort people [ a-person ->
+    ask a-person [
+      ifelse is-gathering-point? current-activity
+      [
+        let slot 0
+        ask current-activity [
+          set slot crowd-slots-taken
+          set crowd-slots-taken crowd-slots-taken + 1
+        ]
+        let shift crowd-offset slot
+        set display-target-xcor (clamped min-pxcor max-pxcor ([xcor] of current-activity + first shift))
+        set display-target-ycor (clamped min-pycor max-pycor ([ycor] of current-activity + last shift))
+      ]
+      [
+        set display-target-xcor xcor
+        set display-target-ycor ycor
+      ]
+    ]
+  ]
+end
+
+;; Where the person holding slot `slot` in a crowd stands, relative to the place.
+;;
+;; Slots fill outwards in rings around the place, six slots to the first ring and
+;; six more to each ring after it. Slot 0 is on the first ring rather than dead
+;; centre, so that the marker for the place itself stays visible under the crowd.
+;; Rings stop growing at `max-crowd-radius`, which keeps a large gathering from
+;; spilling over its neighbours.
+;;
+;; @param slot  the person's index in the crowd, counting from 0
+;; @return the offset from the place, as a two-element list (dx, dy)
+;; @see crowd-ring-slots
+to-report crowd-offset [slot]
+  let ring 1
+  let index slot
+  while [index >= crowd-ring-slots ring] [
+    set index index - crowd-ring-slots ring
+    set ring ring + 1
+  ]
+
+  let angle 360 * index / crowd-ring-slots ring
+  let radius min (list max-crowd-radius (crowd-ring-spacing * ring))
+  report (list (radius * sin angle) (radius * cos angle))
+end
+
+;; How many people stand on ring `ring` of a crowd.
+;;
+;; @param ring  the ring, counting from 1
+;; @return a count of slots
+to-report crowd-ring-slots [ring]
+  report 6 * ring
+end
+
+;; How far apart the rings of a crowd are.
+;;
+;; @return a distance in patches
+to-report crowd-ring-spacing
+  report 0.4
+end
+
+;; How far from its place a crowd is allowed to spread.
+;;
+;; Chosen against the district grids in `layout-gathering-points`: it is under half
+;; the spacing between two places of the same kind, so two crowds never merge.
+;;
+;; @return a distance in patches
+to-report max-crowd-radius
+  report 1.2
+end
+
+;#endregion
+
+;#region Walking
+
+;; Walk everybody to their display target, a step at a time, refreshing the view.
+;;
+;; Only used when `animate?` is on. The step budget is what a person needs to cross
+;; the world twice; anybody it does not cover is put on their target anyway, so
+;; that nobody is left stranded between two places.
+;;
+;; @context observer
+;; @side-effects moves people, and refreshes the view repeatedly
+;; @see animation-step-length
+to walk-people-to-their-positions
+  let walkers people with [not is-at-display-target?]
+  let steps-left #max-animation-steps
+
+  while [any? walkers and steps-left > 0] [
+    ask walkers [
+      facexy display-target-xcor display-target-ycor
+      forward min (list animation-step-length distancexy display-target-xcor display-target-ycor)
+    ]
+    display
+    wait animation-frame-delay
+    set walkers people with [not is-at-display-target?]
+    set steps-left steps-left - 1
+  ]
+
+  ask people [setxy display-target-xcor display-target-ycor]
+end
+
+;; True when this person has arrived where they are being drawn.
+;;
+;; @context person
+;; @return true if they are within a hundredth of a patch of their display target
+to-report is-at-display-target?
+  report distancexy display-target-xcor display-target-ycor < 0.01
+end
+
+;; How far a walking person moves per animation step.
+;;
+;; @return a distance in patches
+to-report animation-step-length
+  report 1
+end
+
+;; How long the view is left up between two animation steps.
+;;
+;; @return a delay in seconds
+to-report animation-frame-delay
+  report 0.03
+end
+
+;; How many steps a walk may take before people are simply put where they belong.
+;;
+;; @return a count of steps, enough to cross the world twice at `animation-step-length`
+to-report #max-animation-steps
+  report 2 * (world-width + world-height)
+end
+
+;#endregion
+
+;#region The district layout
+
+;; Arrange every place in the world into one district per kind of place.
+;;
+;; The residential quarter takes the left of the world, since there are more homes
+;; than anything else; the right is split into two columns and four rows, which
+;; gives the eight other kinds of place a district each, paired by what they are
+;; for - work at the top, then trade, then the civic places, and at the bottom the
+;; two places people end up at when things go wrong. A lane of untinted patches
+;; separates the quarters.
+;;
+;; Each district is tinted, labelled on its top row, and its places are spread over
+;; an even grid filling the rest of it. Any kind of place with no district of its
+;; own - the `away` placeholder, and leisure venues if they are ever built - is put
+;; along the top margin.
+;;
+;; Must run after `create-all-households`, or the homes will not exist yet to be
+;; placed.
+;;
+;; @context observer
+;; @side-effects moves every gathering point, and repaints and relabels every patch
+;; @see place-district
+;; @see arrange-on-grid
+to layout-gathering-points
+  ask patches [set pcolor black set plabel ""]
+
+  ; the world minus a one-patch margin, which is where the strays go
+  let left-edge min-pxcor + 1
+  let right-edge max-pxcor - 1
+  let bottom-edge min-pycor + 1
+  let top-edge max-pycor - 1
+
+  ; the residential quarter, then a one-patch lane, then two service columns
+  let quarter-edge left-edge + round (0.42 * (right-edge - left-edge))
+  let column-a-left quarter-edge + 2
+  let column-a-right column-a-left + floor ((right-edge - column-a-left - 1) / 2)
+  let column-b-left column-a-right + 1
+  let column-b-right right-edge
+
+  let row-1 band-bounds bottom-edge top-edge 4 0
+  let row-2 band-bounds bottom-edge top-edge 4 1
+  let row-3 band-bounds bottom-edge top-edge 4 2
+  let row-4 band-bounds bottom-edge top-edge 4 3
+
+  (place-district home-gathering-type "HOMES"
+    left-edge quarter-edge bottom-edge top-edge (green - 4))
+
+  (place-district workplace-mine-gathering-type "MINES"
+    column-a-left column-a-right (first row-4) (last row-4) (brown - 4))
+  (place-district workplace-agriculture-gathering-type "FARMS"
+    column-b-left column-b-right (first row-4) (last row-4) (lime - 4))
+
+  (place-district stores-gathering-type "SHOPS"
+    column-a-left column-a-right (first row-3) (last row-3) (yellow - 4))
+  (place-district markets-gathering-type "MARKETS"
+    column-b-left column-b-right (first row-3) (last row-3) (orange - 4))
+
+  (place-district school-gathering-type "SCHOOLS"
+    column-a-left column-a-right (first row-2) (last row-2) (pink - 4))
+  (place-district churches-gathering-type "CHURCHES"
+    column-b-left column-b-right (first row-2) (last row-2) (sky - 4))
+
+  (place-district hospital-gathering-type "HOSPITALS"
+    column-a-left column-a-right (first row-1) (last row-1) (turquoise - 4))
+  (place-district cemeteries-gathering-type "CEMETERIES"
+    column-b-left column-b-right (first row-1) (last row-1) (gray - 3.5))
+
+  let strays gathering-points with [not member? gathering-type districted-gathering-types]
+  arrange-on-grid strays left-edge right-edge max-pycor max-pycor
+end
+
+;; The kinds of place `layout-gathering-points` gives a district of their own.
+;;
+;; @return a list of `gathering-type` strings
+to-report districted-gathering-types
+  report ["home" "workplace-mine" "workplace-agriculture" "store" "market"
+          "school" "church" "hospital" "cemetery"]
+end
+
+;; Tint, label and fill one district.
+;;
+;; The top row of the rectangle is left to the label, and the places are arranged
+;; over what is left of it.
+;;
+;; @param gps            the places belonging to this district
+;; @param district-name  the label drawn on the district's top-left patch
+;; @param x0             leftmost patch column of the district
+;; @param x1             rightmost patch column
+;; @param y0             bottom patch row
+;; @param y1             top patch row, which holds the label
+;; @param tint           the patch colour of the district
+;; @context observer
+;; @side-effects repaints and labels patches, and moves the places
+;; @see arrange-on-grid
+to place-district [gps district-name x0 x1 y0 y1 tint]
+  ask patches with [pxcor >= x0 and pxcor <= x1 and pycor >= y0 and pycor <= y1] [
+    set pcolor tint
+  ]
+
+  ask patch x0 y1 [
+    set plabel district-name
+    set plabel-color white
+  ]
+
+  arrange-on-grid gps x0 x1 y0 (max (list y0 (y1 - 1)))
+end
+
+;; Spread `gps` evenly over the rectangle, filling it from the top-left.
+;;
+;; The grid is as square as the rectangle allows: the number of columns is chosen
+;; so that the cells come out roughly as wide as they are tall, and the places are
+;; spread to the edges of the rectangle rather than packed into a corner of it.
+;; Places are taken in `who` order, so a district always fills the same way.
+;;
+;; @param gps  the places to arrange; may be empty
+;; @param x0   leftmost patch column of the rectangle
+;; @param x1   rightmost patch column
+;; @param y0   bottom patch row
+;; @param y1   top patch row
+;; @context observer
+;; @side-effects moves every place in `gps`
+to arrange-on-grid [gps x0 x1 y0 y1]
+  let #places count gps
+  if #places = 0 [stop]
+
+  let usable-width x1 - x0
+  let usable-height y1 - y0
+  let #columns min (list #places (max (list 1 (ceiling sqrt (#places * (usable-width + 1) / (usable-height + 1))))))
+  let #rows ceiling (#places / #columns)
+
+  let column-spacing ifelse-value (#columns > 1) [usable-width / (#columns - 1)] [0]
+  let row-spacing ifelse-value (#rows > 1) [usable-height / (#rows - 1)] [0]
+
+  let index 0
+  foreach sort gps [ a-place ->
+    let column index mod #columns
+    let row floor (index / #columns)
+    let x ifelse-value (#columns > 1) [x0 + column * column-spacing] [(x0 + x1) / 2]
+    let y ifelse-value (#rows > 1) [y1 - row * row-spacing] [(y0 + y1) / 2]
+    ask a-place [setxy x y]
+    set index index + 1
+  ]
+end
+
+;; The bounds of band `index` when `lo`..`hi` is cut into `#bands` equal bands.
+;;
+;; Bands are contiguous and whole patches wide: rounding is done on the cuts rather
+;; than on the widths, so no row is ever left over or counted twice.
+;;
+;; @param lo      first patch row or column of the range
+;; @param hi      last patch row or column
+;; @param #bands  how many bands to cut it into
+;; @param index   which band is wanted, counting from 0
+;; @return a two-element list, (first row or column, last row or column)
+to-report band-bounds [lo hi #bands index]
+  let band-size (hi - lo + 1) / #bands
+  report (list (lo + round (index * band-size)) (lo + round ((index + 1) * band-size) - 1))
+end
+
+;#endregion
+
+;; Restrict `value` to the closed range [`low`, `high`].
+;;
+;; @param low    lower bound
+;; @param high   upper bound
+;; @param value  the value to restrict
+;; @return `value`, pinned to the nearest bound if it lies outside the range
+to-report clamped [low high value]
+  report min (list high (max (list low value)))
 end
