@@ -1,5 +1,3 @@
-;;here one should also include caring for children.
-;;Now it's highjacking the decision process
 
 to-report my-available-activity-descriptors
   ;conditional for migration activity
@@ -12,27 +10,34 @@ to-report my-available-activity-descriptors
 ;   ]
   
   ;add resting at home for SLEEP need
-  let activities (list (list one-of home-gathering-type "rest"))
+  ;now the people actually go to their own home to sleep
+  let activities (list (list my-home rest-motive))
 
   ;get food
   ;from store any day except sundays
    if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week != "sunday")
-    [ set activities (lput (activity-descriptor one-of stores-gathering-type "get food") activities)]    
-   
-    if day-of-the-week = "saturday" or day-of-the-week = "sunday" and slice-of-the-day = "afternoon"
-    [ set activities (lput (activity-descriptor one-of markets-gathering-type "get food") activities)]
+    [
+      set activities (lput (activity-descriptor my-store food-motive ) activities)
+    ]
 
-  
+  ;get food
+  ;from markets on saturday or sunday afternoons 
+  if day-of-the-week = "saturday" or day-of-the-week = "sunday" and slice-of-the-day = "afternoon"
+    [
+      set activities (lput (activity-descriptor my-market food-motive) activities)
+    ]
+
+  ;work motive
   ;work during the week
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
     [
-      if is-female? [set activities (lput (activity-descriptor one-of home-gathering-type "work") activities)]
-    ;  print "i go to work"
+      if is-female? [set activities (lput (activity-descriptor my-work work-motive) activities)]
+      print "i go to work as woman"
       
-      if is-male? [set activities (lput (activity-descriptor one-of workplace-mine-gathering-type "work") activities)]
-    ;  print "i also go to work"
+      if is-male? [set activities (lput (activity-descriptor my-work work-motive) activities)]
+      print "i also go to work"
 
-        ;go to school
+   ;go to school
 ;       if is-child? [set activities (lput (activity-descriptor my-school  "school") activities)]
 ;     print "i  go to school"
   ]  
@@ -63,8 +68,9 @@ to-report my-available-activity-descriptors
   ;visits
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
-  ;set activities lput (activity-descriptor my-networks-home "visits") activities
-   ; print "i go to visit family"
+    ;visit my own home
+  set activities lput (activity-descriptor my-home "visits") activities
+    print "i go to visit family"
     ]
  
   

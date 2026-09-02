@@ -13,7 +13,7 @@ to execute-activity-effect
     stop
   ]
 
-;  update-resources-based-on-current-activity
+ ; update-resources-based-on-current-activity
 
   ;might be interesting to hold this variable as an integer, for storing when the next shopping will be needed
   ;additionally, we might want at some point to hold additional variables within homes (i.e. one person getting the food for the whole community)
@@ -29,7 +29,6 @@ end
 
 ; Create a list describing an activity based on a gathering point and a motive
 ; gathering-point is a breed
-; Q: Why only 2 elements in the returned list when there is a function social-distancing-of that extract the third element of this list?
 
 to-report activity-descriptor [a-gathering-point a-motive]
   if not is-gathering-point? a-gathering-point [error (sentence a-gathering-point "should be a gathering point")]
@@ -56,9 +55,6 @@ end
 ;   error (sentence "dont know if mourning yet")
 ; end
 
-to-report is-forced-to-be-here?
-  report is-forced-motive? current-motivation
-end
 
 to-report is-being-away? [a]
   report a = away-gathering-point
@@ -105,7 +101,7 @@ end
 
 
 to-report #workers-working-at-agriculture
-  report count workers with [is-working? and [gathering-type] of my-work = "agriculture"]
+  report count workers with [is-working? and [gathering-type] of my-work = "workplace-agriculture"]
 end
 
 to-report #workers-working-at-church
@@ -159,7 +155,6 @@ to-report is-learning?
 end
 
 
-
 to-report is-getting-tested?
   report current-motivation = "get-tested"
 end
@@ -168,13 +163,7 @@ end
 ;;;please modify from here for ebola
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-to-report is-performing-essential-shopping?
-  report is-essential-shop-gathering-point? current-motivation
-end
 
-to-report is-essential-shop-gathering-point? [a-gathering-point]
-  report a-gathering-point = "essential shopping"
-end
 
 
 to-report is-performing-shopping?
@@ -216,23 +205,6 @@ to-report is-home-gathering-point? [location]
   report [gathering-type] of location = "home"
 end
 
-to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
-  if
-  is-home-gathering-point? location-of an-activity-descriptor
-  or ([is-hospital?] of first an-activity-descriptor and motive-of an-activity-descriptor = "get-tested")
-  or (is-a-shopping-motivation? motive-of an-activity-descriptor)
-  or (is-a-leisure-motivation? motive-of an-activity-descriptor)
-  or motive-of an-activity-descriptor = treatment-motive
-  [report true]
-
-  if
-  ([ is-hospital? or is-workplace? or is-store? or is-school?] of location-of an-activity-descriptor)
-  and (motive-of an-activity-descriptor = learning-motive or
-    is-contractual-obligation? motive-of an-activity-descriptor)
-  [report false]
-
-  error (sentence "unimplemented" [gathering-type] of first an-activity-descriptor last an-activity-descriptor)
-end
 
 to perform-people-activities
   reset-timer
@@ -294,9 +266,33 @@ end
 
 
 
+;#region garbage
+to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
+  if
+  is-home-gathering-point? location-of an-activity-descriptor
+  or ([is-hospital?] of first an-activity-descriptor and motive-of an-activity-descriptor = "get-tested")
+  or (is-a-shopping-motivation? motive-of an-activity-descriptor)
+  or (is-a-leisure-motivation? motive-of an-activity-descriptor)
+  or motive-of an-activity-descriptor = treatment-motive
+  [report true]
+
+  if
+  ([ is-hospital? or is-workplace? or is-store? or is-school?] of location-of an-activity-descriptor)
+  and (motive-of an-activity-descriptor = learning-motive or
+    is-contractual-obligation? motive-of an-activity-descriptor)
+  [report false]
+
+  error (sentence "unimplemented" [gathering-type] of first an-activity-descriptor last an-activity-descriptor)
+end
 
 
+to-report is-performing-essential-shopping?
+  report is-essential-shop-gathering-point? current-motivation
+end
 
+to-report is-essential-shop-gathering-point? [a-gathering-point]
+  report a-gathering-point = "essential shopping"
+end
 
 ;;;,;;;;;;;,,LEGACY COVID
 
@@ -384,3 +380,13 @@ end
 
 ;   error (sentence "not implemented" [gathering-type] of current-activity current-motivation)
 ; end
+
+
+to-report is-forced-to-be-here?
+  report is-forced-motive? current-motivation
+end
+
+to-report is-forced-motive? [a-motive]
+  report a-motive = "mandatory"
+end
+;#endregion
