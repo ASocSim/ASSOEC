@@ -1,17 +1,27 @@
 
 to-report my-available-activity-descriptors
-  ;conditional for migration activity
-;   if migration? and is-away?
-;   [
-;     print "begin"
-;     if (not (random-float 1 < probability-getting-back-when-abroad)) [
-;       report (list (list away-gathering-point travelling-reason false))
-;     ]
-;   ]
-  
+    
   ;add resting at home for SLEEP need
   ;now the people actually go to their own home to sleep
   let activities (list (list my-home rest-motive))
+
+  if someone-died? 
+  [
+    set activities []
+    set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+
+    print (sentence "someone died, so I go to funeral" funeral-cemetery)
+
+    let ret []
+    foreach activities [ activity ->
+      set ret fput (lput false activity) ret
+  ]
+  report ret
+  ]
+  
+ ; set activities lput (list my-hospital "get treatment") activities
+
+  
 
   ;get food
   ;from store any day except sundays
@@ -21,8 +31,8 @@ to-report my-available-activity-descriptors
     ]
 
   ;get food
-  ;from markets on saturday or sunday afternoons 
-  if day-of-the-week = "saturday" or day-of-the-week = "sunday" and slice-of-the-day = "afternoon"
+  ;from markets on any afternoon 
+  if slice-of-the-day = "afternoon"
     [
       set activities (lput (activity-descriptor my-market food-motive) activities)
     ]
@@ -30,26 +40,23 @@ to-report my-available-activity-descriptors
   ;work motive
   ;work during the week
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
-    [
-      if is-female? [set activities (lput (activity-descriptor my-work work-motive) activities)]
-      print "i go to work as woman"
+  [
+      set activities (lput (activity-descriptor my-work work-motive) activities)
       
-      if is-male? [set activities (lput (activity-descriptor my-work work-motive) activities)]
-      print "i also go to work"
-
-   ;go to school
-;       if is-child? [set activities (lput (activity-descriptor my-school  "school") activities)]
-;     print "i  go to school"
+      ;print (sentence "working day for me:" is-working-day-for-me? " my work is" [gathering-type] of my-work " my motive is" work-motive)
   ]  
   
   
   ;attend religious gathering,
   ;on sunday we can go to religious gathering 
   if (day-of-the-week = "sunday" and slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
-    set activities (lput (activity-descriptor one-of churches-gathering-type "attend religious gathering") activities)]
+    set activities (lput (activity-descriptor my-church spiritual-motive) activities)]
   
   ;organize funeral
-  ;not now
+  if someone-died?
+  [
+    set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+  ]
   
   ;get treatment
 ;; THIS NEEDS TO BE EXPANDED FOR THE PIVOTAL CHOICE OF GOING TO HOSPITAL OR NOT
@@ -69,12 +76,16 @@ to-report my-available-activity-descriptors
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
     ;visit my own home
-  set activities lput (activity-descriptor my-home "visits") activities
-    print "i go to visit family"
-    ]
+    set activities lput (activity-descriptor one-of homes social-motive) activities
+    ;print "i go to visit family"
+  ]
  
   
-;leisure
+
+;;hacky funeral test
+;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
+;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
+
   
  ; set activities lput (list my-hospital "get treatment") activities
 

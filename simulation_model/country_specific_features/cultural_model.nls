@@ -82,102 +82,7 @@ to set-initial-need-satisfaction-levels-ebo
   ]
 end
 
-; to set-social-distance-profile
-;   ask people [
-;     ;Calibrate social distance variables
-;     ifelse make-social-distance-profile-value-based? [
 
-;       ;extroverts tend to value achievement, stimulation, hedonism (Roccas et al., 2002)
-;       ;extroversion relates to tendency to approach / interact with people.
-;       let extroversion (importance-given-to-achievement-value + importance-given-to-stimulation-value + (0.5 * importance-given-to-hedonism-value)) / 2.5
-;       set extroversion extroversion / 100
-
-;       ;introverts tend to value conformity & tradition, security (Roccas et al., 2002)
-;       ;introversion relates to tendency to avoid / not interact with people.
-;       let introversion (importance-given-to-conformity-tradition-value + importance-given-to-security-value) / 2
-;       set introversion introversion / 100
-
-;       ifelse extroversion > introversion [
-;         ;the more extrovert the agent, the HIGHER its social distance profile.
-;         set social-distance-profile clamp 0 1 random-normal extroversion std-dev-social-distance-profile
-;       ][
-;         ;the more introvert the agent, the LOWER its social distance profile.
-;         set social-distance-profile clamp 0 1 random-normal (1 - introversion) std-dev-social-distance-profile
-;       ]
-;     ][
-;       ;if social-distance-profile is not value based? then set it according to the relevant slider settings
-;       set social-distance-profile clamp 0 1 random-normal mean-social-distance-profile std-dev-social-distance-profile
-;     ]
-;     set is-I-apply-social-distancing? false
-;   ]
-; end
-
-
-; to recalibrate-value-system-according-to-age-group-of-agent
-;  ask people [
-
-;     ;coefficients based on "Correlations of Value Priorities with Age" (see http://essedunet.nsd.uib.no/cms/topics/1/2/2.html)
-;     let HED_coeff -0.34
-;     let STM_coeff -0.38
-;     let SD_coeff -0.06
-;     let UNI_coeff 0.12
-;     let BEN_coeff 0.13
-;     let CT_coeff 0.33
-;     let SEC_coeff 0.26
-;     let POW_coeff -0.07
-;     let ACH_coeff -0.25
-
-;     let coeffs (list
-;       HED_coeff
-;       STM_coeff
-;       SD_coeff
-;       UNI_coeff
-;       BEN_coeff
-;       CT_coeff
-;       SEC_coeff
-;       POW_coeff
-;       ACH_coeff)
-
-;     ;internal checks:
-;     ;show word "my age is: " age
-
-;     let value_system (list
-;       importance-given-to-hedonism-value
-;       importance-given-to-stimulation-value
-;       importance-given-to-self-direction-value
-;       importance-given-to-universalism-value
-;       importance-given-to-benevolence-value
-;       importance-given-to-conformity-tradition-value
-;       importance-given-to-security-value
-;       importance-given-to-power-value
-;       importance-given-to-achievement-value)
-
-;     ;internal checks:
-;     ;show word "non-updated value system: " value_system
-    
-;     let weight 0
-;     let recalibrated_value_system []
-;     if age = "young" [set weight 3 * influence-of-age-on-value-system]
-;     if age = "student" [set weight 2 * influence-of-age-on-value-system]
-;     if age = "worker" [set weight 1 * influence-of-age-on-value-system]
-;     if age = "retired" [set weight 0 * influence-of-age-on-value-system]
-;     set recalibrated_value_system (map [ [c v] -> clamp 0 100 (v - (c * weight)) ] coeffs value_system)
-    
-;     ;internal checks:
-;     ;show word "calibrated value system: " recalibrated_value_system
-    
-;     set importance-given-to-hedonism-value item 0 recalibrated_value_system
-;     set importance-given-to-stimulation-value item 1 recalibrated_value_system
-;     set importance-given-to-self-direction-value item 2 recalibrated_value_system
-;     set importance-given-to-universalism-value item 3 recalibrated_value_system
-;     set importance-given-to-benevolence-value item 4 recalibrated_value_system
-;     set importance-given-to-conformity-tradition-value item 5 recalibrated_value_system
-;     set importance-given-to-security-value item 6 recalibrated_value_system
-;     set importance-given-to-power-value item 7 recalibrated_value_system
-;     set importance-given-to-achievement-value item 8 recalibrated_value_system
-    
-;   ]
-; end
 
  to calibrate-importance-weights-of-needs
 
@@ -379,7 +284,9 @@ end
 ;   ]
 ; end
 
-
+;;
+;;WHERE IS THE DATA?!!!???
+;;
 to load-nations-hofstede-dimension-scores
   
   ;COVID legacy
@@ -485,3 +392,107 @@ to-report return-position-of-item-from-list [#criteria #list]
   let result filter [ i -> item i #list = #criteria ] indices
   report result
 end
+
+
+
+;#region GARBAGE
+
+
+; to set-social-distance-profile
+;   ask people [
+;     ;Calibrate social distance variables
+;     ifelse make-social-distance-profile-value-based? [
+
+;       ;extroverts tend to value achievement, stimulation, hedonism (Roccas et al., 2002)
+;       ;extroversion relates to tendency to approach / interact with people.
+;       let extroversion (importance-given-to-achievement-value + importance-given-to-stimulation-value + (0.5 * importance-given-to-hedonism-value)) / 2.5
+;       set extroversion extroversion / 100
+
+;       ;introverts tend to value conformity & tradition, security (Roccas et al., 2002)
+;       ;introversion relates to tendency to avoid / not interact with people.
+;       let introversion (importance-given-to-conformity-tradition-value + importance-given-to-security-value) / 2
+;       set introversion introversion / 100
+
+;       ifelse extroversion > introversion [
+;         ;the more extrovert the agent, the HIGHER its social distance profile.
+;         set social-distance-profile clamp 0 1 random-normal extroversion std-dev-social-distance-profile
+;       ][
+;         ;the more introvert the agent, the LOWER its social distance profile.
+;         set social-distance-profile clamp 0 1 random-normal (1 - introversion) std-dev-social-distance-profile
+;       ]
+;     ][
+;       ;if social-distance-profile is not value based? then set it according to the relevant slider settings
+;       set social-distance-profile clamp 0 1 random-normal mean-social-distance-profile std-dev-social-distance-profile
+;     ]
+;     set is-I-apply-social-distancing? false
+;   ]
+; end
+
+
+; to recalibrate-value-system-according-to-age-group-of-agent
+;  ask people [
+
+;     ;coefficients based on "Correlations of Value Priorities with Age" (see http://essedunet.nsd.uib.no/cms/topics/1/2/2.html)
+;     let HED_coeff -0.34
+;     let STM_coeff -0.38
+;     let SD_coeff -0.06
+;     let UNI_coeff 0.12
+;     let BEN_coeff 0.13
+;     let CT_coeff 0.33
+;     let SEC_coeff 0.26
+;     let POW_coeff -0.07
+;     let ACH_coeff -0.25
+
+;     let coeffs (list
+;       HED_coeff
+;       STM_coeff
+;       SD_coeff
+;       UNI_coeff
+;       BEN_coeff
+;       CT_coeff
+;       SEC_coeff
+;       POW_coeff
+;       ACH_coeff)
+
+;     ;internal checks:
+;     ;show word "my age is: " age
+
+;     let value_system (list
+;       importance-given-to-hedonism-value
+;       importance-given-to-stimulation-value
+;       importance-given-to-self-direction-value
+;       importance-given-to-universalism-value
+;       importance-given-to-benevolence-value
+;       importance-given-to-conformity-tradition-value
+;       importance-given-to-security-value
+;       importance-given-to-power-value
+;       importance-given-to-achievement-value)
+
+;     ;internal checks:
+;     ;show word "non-updated value system: " value_system
+    
+;     let weight 0
+;     let recalibrated_value_system []
+;     if age = "young" [set weight 3 * influence-of-age-on-value-system]
+;     if age = "student" [set weight 2 * influence-of-age-on-value-system]
+;     if age = "worker" [set weight 1 * influence-of-age-on-value-system]
+;     if age = "retired" [set weight 0 * influence-of-age-on-value-system]
+;     set recalibrated_value_system (map [ [c v] -> clamp 0 100 (v - (c * weight)) ] coeffs value_system)
+    
+;     ;internal checks:
+;     ;show word "calibrated value system: " recalibrated_value_system
+    
+;     set importance-given-to-hedonism-value item 0 recalibrated_value_system
+;     set importance-given-to-stimulation-value item 1 recalibrated_value_system
+;     set importance-given-to-self-direction-value item 2 recalibrated_value_system
+;     set importance-given-to-universalism-value item 3 recalibrated_value_system
+;     set importance-given-to-benevolence-value item 4 recalibrated_value_system
+;     set importance-given-to-conformity-tradition-value item 5 recalibrated_value_system
+;     set importance-given-to-security-value item 6 recalibrated_value_system
+;     set importance-given-to-power-value item 7 recalibrated_value_system
+;     set importance-given-to-achievement-value item 8 recalibrated_value_system
+    
+;   ]
+; end
+
+;#endregion

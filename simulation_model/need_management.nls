@@ -280,7 +280,7 @@ to-report SUE-social-status [ad]
     if ([gathering-type] of gp = "store") and (motive = "get food")[
       report 0.4]
   ][
-    if ([gathering-type] of gp = my-work ) and (motive = "work")[report 0.4]
+    if ([gathering-type] of gp = [gathering-type] of my-work ) and (motive = "work")[report 0.4]
   ]
 ;   if age = "young" [
 ;       if (gp = my-school ) and (motive = "learn")[

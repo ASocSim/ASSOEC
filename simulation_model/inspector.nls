@@ -13,7 +13,7 @@ to setup-agent-inspector
   ]
   set inspector-file (word inspector-file "_run" behaviorspace-run-number ".csv")
   if inspect-to-file? [
-    set inspected-youth one-of youngs
+    ;set inspected-youth one-of youngs
     set inspected-student one-of students
     set inspected-worker one-of workers
 
@@ -27,7 +27,7 @@ end
 
 to inspect-agents
   if inspect-to-file? [
-    if inspected-youth = nobody and any? youngs [ set inspected-youth one-of youngs ]
+    ;if inspected-youth = nobody and any? youngs [ set inspected-youth one-of youngs ]
     if inspected-student = nobody and any? students [ set inspected-student one-of students ]
     if inspected-worker = nobody and any? workers [ set inspected-worker one-of workers ]
 

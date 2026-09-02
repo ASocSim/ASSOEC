@@ -28,7 +28,7 @@ to-report treatment-motive
 end
 
 to-report work-motive
-  report "contractual obligation"
+  report "work"
 end
   
 to-report travelling-motive
@@ -37,4 +37,12 @@ end
 
 to-report learning-motive
   report "learning"
+end
+
+to-report funeral-motive
+  report "funeral"
+end
+
+to-report visit-motive
+  report "visit"
 end

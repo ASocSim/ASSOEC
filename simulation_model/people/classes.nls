@@ -6,7 +6,7 @@ to-report female-sex
   report "female"
 end
 
-to-report females
+to-report female-agentset
   report people with [is-female?]
 end
 
@@ -15,7 +15,7 @@ to-report male-sex
   report "male"
 end
 
-to-report males
+to-report male-agentset
   report people with [is-male?]
 end
 
@@ -24,40 +24,3 @@ to-report all-sexes
   report (list female-sex male-sex)
 end
 
-;;LEGACY COVID;;;;;; might use
-
-to-report is-parent?
-  report is-worker? and any? my-housemates with [is-young?]
-end
-
-to-report parents
-  report people with [is-parent?]
-end
-
-
-to-report young-age
-   report "young"
- end
-
-to-report youngs
-  report people with [is-young?]
-end
-
-
-;;;;;LEGACY COVID;;;;;;
-
-; to-report worker-age
-;   report "worker"
-; end
-
-; to-report student-age
-;   report "student"
-; end
-
-; to-report retired-age
-;   report "retired"
-; end
-
-; to-report all-ages
-;   report (list young-age student-age worker-age retired-age)
-; end

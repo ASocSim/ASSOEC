@@ -1,5 +1,37 @@
+;; @file activity_model.nls
+;; @brief Activity descriptors, the predicates that ask what a person is doing,
+;; and the tick loop that makes everyone do it.
+;;
+;; An *activity descriptor* is the unit of choice in this model: a small list
+;; pairing a gathering point with a motive, built by `activity-descriptor` and
+;; read back with `location-of` and `motive-of`. `select_activity.nls` offers a
+;; person the descriptors available to them, `need_management.nls` scores them,
+;; and `perform-people-activities` here carries out the winner.
+;;
+;; Most of the file is one-line predicates over `current-activity` and
+;; `current-motivation`, so that the rest of the model can ask "is this person at
+;; work?" without knowing how that is stored.
+;;
+;; @note Motive strings are in transition. motives.nls defines constants
+;; (`work-motive` is "contractual obligation"), while `select_activity.nls`
+;; records bare strings such as "work". Predicates below that test the constants
+;; therefore never fire on descriptors the Ebola build actually produces.
+;; @see decision/select_activity.nls
+;; @see motives.nls
+;; @see docs/WIP_ISSUES.md
+
 __includes ["motives.nls" "transport.nls"]
 
+;; Apply the consequences of the activity this person has just performed.
+;;
+;; Hospital beds are claimed and released here: a person who is being treated
+;; takes a bed if they have none, and anyone holding a bed for any other reason
+;; gives it back. An activity the person was turned away from has no further
+;; effect. Otherwise the activity updates what the person believes.
+;;
+;; @context person
+;; @side-effects acquires or releases a hospital bed, and updates beliefs
+;; @see update-belief-based-on-current-activity
 to execute-activity-effect
   if is-currently-allocated-a-bed-in-hospital? and not (current-motivation = treatment-motive) [
     release-bed-in-hospital
@@ -13,7 +45,7 @@ to execute-activity-effect
     stop
   ]
 
- ; update-resources-based-on-current-activity
+  ;update-resources-based-on-current-activity
 
   ;might be interesting to hold this variable as an integer, for storing when the next shopping will be needed
   ;additionally, we might want at some point to hold additional variables within homes (i.e. one person getting the food for the whole community)
@@ -27,24 +59,52 @@ to execute-activity-effect
 
 end
 
-; Create a list describing an activity based on a gathering point and a motive
-; gathering-point is a breed
 
+
+;; Build an activity descriptor: a place paired with a reason for being there.
+;;
+;; This is the only supported way to construct a descriptor, and it checks that
+;; the place really is a gathering point rather than, say, a bare string.
+;;
+;; @param a-gathering-point  where the activity happens
+;; @param a-motive           why the person would go there
+;; @return a two-element list, read back with `location-of` and `motive-of`
+;; @see location-of
+;; @see motive-of
+;; @note Descriptors gain a third element - a social-distancing flag - only later,
+;; where `my-available-activity-descriptors` appends `false` to each of them.
 to-report activity-descriptor [a-gathering-point a-motive]
   if not is-gathering-point? a-gathering-point [error (sentence a-gathering-point "should be a gathering point")]
 
   report (list a-gathering-point a-motive)
 end
 
-; Why this not called gathering-point?
+;; The place an activity descriptor refers to.
+;;
+;; @param an-activity-descriptor  the descriptor to read
+;; @return a gathering point
+;; @note Named for its position in the descriptor rather than for its type; it
+;; always reports a gathering point.
 to-report location-of [an-activity-descriptor]
   report item 0 an-activity-descriptor
 end
 
+;; The reason an activity descriptor gives for going somewhere.
+;;
+;; @param an-activity-descriptor  the descriptor to read
+;; @return a motive string
 to-report motive-of [an-activity-descriptor]
   report item 1 an-activity-descriptor
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param an-activity-descriptor  work in progress
+;; @return work in progress
+;; @todo Reads a third element that `activity-descriptor` never creates. See
+;; docs/WIP_ISSUES.md#social-distancing-of.
 to-report social-distancing-of [an-activity-descriptor]
   report item 2 an-activity-descriptor
 end
@@ -56,22 +116,51 @@ end
 ; end
 
 
+
+;; True when `a` is the abroad placeholder gathering point.
+;;
+;; @param a  a gathering point
+;; @return true if `a` is `away-gathering-point`
 to-report is-being-away? [a]
   report a = away-gathering-point
 end
 
+;; True when this person is working and is at their own workplace.
+;;
+;; @context person
+;; @return true if working, at `my-work`
+;; @see is-working?
 to-report is-working-at-work?
   report is-working? and is-at-work?
 end
 
+;; True when this person's current motive is work.
+;;
+;; @context person
+;; @return true if `current-motivation` is `work-motive`
+;; @note Never true in the current build: `work-motive` is "contractual
+;; obligation" while `select-activity` records the motive as "work".
 to-report is-working?
   report is-working-motive? current-motivation
 end
 
+;; True when `a-motive` is the work motive.
+;;
+;; @param a-motive  the motive string to test
+;; @return true if the motive is "contractual obligation"
+;; @note Duplicates `is-contractual-obligation?`, and both test the literal string
+;; rather than calling `work-motive`.
+;; @see is-contractual-obligation?
 to-report is-working-motive? [a-motive]
   report a-motive = "contractual obligation"
 end
 
+;; How many workers are working right now, anywhere.
+;;
+;; @return a count of people
+;; @note 0 in the current build, on both counts: `workers` is gated on `age`,
+;; which nothing assigns, and `is-working?` tests a motive string the Ebola build
+;; never produces.
 to-report #workers-working
   report count workers with [is-working?]
 end
@@ -79,82 +168,170 @@ end
 ;;;WORKERS AT EACH WORKING PLACE
 
 
+;; How many workers are working at a hospital right now.
+;;
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-hospital
   report count workers with [is-working? and [gathering-type] of my-work = "hospital"]
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Tests the gathering type "workplace-mines"; the type created at setup is
+;; "workplace-mine". See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
 to-report #workers-working-at-mine
   report count workers with [is-working? and [gathering-type] of my-work = "workplace-mines"]
 end
 
+;; How many workers are working at a school right now.
+;;
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-school
   report count workers with [is-working? and [gathering-type] of my-work = "school"]
 end
 
+;; How many workers are working at a store right now.
+;;
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-store
   report count workers with [is-working? and [gathering-type] of my-work = "store"]
 end
 
+;; How many workers are working at a market right now.
+;;
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-market
   report count workers with [is-working? and [gathering-type] of my-work = "market"]
 end
 
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Tests the gathering type "agriculture"; the type created at setup is
+;; "workplace-agriculture". See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
 to-report #workers-working-at-agriculture
-  report count workers with [is-working? and [gathering-type] of my-work = "workplace-agriculture"]
+  report count workers with [is-working? and [gathering-type] of my-work = "agriculture"]
 end
 
+;; How many workers are working at a church right now.
+;;
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-church
   report count workers with [is-working? and [gathering-type] of my-work = "church"]
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @return work in progress
+;; @todo Tests the gathering type "house"; the type created at setup is "home".
+;; See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
 to-report #workers-working-at-house
   report count workers with [is-working? and [gathering-type] of my-work = "house"]
 end
 
 
 
+;; The motive recorded when a person tags along with whoever is looking after them.
+;;
+;; @return the string "follow person in charge"
+;; @see perform-people-activities
 to-report follow-person-in-charge-motive
   report "follow person in charge"
 end
 
 
+;; True when this person owes work time on this tick: a working-age adult, on a
+;; weekday, in the morning or afternoon.
+;;
+;; @context person
+;; @return true if this person should be at work now
+;; @note Never true in the current build: nothing assigns `age`.
 to-report is-I-have-contractual-obligations?
   report age = "worker" and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
   and not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
 end
 
+;; True when the descriptor means "rest at my own home".
+;;
+;; @param an-activity-descriptor  the descriptor to test
+;; @context person
+;; @return true if the descriptor pairs `my-home` with the "rest" motive
 to-report is-rest-at-home-descriptor? [an-activity-descriptor]
   report location-of an-activity-descriptor = my-home and motive-of an-activity-descriptor = "rest"
 end
 
+;; True when this person is resting and is at their own home.
+;;
+;; @context person
+;; @return true if resting at `my-home`
 to-report is-resting-at-home?
   report is-resting?
   and is-at-home?
 end
 
+;; True when this person's current motive is rest.
+;;
+;; @context person
+;; @return true if `current-motivation` is "rest"
 to-report is-resting?
   report current-motivation = "rest"
 end
 
+;; True when this person's current motive is leisure.
+;;
+;; @context person
+;; @return true if `current-motivation` is "relaxing"
+;; @note The Ebola build never offers a "relaxing" activity, so this is currently
+;; always false.
 to-report is-relaxing?
   report current-motivation = "relaxing"
 end
 
-; Q: why an activity is a location?
+;; True when this person is at their own home.
+;;
+;; @context person
+;; @return true if `current-activity` is `my-home`
+;; @note `current-activity` holds a place, not an activity - the motive is kept
+;; separately in `current-motivation`.
 to-report is-at-home?
   report  current-activity = my-home
 end
 
+;; True when this person is at a school under compulsion.
+;;
+;; @context person
+;; @return true if at a school with the "mandatory" motive
 to-report is-forced-to-be-in-school?
   report [gathering-type] of current-activity = "school" and current-motivation = "mandatory"
 end
 
+;; True when this person's current motive is learning.
+;;
+;; @context person
+;; @return true if `current-motivation` is `learning-motive`
 to-report is-learning?
   report current-motivation = learning-motive
 end
 
 
+
+;; True when this person's current motive is being tested.
+;;
+;; @context person
+;; @return true if `current-motivation` is "get-tested"
 to-report is-getting-tested?
   report current-motivation = "get-tested"
 end
@@ -163,55 +340,158 @@ end
 ;;;please modify from here for ebola
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Passes a motive to a predicate that names a gathering point. See
+;; docs/WIP_ISSUES.md#is-performing-essential-shopping--and-is-essential-shop-gathering-point-.
+to-report is-performing-essential-shopping?
+  report is-essential-shop-gathering-point? current-motivation
+end
+
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @param a-gathering-point  work in progress
+;; @return work in progress
+;; @todo Named for a gathering point but compares against a motive string. See
+;; docs/WIP_ISSUES.md#is-performing-essential-shopping--and-is-essential-shop-gathering-point-.
+to-report is-essential-shop-gathering-point? [a-gathering-point]
+  report a-gathering-point = "essential shopping"
+end
 
 
-
+;; True when this person's current motive is shopping of either kind.
+;;
+;; @context person
+;; @return true if the motive is essential or non-essential shopping
+;; @see is-a-shopping-motivation?
 to-report is-performing-shopping?
   report is-a-shopping-motivation? current-motivation
 end
 
 
+;; True when this person is shopping for non-essentials, at a non-essential shop.
+;;
+;; @context person
+;; @return true if both the motive and the place are non-essential
+;; @note Never true in the Ebola build, which creates no "non-essential-shop"
+;; gathering points.
 to-report is-performing-non-essential-shopping?
   report is-a-non-essential-shopping-motivation? current-motivation and
   is-a-non-essential-gathering-point? current-activity
 end
 
+;; True when `a-gathering-point` is a non-essential shop.
+;;
+;; @param a-gathering-point  the place to test
+;; @return true if its `gathering-type` is "non-essential-shop"
+;; @note The Ebola build creates no such places.
 to-report is-a-non-essential-gathering-point? [a-gathering-point]
   report [gathering-type] of a-gathering-point = "non-essential-shop"
 end
 
+;; True when `a-motive` is shopping for non-essentials.
+;;
+;; @param a-motive  the motive string to test
+;; @return true if the motive is "shopping"
 to-report is-a-non-essential-shopping-motivation? [a-motive]
   report  a-motive = "shopping"
 end
 
+;; True when `a-motive` is shopping of either kind.
+;;
+;; @param a-motive  the motive string to test
+;; @return true if the motive is essential or non-essential shopping
 to-report is-a-shopping-motivation? [a-motive]
   report is-essential-shop-gathering-point? a-motive or
   is-a-non-essential-shopping-motivation? a-motive
 end
 
+;; How much food this person buys in one shopping trip.
+;;
+;; Enough to feed everyone in their household for the configured number of days.
+;;
+;; @context person
+;; @return a number of rations
+;; @unit person-days of food
 to-report amount-of-rations-I-buy-when-going-to-essential-shops
   report days-of-rations-bought * count [gatherers] of my-home
 end
 
+;; True when `a-motive` is leisure.
+;;
+;; @param a-motive  the motive string to test
+;; @return true if the motive is "relaxing"
 to-report is-a-leisure-motivation? [a-motive]
   report a-motive = "relaxing"
 end
 
+;; True when `a-motive` is the work motive.
+;;
+;; @param a-motive  the motive string to test
+;; @return true if the motive is "contractual obligation"
+;; @see is-working-motive?
 to-report  is-contractual-obligation? [a-motive]
   report a-motive = "contractual obligation"
 end
 
+;; True when `location` is a home.
+;;
+;; @param location  the place to test
+;; @return true if its `gathering-type` is "home"
 to-report is-home-gathering-point? [location]
   report [gathering-type] of location = "home"
 end
 
+;; Whether a child in someone's care could be brought along to this activity.
+;;
+;; Anything at a home, a hospital test, shopping, leisure and treatment can be
+;; done with a dependant in tow. Work and school cannot. Anything else raises an
+;; error rather than guessing, so that a new activity type is noticed here.
+;;
+;; @param an-activity-descriptor  the activity being considered
+;; @return true if a dependant can come along
+;; @context person
+;; @side-effects raises an error for any descriptor the rules above do not cover
+to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
+  if
+  is-home-gathering-point? location-of an-activity-descriptor
+  or ([is-hospital?] of first an-activity-descriptor and motive-of an-activity-descriptor = "get-tested")
+  or (is-a-shopping-motivation? motive-of an-activity-descriptor)
+  or (is-a-leisure-motivation? motive-of an-activity-descriptor)
+  or motive-of an-activity-descriptor = treatment-motive
+  [report true]
 
+  if
+  ([ is-hospital? or is-workplace? or is-store? or is-school?] of location-of an-activity-descriptor)
+  and (motive-of an-activity-descriptor = learning-motive or
+    is-contractual-obligation? motive-of an-activity-descriptor)
+  [report false]
+
+  error (sentence "unimplemented" [gathering-type] of first an-activity-descriptor last an-activity-descriptor)
+end
+
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo The capacity pass selects the people whose activity is *not* here, and
+;; the procedure still prints and resets the timer every tick. See
+;; docs/WIP_ISSUES.md#perform-people-activities.
 to perform-people-activities
   reset-timer
   print (sentence "performing activities for" count people "people")
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
     select-activity
+
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
 
     if is-currently-in-situation-of-active-dependence? and current-person-I-depend-on != nobody
@@ -223,6 +503,10 @@ to perform-people-activities
 
   ;travelling-to-activity-phase
   
+  ;; there are more failure conditions in this model than just whether the place is open and under capacity. 
+  ;;For example, a person might be turned away from a hospital if they are not sick enough to be treated, or from a school if they are not enrolled there. 
+  ;;The model currently does not implement those checks, so it assumes that if a person has selected an activity, 
+  ;they will be able to perform it successfully, unless the place is closed or over capacity.
   ask people with [[capacity = disabled-capacity] of current-activity or not [is-operating?] of current-activity] [
     set is-activity-successful? true
   ]
@@ -251,11 +535,22 @@ to perform-people-activities
   ; runs straight after this
 end
 
+;; True when the descriptor means "go to a hospital to be treated".
+;;
+;; @param an-activity-descriptor  the descriptor to test
+;; @return true if the place is a hospital and the motive is `treatment-motive`
 to-report is-get-healed-to-hospital-descriptor? [an-activity-descriptor]
   report [is-hospital?] of location-of an-activity-descriptor and motive-of an-activity-descriptor = treatment-motive
 end
 
-;;loose definition, to be tightened if needed
+;; Whether this place is running at all.
+;;
+;; A place counts as operating as soon as anyone is hired there, whether or not
+;; the staff turned up on this tick.
+;;
+;; @context gathering-point
+;; @return true if the place has at least one hired worker
+;; @todo Loose definition, to be tightened once staffing matters.
 to-report is-operating?
   report any? hired-workers
 end
@@ -266,33 +561,9 @@ end
 
 
 
-;#region garbage
-to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
-  if
-  is-home-gathering-point? location-of an-activity-descriptor
-  or ([is-hospital?] of first an-activity-descriptor and motive-of an-activity-descriptor = "get-tested")
-  or (is-a-shopping-motivation? motive-of an-activity-descriptor)
-  or (is-a-leisure-motivation? motive-of an-activity-descriptor)
-  or motive-of an-activity-descriptor = treatment-motive
-  [report true]
-
-  if
-  ([ is-hospital? or is-workplace? or is-store? or is-school?] of location-of an-activity-descriptor)
-  and (motive-of an-activity-descriptor = learning-motive or
-    is-contractual-obligation? motive-of an-activity-descriptor)
-  [report false]
-
-  error (sentence "unimplemented" [gathering-type] of first an-activity-descriptor last an-activity-descriptor)
-end
 
 
-to-report is-performing-essential-shopping?
-  report is-essential-shop-gathering-point? current-motivation
-end
 
-to-report is-essential-shop-gathering-point? [a-gathering-point]
-  report a-gathering-point = "essential shopping"
-end
 
 ;;;,;;;;;;;,,LEGACY COVID
 
@@ -380,13 +651,3 @@ end
 
 ;   error (sentence "not implemented" [gathering-type] of current-activity current-motivation)
 ; end
-
-
-to-report is-forced-to-be-here?
-  report is-forced-motive? current-motivation
-end
-
-to-report is-forced-motive? [a-motive]
-  report a-motive = "mandatory"
-end
-;#endregion
