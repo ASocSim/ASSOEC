@@ -21,12 +21,19 @@ gathering-points-own [
   
   amount-of-capital
   
+<<<<<<< Updated upstream
   hired-workers
   stock-of-goods
   
   vacancies
   cached-number-of-participants
   capacity
+=======
+  vacancies                   ;;< jobs still unfilled, counted down during setup hiring
+  cached-number-of-participants ;;< memoised result of `expected-number-of-other-participants`, 0 until first computed
+  capacity                    ;;< how many people may be here at once, or `disabled-capacity` for no limit
+  crowd-slots-taken           ;;< display only: how many of the standing spots around this place have been handed out this tick, see `assign-crowd-positions`
+>>>>>>> Stashed changes
 ]
 
 ;the head of the link are people and the tail are gathering points

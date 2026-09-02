@@ -162,10 +162,25 @@ people-own [
   my-current-income
   my-expected-income
   
+<<<<<<< Updated upstream
   ;Other variables
   number-of-people-I-infected
   #days-I-should-remain-in-self-quarantining
   events-to-process
+=======
+;; @group Display
+;;
+;; Where the view should draw this person: the spot in the crowd at their
+;; `current-activity` that `assign-crowd-positions` gave them. Nothing but
+;; animation.nls reads these.
+  display-target-xcor         ;;< x coordinate this person is being drawn at, or walking towards
+  display-target-ycor         ;;< y coordinate this person is being drawn at, or walking towards
+
+;; @group Other
+  number-of-people-I-infected ;;< how many people this person has infected so far
+  #days-I-should-remain-in-self-quarantining ;;< remaining self-quarantine countdown; 0 when not quarantining
+  events-to-process           ;;< queue of event strings raised this tick and drained by `update-people-mind`
+>>>>>>> Stashed changes
 ]
 
 to update-people-epistemic-status
