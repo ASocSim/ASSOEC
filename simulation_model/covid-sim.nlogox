@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<model version="NetLogo 7.0.4" snapToGrid="false">
+<model version="NetLogo 7.0.3" snapToGrid="false">
   <code><![CDATA[extensions [profiler table]
 __includes [ "setup/setup-ebola.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls" ]
 breed [people person]
@@ -112,7 +112,7 @@ while [slice-of-the-day != "morning"] [go]</button>
       <choice type="string" value="U.S.A."></choice>
     </chooser>
     <note x="4065" y="22" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
-    <switch x="4065" y="56" height="40" on="false" variable="animate?" width="111" display="animate?"></switch>
+    <switch x="4065" y="56" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
     <switch x="4070" y="227" height="40" on="false" variable="log?" width="103" display="log?"></switch>
     <switch x="4186" y="56" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
     <chooser x="4066" y="105" height="60" variable="preset-scenario" current="0" width="242" display="preset-scenario">

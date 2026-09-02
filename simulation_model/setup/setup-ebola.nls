@@ -8,7 +8,7 @@ globals[]
 to setup-ebola
   clear-all
   reset-ticks
-  
+
   if clear-log-on-setup? [clear-logfile]
   if log? [print "debug mode active; this dramatically slows down computation speed"]
 ;   check-parameters
@@ -23,9 +23,6 @@ to setup-ebola
   set when-has-2%-infected-threshold-first-been-met? "never"
   set when-has-5%-infected-threshold-first-been-met? "never"
   set start-tick-of-global-quarantine "never"
-
-  
-
   
   setup-gathering-points-as-turtle-sets
   create-all-households

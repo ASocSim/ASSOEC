@@ -295,7 +295,7 @@ end
 
 to-report my-store
   let my-stores gathering-link-neighbors with [gathering-type = "store"]
-  report one-of my-stores with [self != my-work]
+  report one-of my-stores ;with [self != my-work]
 end
 
 to-report my-school

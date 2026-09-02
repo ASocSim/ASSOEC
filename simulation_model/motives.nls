@@ -1,5 +1,26 @@
-to-report is-forced-motive? [a-motive]
-  report a-motive = "mandatory"
+
+to-report rest-motive
+  report "rest"
+end
+
+to-report social-motive
+  report "socialize"
+end
+
+to-report leisure-motive
+  report "leisure"
+end
+
+to-report spiritual-motive
+  report "spirituality"
+end
+
+to-report grieving-motive
+  report "grieving"
+end
+
+to-report food-motive
+ report "get food"
 end
 
 to-report treatment-motive
@@ -17,5 +38,3 @@ end
 to-report learning-motive
   report "learning"
 end
-
-;i am commment
