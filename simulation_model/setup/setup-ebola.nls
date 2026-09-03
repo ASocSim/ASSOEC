@@ -168,7 +168,7 @@ end
    
   create-gathering-points #agriculture-gp 
   [
-    set vacancies 15
+    set vacancies 5
     set workplace-agriculture (turtle-set workplace-agriculture self)
     set hired-workers (turtle-set)
     set gathering-type "workplace-agriculture" set shape "square 2" set color green
@@ -501,9 +501,7 @@ to setup-relation-to-gathering-points
       set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
     ]
   ]
-
-  ;setup-worker-relation-to-gathering-point
-  ]
+ ]
 
 end
 
@@ -615,7 +613,6 @@ to  setup-worker-relation-to-gathering-point
   ]
   ask cemeteries
   [ 
-    print "Come work at the cemetery"
     ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
 
@@ -662,7 +659,8 @@ to  setup-worker-relation-to-gathering-point
     ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
     [
-      let potential-workers people with [my-work = 0 and is-male?]
+      let potential-workers people with [my-work = 0 ] ;and is-female?
+      ; print "I am unemployed, can I work in agriculture?"
       if (count potential-workers = 0) [stop]
       let potential-worker one-of potential-workers
       let hiring-agriculture self
@@ -678,8 +676,10 @@ to  setup-worker-relation-to-gathering-point
     set hired-workers (turtle-set people with [my-work = hiring-agriculture])
   ]
 
-  ask people with [my-work = 0 and is-male?]
+
+  ask people with [my-work = 0 ];and is-male?
   [
+    ;print "I am unemployed, can I work in mine?"
     let mine one-of workplace-mines
     set my-work mine
   ]
