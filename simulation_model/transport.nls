@@ -108,12 +108,12 @@ to-report my-probability-of-taking-a-shared-car
 end
 
 
-to move-on-display 
-  ask people
-  [
-    if not animate? [
-      move-to one-of [patches in-radius 3  with [pxcor > [pxcor] of myself]] of current-activity
-      set heading towards current-activity
-    ]
-  ]
+;; Put every person on the place they are at.
+;;
+;; @context observer
+;; @side-effects moves every person
+;; @deprecated Kept for `travelling-to-activity-phase`, itself dormant. Display
+;; code lives in animation.nls; call `move-people-to-their-activities` directly.
+to move-on-display
+  move-people-to-their-activities
 end

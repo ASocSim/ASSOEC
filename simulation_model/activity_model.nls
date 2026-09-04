@@ -45,7 +45,7 @@ to execute-activity-effect
     stop
   ]
 
-;  update-resources-based-on-current-activity
+  ;update-resources-based-on-current-activity
 
   ;might be interesting to hold this variable as an integer, for storing when the next shopping will be needed
   ;additionally, we might want at some point to hold additional variables within homes (i.e. one person getting the food for the whole community)
@@ -495,6 +495,7 @@ to perform-people-activities
   ask people [
     if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
     select-activity
+
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
 
     if is-currently-in-situation-of-active-dependence? and current-person-I-depend-on != nobody
@@ -506,6 +507,10 @@ to perform-people-activities
 
   ;travelling-to-activity-phase
   
+  ;; there are more failure conditions in this model than just whether the place is open and under capacity. 
+  ;;For example, a person might be turned away from a hospital if they are not sick enough to be treated, or from a school if they are not enrolled there. 
+  ;;The model currently does not implement those checks, so it assumes that if a person has selected an activity, 
+  ;they will be able to perform it successfully, unless the place is closed or over capacity.
   ask people with [[capacity = disabled-capacity] of current-activity or not [is-operating?] of current-activity] [
     set is-activity-successful? true
   ]
@@ -530,8 +535,8 @@ to perform-people-activities
     execute-activity-effect
     update-needs-for-playing (list current-activity current-motivation is-I-apply-social-distancing?)
   ]
-  animate-walk-to-goal
-
+  ; people are moved onto the place they picked by `update-display`, which `go`
+  ; runs straight after this
 end
 
 ;; True when the descriptor means "go to a hospital to be treated".

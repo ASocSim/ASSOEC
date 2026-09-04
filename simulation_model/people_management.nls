@@ -192,6 +192,14 @@ people-own [
   my-current-income           ;;< income received this tick; part of the dormant COVID economy
   my-expected-income          ;;< income this person expects from working, used by `SUE-financial-survival`
   
+;; @group Display
+;;
+;; Where the view should draw this person: the spot in the crowd at their
+;; `current-activity` that `assign-crowd-positions` gave them. Nothing but
+;; animation.nls reads these.
+  display-target-xcor         ;;< x coordinate this person is being drawn at, or walking towards
+  display-target-ycor         ;;< y coordinate this person is being drawn at, or walking towards
+
 ;; @group Other
   number-of-people-I-infected ;;< how many people this person has infected so far
   #days-I-should-remain-in-self-quarantining ;;< remaining self-quarantine countdown; 0 when not quarantining
@@ -233,24 +241,6 @@ to update-people-mind
  ; print (sentence "updating people mind for" count people "people")
   update-alive-status
   
-  update-people-epistemic-status
-  
-  update-quarantining-decisions
-  
-  ask people 
-  [
-    foreach events-to-process [[x]-> 
-      
-      if x = just-learned-I-am-infected-event [
-        quarantining-reaction-when-being-infected
-        ask [gatherers] of my-home
-        [quarantining-reaction-when-someone-from-household-is-infected]
-      ]
-      
-      update-people-epistemic-status
-    ]
-    set  events-to-process (list)
-  ]
 end
 
 
@@ -269,6 +259,11 @@ to update-alive-status
   if random 100 > 80
   [ 
     print "I have died"
+    
+    set someone-died? true
+
+    set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+
     ask one-of people [ die ]    
   ]
   
@@ -290,6 +285,8 @@ to-report has-a-work?
 to-report homeless-people
   report people with [not any? out-link-neighbors with [gathering-type = "home"]]
 end
+
+
 
 ;; Everyone of the "young" age class.
 ;;
@@ -314,6 +311,8 @@ end
 to-report is-male?
   report sex = male-sex
 end
+
+
 
 ;; True when this person is of the "young" age class.
 ;;
@@ -407,7 +406,7 @@ end
 ;; @return a gathering point, or `nobody` if the only linked store is their workplace
 to-report my-store
   let my-stores gathering-link-neighbors with [gathering-type = "store"]
-  report one-of my-stores with [self != my-work]
+  report one-of my-stores
 end
 
 ;; The school this person is attached to.

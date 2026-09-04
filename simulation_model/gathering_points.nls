@@ -45,6 +45,7 @@ gathering-points-own [
   vacancies                   ;;< jobs still unfilled, counted down during setup hiring
   cached-number-of-participants ;;< memoised result of `expected-number-of-other-participants`, 0 until first computed
   capacity                    ;;< how many people may be here at once, or `disabled-capacity` for no limit
+  crowd-slots-taken           ;;< display only: how many of the standing spots around this place have been handed out this tick, see `assign-crowd-positions`
 ]
 
 ;; A person's attachment to a place they may use, carrying the reasons they have
