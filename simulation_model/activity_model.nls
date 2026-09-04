@@ -59,8 +59,6 @@ to execute-activity-effect
 
 end
 
-
-
 ;; Build an activity descriptor: a place paired with a reason for being there.
 ;;
 ;; This is the only supported way to construct a descriptor, and it checks that
@@ -115,7 +113,13 @@ end
 ;   error (sentence "dont know if mourning yet")
 ; end
 
-
+;; True when this person is at their current place under compulsion.
+;;
+;; @context person
+;; @return true if `current-motivation` is the "mandatory" motive
+to-report is-forced-to-be-here?
+  report is-forced-motive? current-motivation
+end
 
 ;; True when `a` is the abroad placeholder gathering point.
 ;;

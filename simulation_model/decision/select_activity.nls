@@ -1,4 +1,29 @@
+;; @file decision/select_activity.nls
+;; @brief Which activities a person may choose from this tick, and committing to one.
+;;
+;; `my-available-activity-descriptors` builds the menu - the places this person
+;; could go and the reason they would go there - and `select-activity` records the
+;; choice that `my-preferred-available-activity-descriptor` makes from it.
+;;
+;; The menu is where the day's rhythm lives: resting at home is always on it,
+;; shopping appears on weekday mornings and afternoons, work on working days,
+;; religious gatherings around Sunday.
+;;
+;; @todo Caring for children belongs on this menu and is not there yet; at the
+;; moment that need is served by hijacking the decision process elsewhere.
+;; @see people_decision.nls
+;; @see activity_model.nls
+;; @see docs/WIP_ISSUES.md
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Operator precedence puts religious gatherings on every afternoon, and the
+;; activities point at random places rather than this person's own. See
+;; docs/WIP_ISSUES.md#my-available-activity-descriptors.
 to-report my-available-activity-descriptors
     
   ;add resting at home for SLEEP need
@@ -96,6 +121,18 @@ to-report my-available-activity-descriptors
   report ret
 end
 
+;; Commit this person to their preferred activity for this tick.
+;;
+;; The chosen place and motive are appended to `schedule` as a
+;; (place, motive, slice-of-day, day) entry, the movement flag is worked out while
+;; `current-activity` still holds the previous place, and only then is the new
+;; place stored.
+;;
+;; @context person
+;; @side-effects sets `current-activity`, `current-motivation` and
+;; `is-moving-outside-for-reaching-current-activity?`, and appends to `schedule`
+;; @see my-preferred-available-activity-descriptor
+;; @see select-activity-wtf?
 to select-activity
   let c-a my-preferred-available-activity-descriptor
 
@@ -118,8 +155,18 @@ to select-activity
   
 end
 
-;;this function is the main bottleneck of the whole application!
-;;it draws 0.2ms per call 
+
+;; Record whether reaching `loc` means leaving where this person already is.
+;;
+;; Must be called before `current-activity` is updated, since it compares the new
+;; place against the old one.
+;;
+;; @param loc  the place this person is about to move to
+;; @context person
+;; @side-effects sets `is-moving-outside-for-reaching-current-activity?`
+;; @note Measured at roughly 0.2 ms per call, which made it the main bottleneck of
+;; the whole application; hence the name, and hence taking the place as an
+;; argument rather than recomputing it.
 to select-activity-wtf? [loc]
  ; set is-moving-outside-for-reaching-current-activity? not (current-activity = location-of c-a)
   set is-moving-outside-for-reaching-current-activity? not (current-activity = loc)

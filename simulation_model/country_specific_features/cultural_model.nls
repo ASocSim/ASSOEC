@@ -1,3 +1,23 @@
+;; @file country_specific_features/cultural_model.nls
+;; @brief Turning a country's culture into the value system and need weights of
+;; each person.
+;;
+;; The chain is: Hofstede's six cultural dimensions for the country, which give
+;; the population-level means of Schwartz's nine value priorities, from which each
+;; person draws their own values, from which the importance weight of each need is
+;; computed. Those weights are what `global-prevalence-of` multiplies the expected
+;; satisfactions by, so this file decides what the population cares about.
+;;
+;; Much of the chain is currently short-circuited for the Ebola adaptation: the
+;; Hofstede scores are hardcoded rather than loaded, and the value calibration
+;; steps are commented out of the setup path.
+;;
+;; @author Bart de Bruin (TU Delft), Kurt Kreulen (TU Delft), coordinated by
+;; Amineh Ghorbani (TU Delft)
+;; @see people_management.nls
+;; @see need_management.nls
+;; @see docs/WIP_ISSUES.md
+
 ;Cultural_model.nls created by Bart de Bruin (TU Delft) and Kurt Kreulen (TU Delft), efforts coordinated by Amineh Ghorbani (TU Delft)
 
 ;Short description of procedures included in this nls file:
@@ -13,6 +33,17 @@
 ;;2026 update for ebola adaptation: set-initial-need-satisfaction-levels now shows
 
 
+;; Give every person their cultural values, need weights and starting need levels.
+;;
+;; Called once from setup. Three of the original six steps - loading the country
+;; scorecard, calibrating value systems, and setting the social distance profile -
+;; are commented out for the Ebola build.
+;;
+;; @context observer
+;; @side-effects sets the Hofstede globals, and the value, weight and satisfaction
+;; variables of every person
+;; @see calibrate-importance-weights-of-needs
+;; @see set-initial-need-satisfaction-levels-ebo
 to setup-person-values-and-needs
  ; load-nations-hofstede-dimension-scores
   drc-hofstede-partial
@@ -26,6 +57,15 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;EBOLA ;;;;;;;;;;;;;;;;;;;;,
 ;;;;;;;;;HARDCODING THIS AS UGANDA and Africa EAST PARTIAL METRICS FOR NOW, PLEASE ADD DRC if values are available or discuss
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Hardcoded to Ugandan and East African scores, and stops before the
+;; "Custom" branch. Real DRC values still needed. See
+;; docs/WIP_ISSUES.md#drc-hofstede-partial.
 to drc-hofstede-partial
     set power-distance 64
     set individualism-vs-collectivism 24 ;uganda, use 32 for east africa
@@ -53,6 +93,17 @@ end
 ;end
 
 
+;; Fill every person's need tanks at the start of the run.
+;;
+;; Survival needs start high (0.8 to 1.0), esteem needs a little lower, belonging
+;; and physical safety lower still (0.5 to 1.0), and autonomy is fixed at 0.95.
+;; The spread is what makes people choose differently from one another on the
+;; first ticks.
+;;
+;; @context observer
+;; @side-effects sets all eleven satisfaction levels on every person
+;; @note The financial-survival, food and health tanks are declared in
+;; need_definition.nls rather than here.
 to set-initial-need-satisfaction-levels-ebo
   ;NOTE: The water tanks for financial safety (SAFETY), food safety (SURVIVAL), financial survival (SURVIVAL), health (SURVIVAL) are located in the need_defintion.nls file
   ;The subneeds defined in need_defintion.nls are not formalized as people-own variables but as to-reporter functions
@@ -84,6 +135,81 @@ end
 
 
 
+; to recalibrate-value-system-according-to-age-group-of-agent
+;  ask people [
+
+;     ;coefficients based on "Correlations of Value Priorities with Age" (see http://essedunet.nsd.uib.no/cms/topics/1/2/2.html)
+;     let HED_coeff -0.34
+;     let STM_coeff -0.38
+;     let SD_coeff -0.06
+;     let UNI_coeff 0.12
+;     let BEN_coeff 0.13
+;     let CT_coeff 0.33
+;     let SEC_coeff 0.26
+;     let POW_coeff -0.07
+;     let ACH_coeff -0.25
+
+;     let coeffs (list
+;       HED_coeff
+;       STM_coeff
+;       SD_coeff
+;       UNI_coeff
+;       BEN_coeff
+;       CT_coeff
+;       SEC_coeff
+;       POW_coeff
+;       ACH_coeff)
+
+;     ;internal checks:
+;     ;show word "my age is: " age
+
+;     let value_system (list
+;       importance-given-to-hedonism-value
+;       importance-given-to-stimulation-value
+;       importance-given-to-self-direction-value
+;       importance-given-to-universalism-value
+;       importance-given-to-benevolence-value
+;       importance-given-to-conformity-tradition-value
+;       importance-given-to-security-value
+;       importance-given-to-power-value
+;       importance-given-to-achievement-value)
+
+;     ;internal checks:
+;     ;show word "non-updated value system: " value_system
+    
+;     let weight 0
+;     let recalibrated_value_system []
+;     if age = "young" [set weight 3 * influence-of-age-on-value-system]
+;     if age = "student" [set weight 2 * influence-of-age-on-value-system]
+;     if age = "worker" [set weight 1 * influence-of-age-on-value-system]
+;     if age = "retired" [set weight 0 * influence-of-age-on-value-system]
+;     set recalibrated_value_system (map [ [c v] -> clamp 0 100 (v - (c * weight)) ] coeffs value_system)
+    
+;     ;internal checks:
+;     ;show word "calibrated value system: " recalibrated_value_system
+    
+;     set importance-given-to-hedonism-value item 0 recalibrated_value_system
+;     set importance-given-to-stimulation-value item 1 recalibrated_value_system
+;     set importance-given-to-self-direction-value item 2 recalibrated_value_system
+;     set importance-given-to-universalism-value item 3 recalibrated_value_system
+;     set importance-given-to-benevolence-value item 4 recalibrated_value_system
+;     set importance-given-to-conformity-tradition-value item 5 recalibrated_value_system
+;     set importance-given-to-security-value item 6 recalibrated_value_system
+;     set importance-given-to-power-value item 7 recalibrated_value_system
+;     set importance-given-to-achievement-value item 8 recalibrated_value_system
+    
+;   ]
+; end
+
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Autonomy is assigned twice and counted twice in the normalising sum,
+;; which omits social safety and providing. The weights do not sum to 1. See
+;; docs/WIP_ISSUES.md#calibrate-importance-weights-of-needs.
  to calibrate-importance-weights-of-needs
 
    ;For each agent: set the importance ascribed to its needs
@@ -153,6 +279,18 @@ end
    ]
  end
 
+;; Draw each person's nine Schwartz value priorities from the country's Hofstede scores.
+;;
+;; Each value has a population mean built from the Hofstede dimensions that theory
+;; associates with it - hedonism from individualism and indulgence, security from
+;; collectivism, uncertainty avoidance and power distance, and so on - and each
+;; person draws from a normal distribution around that mean, clamped to [0, 100].
+;;
+;; @context observer
+;; @side-effects sets the nine `importance-given-to-*-value` variables on every person
+;; @note Not called in the Ebola build: its caller `calibrate-agent-value-systems`
+;; is commented out, so the value variables stay at 0 and every weight derived
+;; from them in `calibrate-importance-weights-of-needs` is 0 too.
 to set-values-based-on-culture
 
   let UAI_pos uncertainty-avoidance
@@ -284,9 +422,13 @@ end
 ;   ]
 ; end
 
+
+;; Load the Hofstede dimension scores for the configured country from CSV.
 ;;
-;;WHERE IS THE DATA?!!!???
-;;
+;; @context observer
+;; @deprecated COVID legacy: the entire body is commented out and the Ebola build
+;; hardcodes its scores in `drc-hofstede-partial` instead. Does nothing if called.
+;; @see drc-hofstede-partial
 to load-nations-hofstede-dimension-scores
   
   ;COVID legacy
@@ -329,7 +471,22 @@ to load-nations-hofstede-dimension-scores
 ;   set country-specific-data-list but-first country-specific-data-list  
 end
 
-;the computational procedure within this reporter is based on Heidari et al. (2018)
+;; Move two value priorities closer together until they respect the Schwartz circumplex.
+;;
+;; Values near each other on Schwartz's circle should be held with similar
+;; importance, and values far apart should differ. The permitted gap grows with
+;; the distance between the two positions, up to halfway around the circle; where
+;; the actual gap exceeds it, both values move towards each other by half the
+;; excess.
+;;
+;; @param #index_i       position of the first value on the circumplex
+;; @param #index_j       position of the second value
+;; @param #value-system  the nine value levels, in circumplex order
+;; @return a two-element list holding the adjusted levels of the two values
+;; @note Based on Heidari et al. (2018). The calibration factor comes from the
+;; `value-system-calibration-factor` slider, 25 by default.
+;; @note Not reached in the Ebola build: its only caller,
+;; `increase-logical-consistency-of-agent-value-systems`, is commented out.
 to-report calibrate-values [#index_i #index_j #value-system]
 
   ;Load value levels into local variable
@@ -387,6 +544,12 @@ to-report calibrate-values [#index_i #index_j #value-system]
   report (list V_i V_j)
 end
 
+;; Every position in `#list` holding `#criteria`.
+;;
+;; @param #criteria  the value to look for
+;; @param #list      the list to search
+;; @return a list of indices, empty if the value never occurs
+;; @note Unlike NetLogo's `position`, which reports only the first match.
 to-report return-position-of-item-from-list [#criteria #list]
   let indices n-values length #list [ i -> i ]
   let result filter [ i -> item i #list = #criteria ] indices

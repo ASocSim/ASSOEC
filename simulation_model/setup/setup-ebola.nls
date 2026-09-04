@@ -123,11 +123,9 @@ end
 ;; Create every place in the world and collect each kind into its own turtle-set.
 ;;
 ;; One pass per kind of place: create the configured number of them, give each its
-;; `gathering-type`, its vacancy count, and the shape and colour it will have on the
-;; view. The abroad placeholder is created only when migration is enabled.
-;;
-;; Nothing here sets a position: `layout-gathering-points` places every kind of
-;; place at once, once the homes exist too.
+;; `gathering-type`, its vacancy count, and the shape, colour and position it will
+;; have on the view. Places of the same kind are spread vertically so they can be
+;; told apart. The abroad placeholder is created only when migration is enabled.
 ;;
 ;; @context observer
 ;; @side-effects creates gathering points and fills the `hospitals`, `schools`,
@@ -265,12 +263,15 @@ end
 ;; gets three to four men and no women. Any other type raises an error rather than
 ;; producing an empty house.
 ;;
-;; @param t  household type, "family" or "displaced"
+;; @param t                      household type, "family" or "displaced"
+;; @param #created-households    how many households exist already, used to place
+;;                               this one on the view
+;; @param #households-to-create  the total being created, used for the same
 ;; @context observer
 ;; @side-effects creates one home gathering point and its residents
 ;; @todo Household composition is a guess: how many people a family home should
 ;; hold needs a source.
-to create-household [t]
+to create-household [t #created-households #households-to-create]
   let current-home nobody
   create-gathering-points 1
   [
@@ -719,5 +720,54 @@ to setup-gathering-point-capacities
  ;   set capacity count gatherers
   ;]
 end
+
+;; Scatter the gathering points across the view without overlapping them.
+;;
+;; Only runs when animation is on. Places are positioned in batches: while many
+;; remain, up to four of the same kind are dropped together onto the neighbours of
+;; a free patch, so places of a kind cluster; once few remain they are placed one
+;; at a time. Candidate patches are rejected if they are too close to something
+;; already placed or against the world edge.
+;;
+;; @context observer
+;; @side-effects moves every gathering point
+;; @side-effects raises "cannot find a spot!" after 10000 failed attempts, which
+;; is what happens when there are more places than the world can separate
+to setup-activity-animate-positions
+  if animate? [
+    let endless-loop 0
+    let to-place gathering-points
+    let placed turtle-set nobody
+    while [any? to-place] [
+      let focal one-of to-place
+      let p-pxcor random-pxcor
+      let p-pycor random-pycor
+      ifelse count to-place > 10 [
+        let placing up-to-n-of 4 to-place with [gathering-type = [gathering-type] of focal]
+
+        while [any? placed with [abs (p-pxcor - pxcor) <= 2  and abs (p-pycor - pycor) <= 2] or p-pxcor >= (max-pxcor - 1) or p-pxcor <= (min-pxcor + 1) or p-pycor >= (max-pycor - 1) or p-pycor <= (min-pycor + 1)] [
+          set endless-loop endless-loop + 1
+          if endless-loop > 10000 [error "cannot find a spot!"]
+          set p-pxcor random-pxcor
+          set p-pycor random-pycor
+        ]
+        (foreach (up-to-n-of (count placing) (sort (([neighbors] of (patch p-pxcor p-pycor)) with [not member? self [neighbors4] of patch p-pxcor p-pycor]))) (sort placing) [ [ p g ] -> ask g [ move-to p ] ])
+        set placed (turtle-set placed placing)
+      ] [
+        while [any? placed with [abs (p-pxcor - pxcor) <= 1 and abs (p-pycor - pycor) <= 1] or p-pxcor = max-pxcor or p-pxcor = min-pxcor or p-pycor = max-pycor or p-pycor = min-pycor] [
+          set p-pxcor random-pxcor
+          set p-pycor random-pycor
+        ]
+        ask focal [
+          setxy p-pxcor p-pycor
+        ]
+        set placed (turtle-set placed focal)
+      ]
+      set to-place to-place with [not member? self placed]
+      
+    ]
+  ]
+end
+
 
 

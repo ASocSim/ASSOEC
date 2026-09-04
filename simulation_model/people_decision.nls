@@ -1,6 +1,29 @@
+;; @file people_decision.nls
+;; @brief Choosing an activity, and the small questions that choice depends on.
+;;
+;; This file sits between the list of activities a person could do
+;; (`select_activity.nls`) and the scoring of those activities
+;; (`need_management.nls`): it picks the winner, and answers the calendar and
+;; dependency questions - is today a working day, is a child in my care, should I
+;; be staying home - that shape both.
+;;
+;; @see decision/select_activity.nls
+;; @see need_management.nls
+;; @see docs/WIP_ISSUES.md
+
 __includes ["need_management.nls" "country_specific_features/cultural_model.nls" "decision/quarantining.nls" "decision/select_activity.nls"]
 
-;;reports a string, which can be related to a gathering point and a concrete activity
+;; The activity this person most wants to do, of those open to them now.
+;;
+;; Every available descriptor is scored by `global-prevalence-of` and the highest
+;; wins. The candidates are shuffled first, so that equal scores are broken at
+;; random rather than by list order.
+;;
+;; @context person
+;; @return an activity descriptor
+;; @side-effects prints the chosen place and motive on every call
+;; @see global-prevalence-of
+;; @see my-available-activity-descriptors
 to-report my-preferred-available-activity-descriptor 
 
  
@@ -29,9 +52,17 @@ if (someone-died?)
 end
 
 
-;; determines working days for people and gathering points. 
-;; for gathering points: all are closed on weekends, except for shops, which are closed only on Sundays
-;; for people: as a function of their work place working days, for everyone else, all days are working days, except for weekends 
+;; Whether today is a working day, asked either of a person or of a place.
+;;
+;; For a place: stores follow shop opening hours, everywhere else works Monday to
+;; Friday. For a person: workers inherit the answer from their workplace, everyone
+;; else works Monday to Friday. Anything that is neither a person nor a gathering
+;; point raises an error.
+;;
+;; @context person or gathering-point
+;; @return true if today is a working day for the caller
+;; @side-effects raises an error if called from any other context
+;; @see is-shops-open-today?
 to-report is-working-day-for-me?
   if is-gathering-point? self 
   [ 
@@ -57,18 +88,42 @@ to-report is-working-day-for-me?
   error (sentence "wrong user of this function" self [age] of self)
 end
 
+;; Whether shops trade today.
+;;
+;; @return true on every day except Sunday
 to-report is-shops-open-today?
   report not (day-of-the-week = "sunday")
 end
 
+;; The motive recorded when a person leaves the country.
+;;
+;; @return `travelling-motive`
+;; @note A thin alias for `travelling-motive`, used by the migration branch of
+;; `my-available-activity-descriptors`, which is currently commented out.
 to-report travelling-reason
   report travelling-motive
 end
 
+;; True when this person needs somebody to look after them today.
+;;
+;; A child whose school is shut has to follow an adult around; that is what
+;; `perform-people-activities` uses this for.
+;;
+;; @context person
+;; @return true if this person is a child and schools are closed
+;; @note Never true in the current build: `is-child?` tests `age`, which nothing
+;; assigns.
 to-report is-currently-in-situation-of-active-dependence?
   report is-child? and closed-schools?
 end
 
+;; Whether this person is under any instruction to stay at home right now.
+;;
+;; @context person
+;; @return true under hard lockdown, under an official quarantine order, or during
+;; curfew hours
+;; @note Two of the three routes are COVID-era: the Ebola model activates neither
+;; lockdown nor curfew, so in practice only the quarantine order can fire.
 to-report should-I-stay-home?
   if is-hard-lockdown-active? [report true]
   if is-officially-asked-to-quarantine? [report true]
@@ -77,20 +132,52 @@ to-report should-I-stay-home?
 end
 
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @return work in progress
+;; @todo Tests for gathering types the Ebola build does not create. See
+;; docs/WIP_ISSUES.md#is-technically-feasible-to-work-from-home-.
 to-report is-technically-feasible-to-work-from-home?
   if not is-worker? [error "not a worker"]
   report member? [gathering-type] of my-work ["workplace" "university"]
   ;link-neighbors with [gathering-type = "workplace"]
 end
 
+;; True when a child is present wherever this person currently is.
+;;
+;; @context person
+;; @return true if any child shares this person's current gathering point
+;; @note Never true in the current build: `is-child?` tests `age`, which nothing
+;; assigns.
 to-report is-currently-watching-a-child?
   report any? [current-gatherers with [is-child?]] of current-activity
 end
 
+;; True when an adult is present wherever this person currently is.
+;;
+;; @context person
+;; @return true if any adult shares this person's current gathering point
+;; @note Never true in the current build: `is-adult?` tests `age`, which nothing
+;; assigns.
 to-report is-currently-watched-by-an-adult?
   report any? [current-gatherers with [is-adult?]] of current-activity
 end
 
+;; Refresh how long it has been since this person saw each part of their network.
+;;
+;; Seeing your relatives, colleagues or friends means more than half of that group
+;; being in the same place as you; when that happens the corresponding
+;; "days since seen" counter resets to zero. Colleagues also pass on the knowledge
+;; that working from home is possible.
+;;
+;; @context person
+;; @side-effects resets `days-since-seen-relatives`, `days-since-seen-colleagues`
+;; and `days-since-seen-friends`, and may set `I-know-of-working-from-home?`
+;; @note The counters are reset here but nothing increments them, and the call to
+;; `update-memory` at the end is commented out.
 to update-belief-based-on-current-activity
   let family-here count my-relatives with [current-activity = [current-activity] of myself]
   if any? my-relatives and family-here / count my-relatives > 0.5 [ set days-since-seen-relatives 0 ]
@@ -109,6 +196,14 @@ to update-belief-based-on-current-activity
   ;update-memory
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Fully written but never called: its call site is commented out. See
+;; docs/WIP_ISSUES.md#update-memory.
 to update-memory
   let network-activities new-counter
   if count my-network > 0 [

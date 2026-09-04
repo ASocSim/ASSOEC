@@ -288,6 +288,14 @@ end
 
 
 
+;; Everyone of the "young" age class.
+;;
+;; @return agentset of people
+;; @note Empty in the current build: nothing assigns `age`.
+to-report children
+  report people with [is-young?]
+end
+
 ;; True when this person is female.
 ;;
 ;; @context person
@@ -305,6 +313,15 @@ to-report is-male?
 end
 
 
+
+;; True when this person is of the "young" age class.
+;;
+;; @context person
+;; @return true if `age` is `young-age`
+;; @note Never true in the current build: nothing assigns `age`.
+to-report is-young?
+  report age = young-age
+end
 
 ;; All the money held by the population.
 ;;

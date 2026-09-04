@@ -1,40 +1,113 @@
+;; @file decision/quarantining.nls
+;; @brief Who is meant to be in quarantine, who actually is, and who is breaking it.
+;;
+;; Quarantine is self-imposed here: a person carries a countdown of days they
+;; should stay home in `#days-I-should-remain-in-self-quarantining`, and the
+;; reporters below compare that obligation against where the person actually went.
+;;
+;; @see people_decision.nls
+;; @see docs/WIP_ISSUES.md
+
+;; True when this person is under any obligation to stay home.
+;;
+;; Three independent sources of the obligation: a self-quarantine countdown still
+;; running, believing oneself to be infected, or living in a household that is
+;; itself in isolation.
+;;
+;; @context person
+;; @return true if the person is expected to quarantine
+;; @see is-in-quarantine?
+;; @see is-violating-quarantine?
 to-report is-officially-asked-to-quarantine?
   report #days-I-should-remain-in-self-quarantining > 0 or is-believing-to-be-infected? or [home-in-isolation?] of my-home
 end
 
+;; Tick down the self-quarantine countdown of everyone still serving one.
+;;
+;; @context observer
+;; @side-effects decrements `#days-I-should-remain-in-self-quarantining` for every
+;; person whose counter is above zero
 to update-quarantining-decisions
   ask people with [#days-I-should-remain-in-self-quarantining > 0] [
     set #days-I-should-remain-in-self-quarantining #days-I-should-remain-in-self-quarantining - 1
   ]
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Body entirely commented out, but still called every tick, so learning you
+;; are infected currently changes nothing. See
+;; docs/WIP_ISSUES.md#the-two-quarantining-reactions.
 to quarantining-reaction-when-being-infected
 ;   if random-float 1  < ratio-self-quarantining-when-symptomatic[
 ;     include-time-for-quarantining 7 * #ticks-per-day
 ;   ]
 end
 
+;; Extend this person's self-quarantine to at least `t`, never shortening it.
+;;
+;; @param t  the quarantine length to impose
+;; @context person
+;; @side-effects raises `#days-I-should-remain-in-self-quarantining` to `t` if `t`
+;; is the larger of the two
+;; @note The variable is named in days and `update-quarantining-decisions`
+;; decrements it once per call, but both callers pass a number of ticks
+;; (`7 * #ticks-per-day`). Both callers are currently commented out, so the
+;; mismatch is latent rather than live.
 to include-time-for-quarantining [t]
   set #days-I-should-remain-in-self-quarantining max (list t #days-I-should-remain-in-self-quarantining)
 end
 
+;; Work in progress.
+;;
+;; work in progress
+;;
+;; @context work in progress
+;; @side-effects work in progress
+;; @todo Body entirely commented out, but still called every tick. See
+;; docs/WIP_ISSUES.md#the-two-quarantining-reactions.
 to quarantining-reaction-when-someone-from-household-is-infected
 ;   if is-infected-and-their-families-requested-to-stay-at-home? and random-float 1  < ratio-self-quarantining-when-a-family-member-is-symptomatic
 ;   [include-time-for-quarantining 14 * #ticks-per-day]
 end
 
+;; Everyone currently under an obligation to quarantine, whether or not they comply.
+;;
+;; @return agentset of people
+;; @see is-officially-asked-to-quarantine?
 to-report officially-quarantiners
   report people with [is-officially-asked-to-quarantine?]
 end
 
+;; True when this person is under an obligation to quarantine and is respecting it.
+;;
+;; Respecting it means being at home, at the hospital for any reason other than
+;; work, or abroad.
+;;
+;; @context person
+;; @return true if obliged to quarantine and in an acceptable place
 to-report is-in-quarantine?
   report is-officially-asked-to-quarantine? and (current-activity = my-home or (current-activity = my-hospital and work-motive != current-motivation) or current-activity = away-gathering-point)
 end
 
+;; True when this person is under an obligation to quarantine and is elsewhere.
+;;
+;; @context person
+;; @return true if obliged to quarantine and not respecting it
+;; @see is-in-quarantine?
 to-report is-violating-quarantine?
   report is-officially-asked-to-quarantine? and not is-in-quarantine?
 end
 
+;; Write one `violating_quarantine` line to the log if this person is breaking quarantine.
+;;
+;; @context person
+;; @side-effects appends to the log file; does nothing when logging is off
+;; @see is-violating-quarantine?
 to process-quarantine-violation-event
     if is-violating-quarantine?[log-file-print (word "violating_quarantine(" ticks "," day-of-the-week "," who "," age "," [who] of current-activity "," [gathering-type] of current-activity "," current-motivation ")")]
 end
