@@ -271,7 +271,7 @@ end
 ;; @side-effects creates one home gathering point and its residents
 ;; @todo Household composition is a guess: how many people a family home should
 ;; hold needs a source.
-to create-household [t #created-households #households-to-create]
+to create-household [t]
   let current-home nobody
   create-gathering-points 1
   [

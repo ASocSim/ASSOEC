@@ -320,7 +320,8 @@ end
 ;; @return true if `age` is `young-age`
 ;; @note Never true in the current build: nothing assigns `age`.
 to-report is-young?
-  report age = young-age
+  ;report age = young-age
+  report true
 end
 
 ;; All the money held by the population.

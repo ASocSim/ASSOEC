@@ -118,7 +118,8 @@ end
 ;; @context person
 ;; @return true if `current-motivation` is the "mandatory" motive
 to-report is-forced-to-be-here?
-  report is-forced-motive? current-motivation
+  ;report is-forced-motive? current-motivation
+  report true
 end
 
 ;; True when `a` is the abroad placeholder gathering point.
