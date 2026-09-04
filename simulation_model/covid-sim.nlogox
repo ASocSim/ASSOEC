@@ -77,7 +77,8 @@ to-report epistemic-false-positive-error-ratio report count people with [is-beli
 to-report epistemic-error-of-ignored-immunity-ratio report count people with [not is-believing-to-be-immune? and not is-immune?] / count people end
   ]]></code>
   <widgets>
-    <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="false" patchSize="17.7143" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="20" updateMode="0" maxPxcor="20" minPxcor="0"></view>
+    <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="false" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="0" maxPxcor="69" minPxcor="0"></view>
+    <switch x="138" y="490" height="40" on="false" variable="show-social-links?" width="196" display="show-social-links?"></switch>
     <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="92" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
 while [current-day <= end-day] [ go ]]]></button>
