@@ -118,8 +118,7 @@ to apply-risk-of-contamination [infector context]
 end
 
 to-report risks-of-contamination [infector susceptible context]
-  if contagion-model = "ebola" [report (ebola-contagion-factor-between infector susceptible context) ]
-  error (sentence "not implemented for" contagion-model)
+  report (ebola-contagion-factor-between infector susceptible context)
 end
 
 
