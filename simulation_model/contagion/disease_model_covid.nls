@@ -180,7 +180,7 @@ end
 
 
 
-to kill-person 
+to kill-person-covid
   set infection-state dead-infection-status
 ;  set #infected #infected - 1
   set #dead-people #dead-people + 1
@@ -230,7 +230,10 @@ end
 to update-within-agent-disease-status
   ask people [
     set-infection-status next-infection-state
-    if infection-status = dead-infection-status [kill-person ]
+    if (infection-status = dead-infection-status )
+    [
+      kill-person
+      ]
   ]
 end
 

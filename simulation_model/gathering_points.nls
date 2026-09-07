@@ -108,7 +108,7 @@ to-report proximity-factor
   if gathering-type = "school"[report density-factor-schools]
   if gathering-type = "market" [report density-factor-markets]
   if gathering-type = "workplace-agriculture" [report density-factor-agriculture]
-  if gathering-type = "workplace-mines" [report density-factor-mines]
+  if gathering-type = "workplace-mine" [report density-factor-mines]
   if gathering-type = "store" [report density-factor-store]
   if gathering-type = "home" [report density-factor-homes]
   if gathering-type = "church" [report density-factor-churches]

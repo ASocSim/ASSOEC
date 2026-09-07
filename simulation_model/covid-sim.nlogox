@@ -77,7 +77,7 @@ to-report epistemic-false-positive-error-ratio report count people with [is-beli
 to-report epistemic-error-of-ignored-immunity-ratio report count people with [not is-believing-to-be-immune? and not is-immune?] / count people end
   ]]></code>
   <widgets>
-    <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="false" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="0" maxPxcor="69" minPxcor="0"></view>
+    <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="false" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="1" maxPxcor="69" minPxcor="0"></view>
     <switch x="138" y="490" height="40" on="true" variable="show-social-links?" width="196" display="show-social-links?"></switch>
     <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="92" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
@@ -235,8 +235,7 @@ Relative proximity between individuals within an activity type (impacts contamin
       <choice type="string" value="oxford"></choice>
       <choice type="string" value="ebola"></choice>
     </chooser>
-    <switch x="1187" y="16" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
-    <slider x="997" step="0.01" y="248" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.16" variable="CFR" width="249" sizeVersion="0"></slider>
+    <slider x="997" step="0.01" y="248" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.74" variable="CFR" width="249" sizeVersion="0"></slider>
     <slider x="997" step="0.1" y="190" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.3" variable="trust-in-institutions"></slider>
     <slider x="996" step="0.01" y="136" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.31" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
     <monitor x="618" precision="17" y="420" height="60" fontSize="11" width="118">day-of-the-week</monitor>
@@ -688,6 +687,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
     <slider x="3237" step="0.01" y="1018" max="1" width="219" display="density-factor-cemeteries" height="50" min="0" direction="Horizontal" default="0.88" variable="density-factor-cemeteries"></slider>
     <input x="3052" multiline="false" y="727" height="60" variable="#leisure-gp" type="number" width="250">3.0</input>
     <slider x="3229" step="0.01" y="1083" max="1" width="219" display="density-factor-leisure" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-leisure"></slider>
+    <switch x="352" y="493" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
   </widgets>
   <info>## WHAT IS IT?
 
