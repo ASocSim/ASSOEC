@@ -33,6 +33,22 @@
 to update-display
   ask people [update-people-display]
   move-people-to-their-activities
+  update-social-link-visibility
+end
+
+;; Show or hide the social network, following the `show-social-links?` switch.
+;;
+;; The friendship and dependency networks are drawn over everything else and, once
+;; people are spread across the world, cover it in a web that hides the districts
+;; underneath. They are therefore off unless asked for. Re-applied every tick rather
+;; than once at setup, so the switch takes effect without a rebuild.
+;;
+;; @context observer
+;; @side-effects hides or shows every social link
+to update-social-link-visibility
+  ifelse show-social-links?
+  [ ask my-friends-links [show-link] ask dependable-adult-links [show-link] ]
+  [ ask my-friends-links [hide-link] ask dependable-adult-links [hide-link] ]
 end
 
 ;; Colour this person by sex, lightened while they are still susceptible.
@@ -41,6 +57,7 @@ end
 ;; @side-effects sets `color`
 ;; @see default-color
 to update-people-display
+  set size person-marker-size
   set color default-color
   if infection-status = susceptible-infection-status
   [set color color + 2]
@@ -157,7 +174,7 @@ end
 ;;
 ;; @return a distance in patches
 to-report crowd-ring-spacing
-  report 0.4
+  report 0.4 * display-scale
 end
 
 ;; How far from its place a crowd is allowed to spread.
@@ -167,7 +184,7 @@ end
 ;;
 ;; @return a distance in patches
 to-report max-crowd-radius
-  report 1.2
+  report 1.2 * display-scale
 end
 
 ;#endregion
@@ -206,14 +223,14 @@ end
 ;; @context person
 ;; @return true if they are within a hundredth of a patch of their display target
 to-report is-at-display-target?
-  report distancexy display-target-xcor display-target-ycor < 0.01
+  report distancexy display-target-xcor display-target-ycor < 0.01 * display-scale
 end
 
 ;; How far a walking person moves per animation step.
 ;;
 ;; @return a distance in patches
 to-report animation-step-length
-  report 1
+  report 1 * display-scale
 end
 
 ;; How long the view is left up between two animation steps.
@@ -232,6 +249,41 @@ end
 
 ;#endregion
 
+;#region Display scale
+
+;; How many patches one drawing unit is worth in the world as it is cut now.
+;;
+;; Nothing the view draws is a fixed number of patches. The world is cut fine so
+;; that districts can be given lanes and headers a few patches wide, which would
+;; otherwise leave every marker, crowd ring and walking step three times too small.
+;; They are all written as multiples of this instead, so the display keeps its size
+;; on screen and resizing the world needs no constant retuned.
+;;
+;; One unit is what a patch was worth in the 21-patch world the model was first
+;; drawn for.
+;;
+;; @return a distance in patches
+to-report display-scale
+  report world-width / 21
+end
+
+;; How large a place is drawn, before `arrange-on-grid` shrinks it to fit its cell.
+;;
+;; @return a size in patches
+;; @see arrange-on-grid
+to-report place-marker-size
+  report 1 * display-scale
+end
+
+;; How large a person is drawn.
+;;
+;; @return a size in patches
+to-report person-marker-size
+  report 0.5 * display-scale
+end
+
+;#endregion
+
 ;#region The district layout
 
 ;; Arrange every place in the world into one district per kind of place.
@@ -240,23 +292,27 @@ end
 ;; than anything else; the right is split into two columns and four rows, which
 ;; gives the eight other kinds of place a district each, paired by what they are
 ;; for - work at the top, then trade, then the civic places, and at the bottom the
-;; two places people end up at when things go wrong. A lane of untinted patches
-;; separates the quarters.
+;; two places people end up at when things go wrong.
 ;;
-;; Each district is tinted, labelled on its top row, and its places are spread over
-;; an even grid filling the rest of it. Any kind of place with no district of its
-;; own - the `away` placeholder, and leisure venues if they are ever built - is put
-;; along the top margin.
+;; Every district is separated from its neighbours by a lane of `district-gutter`
+;; patches painted `district-lane-color`, so no two districts ever share a border
+;; patch and the seam between them is visible rather than inferred from a change of
+;; tint. Each district is then tinted, given a header strip carrying its name, and
+;; its places are spread over an even grid filling the rest of it.
+;;
+;; Any kind of place with no district of its own - the `away` placeholder, and
+;; leisure venues if they are ever built - is put along the top margin.
 ;;
 ;; Must run after `create-all-households`, or the homes will not exist yet to be
 ;; placed.
 ;;
 ;; @context observer
-;; @side-effects moves every gathering point, and repaints and relabels every patch
+;; @side-effects moves and resizes every gathering point, and repaints and relabels
+;; every patch
 ;; @see place-district
 ;; @see arrange-on-grid
 to layout-gathering-points
-  ask patches [set pcolor black set plabel ""]
+  ask patches [set pcolor district-lane-color set plabel ""]
 
   ; the world minus a one-patch margin, which is where the strays go
   let left-edge min-pxcor + 1
@@ -264,12 +320,10 @@ to layout-gathering-points
   let bottom-edge min-pycor + 1
   let top-edge max-pycor - 1
 
-  ; the residential quarter, then a one-patch lane, then two service columns
+  ; the residential quarter, then a lane, then two equal service columns
   let quarter-edge left-edge + round (0.42 * (right-edge - left-edge))
-  let column-a-left quarter-edge + 2
-  let column-a-right column-a-left + floor ((right-edge - column-a-left - 1) / 2)
-  let column-b-left column-a-right + 1
-  let column-b-right right-edge
+  let column-a band-bounds (quarter-edge + 1 + district-gutter) right-edge 2 0
+  let column-b band-bounds (quarter-edge + 1 + district-gutter) right-edge 2 1
 
   let row-1 band-bounds bottom-edge top-edge 4 0
   let row-2 band-bounds bottom-edge top-edge 4 1
@@ -277,27 +331,27 @@ to layout-gathering-points
   let row-4 band-bounds bottom-edge top-edge 4 3
 
   (place-district home-gathering-type "HOMES"
-    left-edge quarter-edge bottom-edge top-edge (green - 4))
+    left-edge quarter-edge bottom-edge top-edge green)
 
   (place-district workplace-mine-gathering-type "MINES"
-    column-a-left column-a-right (first row-4) (last row-4) (brown - 4))
+    (first column-a) (last column-a) (first row-4) (last row-4) brown)
   (place-district workplace-agriculture-gathering-type "FARMS"
-    column-b-left column-b-right (first row-4) (last row-4) (lime - 4))
+    (first column-b) (last column-b) (first row-4) (last row-4) lime)
 
   (place-district stores-gathering-type "SHOPS"
-    column-a-left column-a-right (first row-3) (last row-3) (yellow - 4))
+    (first column-a) (last column-a) (first row-3) (last row-3) yellow)
   (place-district markets-gathering-type "MARKETS"
-    column-b-left column-b-right (first row-3) (last row-3) (orange - 4))
+    (first column-b) (last column-b) (first row-3) (last row-3) orange)
 
   (place-district school-gathering-type "SCHOOLS"
-    column-a-left column-a-right (first row-2) (last row-2) (pink - 4))
+    (first column-a) (last column-a) (first row-2) (last row-2) pink)
   (place-district churches-gathering-type "CHURCHES"
-    column-b-left column-b-right (first row-2) (last row-2) (sky - 4))
+    (first column-b) (last column-b) (first row-2) (last row-2) sky)
 
   (place-district hospital-gathering-type "HOSPITALS"
-    column-a-left column-a-right (first row-1) (last row-1) (turquoise - 4))
+    (first column-a) (last column-a) (first row-1) (last row-1) turquoise)
   (place-district cemeteries-gathering-type "CEMETERIES"
-    column-b-left column-b-right (first row-1) (last row-1) (gray - 3.5))
+    (first column-b) (last column-b) (first row-1) (last row-1) violet)
 
   let strays gathering-points with [not member? gathering-type districted-gathering-types]
   arrange-on-grid strays left-edge right-edge max-pycor max-pycor
@@ -311,40 +365,60 @@ to-report districted-gathering-types
           "school" "church" "hospital" "cemetery"]
 end
 
-;; Tint, label and fill one district.
+;; Tint one district, write its name on it, and fill it with its places.
 ;;
-;; The top row of the rectangle is left to the label, and the places are arranged
-;; over what is left of it.
+;; The district body is painted four shades below `hue`, dark enough for the place
+;; markers standing on it to read; the top `district-header-height` rows are painted
+;; a shade and a half below `hue` instead, which makes a title bar in the district's
+;; own colour. The name goes on that bar, and the places are arranged over what is
+;; left below it, so a marker can never end up underneath the name.
+;;
+;; The name is anchored towards the header's *right* edge, not its left: NetLogo
+;; right-justifies a patch label against the patch's right edge and draws it upwards
+;; from the patch's bottom, so anchoring on the right makes the name grow inwards
+;; into its own district instead of spilling across the neighbouring one. It sits
+;; `district-label-margin` in from the bottom and the right of the strip, which is
+;; what keeps the glyphs off the places below and off the lane beside.
 ;;
 ;; @param gps            the places belonging to this district
-;; @param district-name  the label drawn on the district's top-left patch
+;; @param district-name  the name drawn on the district's header strip
 ;; @param x0             leftmost patch column of the district
 ;; @param x1             rightmost patch column
 ;; @param y0             bottom patch row
-;; @param y1             top patch row, which holds the label
-;; @param tint           the patch colour of the district
+;; @param y1             top patch row
+;; @param hue            the district's colour, as a NetLogo base colour
 ;; @context observer
-;; @side-effects repaints and labels patches, and moves the places
+;; @side-effects repaints and labels patches, and moves and resizes the places
 ;; @see arrange-on-grid
-to place-district [gps district-name x0 x1 y0 y1 tint]
+to place-district [gps district-name x0 x1 y0 y1 hue]
   ask patches with [pxcor >= x0 and pxcor <= x1 and pycor >= y0 and pycor <= y1] [
-    set pcolor tint
+    set pcolor hue - 4
   ]
 
-  ask patch x0 y1 [
+  let header-bottom max (list y0 (y1 - district-header-height + 1))
+  ask patches with [pxcor >= x0 and pxcor <= x1 and pycor >= header-bottom and pycor <= y1] [
+    set pcolor hue - 1.5
+  ]
+
+  ask patch (max (list x0 (x1 - district-label-margin))) (min (list y1 (header-bottom + district-label-margin))) [
     set plabel district-name
-    set plabel-color white
+    set plabel-color black
   ]
 
-  arrange-on-grid gps x0 x1 y0 (max (list y0 (y1 - 1)))
+  arrange-on-grid gps x0 x1 y0 (max (list y0 (header-bottom - 1)))
 end
 
-;; Spread `gps` evenly over the rectangle, filling it from the top-left.
+;; Spread `gps` evenly over the rectangle, one place per cell of an even grid.
 ;;
-;; The grid is as square as the rectangle allows: the number of columns is chosen
-;; so that the cells come out roughly as wide as they are tall, and the places are
-;; spread to the edges of the rectangle rather than packed into a corner of it.
-;; Places are taken in `who` order, so a district always fills the same way.
+;; The grid is as square as the rectangle allows: the number of columns is chosen so
+;; that the cells come out roughly as wide as they are tall. Each place is put at the
+;; *centre* of its cell rather than on the grid lines, which keeps every marker at
+;; least half a cell clear of the rectangle's border and so inside its own district.
+;;
+;; Markers are also shrunk to fit: a place is never drawn wider than four fifths of
+;; the smaller side of its cell, so a district holding many places packs tighter
+;; instead of overlapping. Places are taken in `who` order, so a district always
+;; fills the same way.
 ;;
 ;; @param gps  the places to arrange; may be empty
 ;; @param x0   leftmost patch column of the rectangle
@@ -352,34 +426,44 @@ end
 ;; @param y0   bottom patch row
 ;; @param y1   top patch row
 ;; @context observer
-;; @side-effects moves every place in `gps`
+;; @side-effects moves and resizes every place in `gps`
+;; @see place-marker-size
 to arrange-on-grid [gps x0 x1 y0 y1]
   let #places count gps
   if #places = 0 [stop]
 
-  let usable-width x1 - x0
-  let usable-height y1 - y0
-  let #columns min (list #places (max (list 1 (ceiling sqrt (#places * (usable-width + 1) / (usable-height + 1))))))
+  ; the rectangle measured to the outer edges of its border patches
+  let usable-width x1 - x0 + 1
+  let usable-height y1 - y0 + 1
+  let #columns min (list #places (max (list 1 (ceiling sqrt (#places * usable-width / usable-height)))))
   let #rows ceiling (#places / #columns)
 
-  let column-spacing ifelse-value (#columns > 1) [usable-width / (#columns - 1)] [0]
-  let row-spacing ifelse-value (#rows > 1) [usable-height / (#rows - 1)] [0]
+  let column-spacing usable-width / #columns
+  let row-spacing usable-height / #rows
+
+  ask gps [
+    set size min (list place-marker-size (0.8 * min (list column-spacing row-spacing)))
+  ]
 
   let index 0
   foreach sort gps [ a-place ->
     let column index mod #columns
     let row floor (index / #columns)
-    let x ifelse-value (#columns > 1) [x0 + column * column-spacing] [(x0 + x1) / 2]
-    let y ifelse-value (#rows > 1) [y1 - row * row-spacing] [(y0 + y1) / 2]
-    ask a-place [setxy x y]
+    ask a-place [
+      setxy (x0 - 0.5 + (column + 0.5) * column-spacing)
+            (y1 + 0.5 - (row + 0.5) * row-spacing)
+    ]
     set index index + 1
   ]
 end
 
-;; The bounds of band `index` when `lo`..`hi` is cut into `#bands` equal bands.
+;; The bounds of band `index` when `lo`..`hi` is cut into `#bands` equal bands
+;; separated by lanes.
 ;;
-;; Bands are contiguous and whole patches wide: rounding is done on the cuts rather
-;; than on the widths, so no row is ever left over or counted twice.
+;; Bands are whole patches wide: rounding is done on the cuts rather than on the
+;; widths, so no row is ever left over or counted twice. Every band but the last
+;; then gives up its top `district-gutter` rows, which is what leaves a lane between
+;; one district and the next.
 ;;
 ;; @param lo      first patch row or column of the range
 ;; @param hi      last patch row or column
@@ -388,7 +472,50 @@ end
 ;; @return a two-element list, (first row or column, last row or column)
 to-report band-bounds [lo hi #bands index]
   let band-size (hi - lo + 1) / #bands
-  report (list (lo + round (index * band-size)) (lo + round ((index + 1) * band-size) - 1))
+  let band-start lo + round (index * band-size)
+  let band-end lo + round ((index + 1) * band-size) - 1
+  if index < #bands - 1 [set band-end band-end - district-gutter]
+  report (list band-start (max (list band-start band-end)))
+end
+
+;; How wide the lane between two districts is.
+;;
+;; Measured in pixels rather than patches - a lane is there to be seen, and how many
+;; patches that takes depends on how finely the world is cut.
+;;
+;; @return a count of patches, at least one
+to-report district-gutter
+  report max (list 1 (round (6 / patch-size)))
+end
+
+;; How many rows at the top of a district are given over to its name.
+;;
+;; The view draws labels in a fixed point size, so the strip has to be however many
+;; patches cover a line of that text, plus the `district-label-margin` row the text
+;; is lifted off the bottom of the strip by.
+;;
+;; @return a count of patches, at least one
+to-report district-header-height
+  report max (list 1 (ceiling (15 / patch-size))) + district-label-margin
+end
+
+;; How far a district's name is inset from the bottom and right of its header strip.
+;;
+;; Without it the glyphs sit flush against the places below the strip and against
+;; the lane beside it, and read as touching both.
+;;
+;; @return a count of patches, at least one
+to-report district-label-margin
+  report max (list 1 (round (4 / patch-size)))
+end
+
+;; The colour of the lanes between districts, and of the margin around them.
+;;
+;; Lighter than any district body, so a district edge reads as an edge.
+;;
+;; @return a NetLogo colour
+to-report district-lane-color
+  report gray - 2
 end
 
 ;#endregion
