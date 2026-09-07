@@ -104,17 +104,16 @@ end
 ;; branch can match and every call falls through to the error. Live in the
 ;; contagion path. See docs/WIP_ISSUES.md#proximity-factor.
 to-report proximity-factor
-  
-  if gathering-type = hospital-gathering-type [report density-factor-hospitals]
-  if gathering-type = school-gathering-type[report density-factor-schools]
-  if gathering-type = markets-gathering-type[report density-factor-markets]
-  if gathering-type = workplace-agriculture-gathering-type [report density-factor-agriculture]
-  if gathering-type = workplace-mine-gathering-type[report density-factor-mines]
-  if gathering-type = stores-gathering-type[report density-factor-store]
-  if gathering-type = home-gathering-type[report density-factor-homes]
-  if gathering-type = churches-gathering-type [report density-factor-churches]
-  if gathering-type = cemeteries-gathering-type [report density-factor-cemeteries]
-  if gathering-type = leisure-gathering-type [report density-factor-leisure]
+  if gathering-type = "hospital" [report density-factor-hospitals]
+  if gathering-type = "school"[report density-factor-schools]
+  if gathering-type = "market" [report density-factor-markets]
+  if gathering-type = "workplace-agriculture" [report density-factor-agriculture]
+  if gathering-type = "workplace-mine" [report density-factor-mines]
+  if gathering-type = "store" [report density-factor-store]
+  if gathering-type = "home" [report density-factor-homes]
+  if gathering-type = "church" [report density-factor-churches]
+  if gathering-type = "cemetery" [report density-factor-cemeteries]
+  if gathering-type = "leisure" [report density-factor-leisure]
   
   error (word gathering-type " not defined")
 end
@@ -206,15 +205,6 @@ end
 ;; @return true if `gathering-type` is "home"
 to-report is-home?
   report gathering-type = "home"
-end
-
-;; True when this place is a university.
-;;
-;; @context gathering-point
-;; @return true if `gathering-type` is "university"
-;; @note Never true: the Ebola setup creates no universities.
-to-report is-university?
-  report gathering-type = "university"
 end
 
 ;; True when this place is a hospital.

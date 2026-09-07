@@ -30,6 +30,8 @@ globals
   #people-infected-in-schools
   #people-infected-in-agriculture
   #people-infected-in-stores
+  #people-infected-in-cemeteries
+  #people-infected-in-leisure
 
   #people-infected-in-away-travel
   
@@ -177,7 +179,10 @@ end
 
 
 to add-to-contagion-tree [infector infectee context]
-  if contamination-network-table = 0 [set contamination-network-table table:make] 
+  if contamination-network-table = 0 
+  [
+    set contamination-network-table table:make
+  ] 
   let key infector
   ifelse infector != nobody 
   [set key [who] of infector]
@@ -201,14 +206,17 @@ to increment-contagion-metrics-from [context infected infector]
   
     if is-gathering-point? context [
     let gt [gathering-type] of context
-    if gt = hospital-gathering-type [set #people-infected-in-hospitals #people-infected-in-hospitals + 1 stop]
-    if gt = workplace-mine-gathering-type [set #people-infected-in-mines  #people-infected-in-mines + 1 stop]
-    if gt = workplace-agriculture-gathering-type [set #people-infected-in-agriculture  #people-infected-in-agriculture + 1 stop]
-    if gt = home-gathering-type [set #people-infected-in-homes #people-infected-in-homes + 1 stop]
-    if gt = churches-gathering-type [set #people-infected-in-churches #people-infected-in-churches + 1 stop]
-    if gt = school-gathering-type [set #people-infected-in-schools #people-infected-in-schools + 1 stop]  
-    if gt = markets-gathering-type [set #people-infected-in-markets #people-infected-in-markets + 1 stop]  
-    if gt = stores-gathering-type [set #people-infected-in-stores #people-infected-in-stores + 1 stop]  
+
+    if gt = "hospital" [set #people-infected-in-hospitals #people-infected-in-hospitals + 1 stop]
+    if gt = "school" [set #people-infected-in-schools #people-infected-in-schools + 1 stop]  
+    if gt = "market" [set #people-infected-in-markets #people-infected-in-markets + 1 stop]  
+    if gt = "workplace-agriculture" [set #people-infected-in-agriculture  #people-infected-in-agriculture + 1 stop]
+    if gt = "workplace-mines" [set #people-infected-in-mines  #people-infected-in-mines + 1 stop]
+    if gt = "store" [set #people-infected-in-stores #people-infected-in-stores + 1 stop]  
+    if gt = "home" [set #people-infected-in-homes #people-infected-in-homes + 1 stop]
+    if gt = "church" [set #people-infected-in-churches #people-infected-in-churches + 1 stop]
+    if gt = "cemetery" [set #people-infected-in-cemeteries #people-infected-in-cemeteries + 1 stop]
+     if gt = "leisure" [set #people-infected-in-leisure #people-infected-in-leisure + 1 stop]   
   ]
   
   if context = "bus" [set #people-infected-in-pubtrans #people-infected-in-pubtrans + 1 stop]
@@ -223,7 +231,6 @@ to increment-#contacts-per-gathering-type-global-metrics [ts context]
   let #contacts-now (count ts * (count ts - 1))
   if is-gathering-point? context [
     let gt [gathering-type] of context
-    print gt
     
     if gt = hospital-gathering-type [set #contacts-in-hospitals #contacts-in-hospitals + #contacts-now stop]
     if gt = workplace-mine-gathering-type [set #contacts-in-mines #contacts-in-mines + #contacts-now stop]

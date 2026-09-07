@@ -1,4 +1,4 @@
-__includes [ "disease/ebola_profiles.nls" "disease/ebola_disease_model.nls"] ; "disease/disease_profiles.nls"  "disease/oxford_disease_model.nls"
+__includes [ "disease/ebola_profiles.nls" "disease/ebola_disease_model.nls"]
 
 
 globals [  
@@ -11,16 +11,11 @@ globals [
   
   #safely-buried
   #unsafely-buried
-  #removed
-   infected-people
-  list-of-dead-and-safely-buried-people ;to remove
 ]
 
 
 to set-contaminated-disease-status
- ; if  disease-fsm-model = "assocc" [set-infection-status infected-asymptomatic-status]
- ; if  disease-fsm-model = "oxford" [set-infection-status just-contaminated-infection-status]
-  if disease-fsm-model = "ebola" [set-infection-status just-exposed-infection-status]
+  set-infection-status just-exposed-infection-status
   set time-when-infected ticks
 end
 
@@ -32,16 +27,11 @@ to-report infection-status
 end
 
 to-report is-immune?
-   ; if  disease-fsm-model = "oxford" [  report infection-status = immune-infection-status]
-  if disease-fsm-model = "ebola" [
-    report infection-status = immune-infection-status] ;AD HOC STATIC STATE
+    report infection-status = immune-infection-status
 end
 
  to-report is-susceptible?
-;   if disease-fsm-model = "oxford" [
-;   report infection-state = healthy-infection-status]
-if disease-fsm-model = "ebola" [
-    report infection-state = susceptible-infection-status]
+    report infection-state = susceptible-infection-status
 end
 
 
@@ -54,10 +44,7 @@ to set-immune
 end
 
 to-report next-infection-state
- ; if disease-fsm-model = "assocc" [update-disease-status-assocc] 
- ; if disease-fsm-model = "oxford" [report next-state-odm infection-state]
-    if disease-fsm-model = "ebola" [report next-state-ebo infection-state]
-  error "unimplemented"
+  report next-state-ebo infection-state
 end
 
 
@@ -197,7 +184,7 @@ end
 
 
 to update-within-agent-disease-status
-  ask people [
+  ask people with [infection-state != susceptible-infection-status] [
     set-infection-status next-infection-state
     
     if infection-status = safe-burial-to-removed-infection-status [
@@ -213,12 +200,11 @@ end
 
 
 to kill-person 
- ; set infection-state removed-infection-status ;add agent belief logic here
   set #infected #infected - 1
   set #hospitalised #hospitalised - 1
   set #non-hospitalised #non-hospitalised - 1
   set #dead-people #dead-people + 1
-  set list-of-dead-and-safely-buried-people fput who list-of-dead-and-safely-buried-people
+  ;set list-of-dead-and-safely-buried-people fput who list-of-dead-and-safely-buried-people
   
 ;   if age = retired-age [ set #dead-retired #dead-retired + 1]
 ;   if age = young-age [set #dead-young #dead-young + 1]

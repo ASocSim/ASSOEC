@@ -79,7 +79,7 @@ to-report epistemic-error-of-ignored-immunity-ratio report count people with [no
   <widgets>
     <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="false" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="0" maxPxcor="69" minPxcor="0"></view>
     <switch x="138" y="490" height="40" on="false" variable="show-social-links?" width="196" display="show-social-links?"></switch>
-    <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="92" display="1 Month Run"><![CDATA[let starting-day current-day
+    <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
 while [current-day <= end-day] [ go ]]]></button>
     <slider x="2825" step="1" y="161" max="100" width="174" display="uncertainty-avoidance" height="50" min="0" direction="Horizontal" default="52.0" variable="uncertainty-avoidance"></slider>
@@ -92,12 +92,12 @@ while [current-day <= end-day] [ go ]]]></button>
     <slider x="3233" step="1" y="90" max="40" width="223" display="value-system-calibration-factor" height="50" min="0" direction="Horizontal" default="25.0" variable="value-system-calibration-factor"></slider>
     <slider x="2829" step="0.1" y="351" max="3" width="172" display="survival-multiplier" height="50" min="0" direction="Horizontal" default="2.4" variable="survival-multiplier"></slider>
     <note x="2819" y="23" backgroundDark="0" fontSize="16" width="508" markdown="false" height="21" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Country-Specific Features Model: Culture, Values, Needs</note>
-    <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="93" display="go once">go</button>
+    <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="go once">go</button>
     <button x="10" actionKey="I" y="361" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="inspect person">inspect one-of people</button>
     <note x="2825" y="129" backgroundDark="0" fontSize="11" width="334" markdown="false" height="27" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Hofstede dimension settings</note>
     <note x="3233" y="70" backgroundDark="0" fontSize="11" width="197" markdown="false" height="30" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent value system settings</note>
     <note x="2833" y="331" backgroundDark="0" fontSize="11" width="190" markdown="false" height="18" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent need system settings</note>
-    <button x="12" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="92" display="1 Day run">if slice-of-the-day = "morning" [go]
+    <button x="10" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Day run">if slice-of-the-day = "morning" [go]
 while [slice-of-the-day != "morning"] [go]</button>
     <slider x="3233" step="1" y="147" max="25" width="233" display="influence-of-age-on-value-system" height="50" min="0" direction="Horizontal" default="5.0" variable="influence-of-age-on-value-system"></slider>
     <chooser x="2820" y="60" height="60" variable="load-country-specific-settings" current="0" width="217" display="load-country-specific-settings">
@@ -154,52 +154,11 @@ save-world-state</button>
     <switch x="4357" y="203" height="40" on="false" variable="log-violating-quarantine?" width="171" display="log-violating-quarantine?"></switch>
     <switch x="4186" y="323" height="40" on="true" variable="log-transactions?" width="150" display="log-transactions?"></switch>
     <switch x="4356" y="306" height="40" on="false" variable="inspect-to-file?" width="152" display="inspect-to-file?"></switch>
-    <button x="13" y="134" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="92" display="go">go
+    <button x="10" y="134" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="95" display="go">go
 if not any? people with [is-contagious?]
 [stop]</button>
     <button x="10" y="224" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Week Run">go
 while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</button>
-    <note x="2192" y="646" backgroundDark="0" fontSize="16" width="278" markdown="false" height="46" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
-    <input x="3025" multiline="false" y="805" height="60" variable="#markets-gp" type="number" width="250">3.0</input>
-    <slider x="3002" step="0.1" y="866" max="1" width="250" display="density-factor-markets" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-markets"></slider>
-    <slider x="2949" step="0.01" y="907" max="1" width="219" display="density-factor-churches" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-churches"></slider>
-    <slider x="2763" step="0.01" y="869" max="1" width="185" display="density-factor-store" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-store"></slider>
-    <slider x="2696" step="0.01" y="912" max="1" width="204" display="density-factor-agriculture" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-agriculture"></slider>
-    <slider x="2552" step="0.01" y="868" max="1" width="182" display="density-factor-mines" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-mines"></slider>
-    <slider x="2455" step="0.01" y="916" max="1" width="150" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-schools"></slider>
-    <switch x="2806" y="702" height="40" on="true" variable="bunia_proxemics" display="bunia_proxemics" width="142" sizeVersion="0"></switch>
-    <input x="2677" multiline="false" y="808" height="60" variable="#agriculture-gp" type="number" width="100">10.0</input>
-    <monitor x="2693" precision="17" y="963" height="60" fontSize="11" width="282">#people-dying-due-to-lack-of-hospitalization</monitor>
-    <monitor x="2445" precision="17" y="964" height="60" fontSize="11" width="238">#denied-requests-for-hospital-beds</monitor>
-    <monitor x="2176" precision="17" y="964" height="60" fontSize="11" width="225">#people-saved-by-hospitalization</monitor>
-    <monitor x="2512" precision="17" y="1030" height="60" fontSize="11" width="280">#who-became-sick-while-travelling-locally</monitor>
-    <monitor x="2898" precision="17" y="1030" height="60" fontSize="11" width="100" display="#away">count people with [is-away?]</monitor>
-    <note x="2189" y="792" backgroundDark="0" fontSize="10" width="160" markdown="false" height="75" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Density factors:
-Relative proximity between individuals within an activity type (impacts contamination risks).</note>
-    <monitor x="2919" precision="17" y="1098" height="60" fontSize="11" width="100" display="#@NEshop">count people with [[gathering-type] of current-activity = "non-essential-shop"]</monitor>
-    <monitor x="2813" precision="17" y="1098" height="60" fontSize="11" width="102" display="#@essential-shop">count people with [[gathering-type] of current-activity = "essential-shop"]</monitor>
-    <monitor x="2707" precision="17" y="1098" height="60" fontSize="11" width="100" display="#@leisure">count people with [member? "leisure" [gathering-type] of current-activity]</monitor>
-    <monitor x="2603" precision="17" y="1098" height="60" fontSize="11" width="100" display="#@hospital">count people with [[gathering-type] of current-activity = "hospital"]</monitor>
-    <monitor x="2497" precision="17" y="1098" height="60" fontSize="11" width="100" display="#@university">count people with [[gathering-type] of current-activity = "university"]</monitor>
-    <monitor x="2393" precision="17" y="1099" height="60" fontSize="11" width="100" display="#@workplace">count people with [[gathering-type] of current-activity = "workplace"]</monitor>
-    <monitor x="2287" precision="17" y="1099" height="60" fontSize="11" width="100" display="#@school">count people with [[gathering-type] of current-activity = "school"]</monitor>
-    <monitor x="2183" precision="17" y="1098" height="60" fontSize="11" width="100" display="#@home">count people with [[gathering-type] of current-activity = "home"]</monitor>
-    <monitor x="2176" precision="17" y="1028" height="60" fontSize="11" width="117">#dead-people</monitor>
-    <slider x="2363" step="0.01" y="873" max="1" width="186" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-hospitals"></slider>
-    <input x="2363" multiline="false" y="808" height="60" variable="#hospital-gp" type="number" width="100">2.0</input>
-    <slider x="2179" step="0.01" y="872" max="1" width="175" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
-    <input x="2903" multiline="false" y="808" height="60" variable="#churches-gp" type="number" width="118">3.0</input>
-    <input x="2783" multiline="false" y="808" height="60" variable="#stores-gp" type="number" width="115">5.0</input>
-    <note x="2366" y="783" backgroundDark="0" fontSize="11" width="753" markdown="false" height="20" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Number of units per activity type (sharing a unit incurs a transmission risk: due to contact)</note>
-    <input x="2573" multiline="false" y="808" height="60" variable="#mines-gp" type="number" width="100">10.0</input>
-    <input x="2467" multiline="false" y="808" height="60" variable="#schools-gp" type="number" width="100">2.0</input>
-    <monitor x="2839" precision="17" y="1398" height="60" fontSize="11" width="105">#agriculture-workers</monitor>
-    <monitor x="2972" precision="17" y="1265" height="60" fontSize="11" width="113">#hospital-workers</monitor>
-    <monitor x="2972" precision="17" y="1198" height="60" fontSize="11" width="175">#church-workers</monitor>
-    <monitor x="2836" precision="17" y="1333" height="60" fontSize="11" width="131">#mine-workers</monitor>
-    <monitor x="2972" precision="17" y="1333" height="60" fontSize="11" width="105">#school-workers</monitor>
-    <monitor x="2832" precision="17" y="1265" height="60" fontSize="11" width="132">#market-workers</monitor>
-    <monitor x="2832" precision="17" y="1198" height="60" fontSize="11" width="133">#store-workers</monitor>
     <note x="3268" y="1403" backgroundDark="0" fontSize="16" width="150" markdown="false" height="26" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Economic Model</note>
     <input x="3522" multiline="false" y="1718" height="60" variable="government-initial-reserve-of-capital" type="number" width="199">100000.0</input>
     <slider x="3522" step="0.01" y="1663" max="1" width="271" display="ratio-of-wage-paid-by-the-government" height="50" min="0" direction="Horizontal" default="0.8" variable="ratio-of-wage-paid-by-the-government"></slider>
@@ -226,17 +185,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <monitor x="843" precision="17" y="84" height="60" fontSize="11" width="100" display="#females">count female-agentset</monitor>
     <button x="699" y="153" height="60" disableUntilTicks="false" forever="false" kind="Observer" width="135" display="set households demographics">load-population-profile-based-on-current-preset-profile</button>
     <note x="997" y="28" backgroundDark="0" fontSize="16" width="167" markdown="false" height="27" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Disease Model</note>
-    <chooser x="998" y="66" height="60" variable="disease-fsm-model" current="2" width="138" display="disease-fsm-model">
-      <choice type="string" value="assocc"></choice>
-      <choice type="string" value="oxford"></choice>
-      <choice type="string" value="ebola"></choice>
-    </chooser>
-    <chooser x="1149" y="66" height="60" variable="contagion-model" current="1" width="138" display="contagion-model">
-      <choice type="string" value="oxford"></choice>
-      <choice type="string" value="ebola"></choice>
-    </chooser>
-    <switch x="1187" y="16" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
-    <slider x="997" step="0.01" y="248" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.16" variable="CFR" width="249" sizeVersion="0"></slider>
+    <slider x="997" step="0.01" y="248" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.74" variable="CFR" width="249" sizeVersion="0"></slider>
     <slider x="997" step="0.1" y="190" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.3" variable="trust-in-institutions"></slider>
     <slider x="996" step="0.01" y="136" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.31" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
     <monitor x="618" precision="17" y="420" height="60" fontSize="11" width="118">day-of-the-week</monitor>
@@ -288,8 +237,6 @@ Relative proximity between individuals within an activity type (impacts contamin
     <slider x="4035" step="0.01" y="1365" max="1" width="297" display="probability-getting-back-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-getting-back-when-abroad"></slider>
     <slider x="3750" step="0.01" y="1253" max="1" width="274" display="probability-infection-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-infection-when-abroad"></slider>
     <slider x="3750" step="0.01" y="1313" max="1" width="275" display="probability-going-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-going-abroad"></slider>
-    <note x="2187" y="714" backgroundDark="0" fontSize="10" width="567" markdown="false" height="57" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
-As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
     <plot x="1985" autoPlotX="true" yMax="10.0" autoPlotY="true" y="25" xMin="0.0" height="332" legend="true" xMax="10.0" yMin="0.0" width="419" display="#people infected in">
       <setup></setup>
       <update></update>
@@ -564,7 +511,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
         <update>plot count people with [infection-status = "safe-burial"]</update>
       </pen>
     </plot>
-    <button x="12" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="89" display="setup">setup-ebola</button>
+    <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
     <plot x="18" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="573" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction">
       <setup></setup>
       <update></update>
@@ -684,10 +631,50 @@ As simplifications: each person relates to a fix set of spaces over time (same s
       </pen>
     </plot>
     <note x="22" y="13" backgroundDark="0" fontSize="32" width="271" markdown="false" height="42" textColorDark="-1" textColorLight="-5298144" backgroundLight="0">ASSOEC</note>
-    <input x="3227" multiline="false" y="944" height="60" variable="#cemeteries-gp" type="number" width="250">3.0</input>
-    <slider x="3237" step="0.01" y="1018" max="1" width="219" display="density-factor-cemeteries" height="50" min="0" direction="Horizontal" default="0.88" variable="density-factor-cemeteries"></slider>
-    <input x="3052" multiline="false" y="727" height="60" variable="#leisure-gp" type="number" width="250">3.0</input>
-    <slider x="3229" step="0.01" y="1083" max="1" width="219" display="density-factor-leisure" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-leisure"></slider>
+    <switch x="352" y="493" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
+    <input x="2369" multiline="false" y="847" height="60" variable="#hospital-gp" type="number" width="122">2.0</input>
+    <input x="2369" multiline="false" y="916" height="60" variable="#schools-gp" type="number" width="122">2.0</input>
+    <input x="2369" multiline="false" y="988" height="60" variable="#mines-gp" type="number" width="122">10.0</input>
+    <input x="2369" multiline="false" y="1056" height="60" variable="#agriculture-gp" type="number" width="122">10.0</input>
+    <input x="2369" multiline="false" y="1127" height="60" variable="#stores-gp" type="number" width="122">5.0</input>
+    <input x="2369" multiline="false" y="1193" height="60" variable="#churches-gp" type="number" width="122">3.0</input>
+    <input x="2369" multiline="false" y="1261" height="60" variable="#markets-gp" type="number" width="122">3.0</input>
+    <input x="2369" multiline="false" y="1401" height="60" variable="#leisure-gp" type="number" width="122">3.0</input>
+    <input x="2369" multiline="false" y="1332" height="60" variable="#cemeteries-gp" type="number" width="122">3.0</input>
+    <slider x="2502" step="0.01" y="785" max="1" width="271" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
+    <slider x="2502" step="0.01" y="1335" max="1" width="271" display="density-factor-cemeteries" height="50" min="0" direction="Horizontal" default="0.88" variable="density-factor-cemeteries"></slider>
+    <slider x="2502" step="0.01" y="1407" max="1" width="271" display="density-factor-leisure" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-leisure"></slider>
+    <slider x="2502" step="0.1" y="1260" max="1" width="271" display="density-factor-markets" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-markets"></slider>
+    <slider x="2502" step="0.01" y="1193" max="1" width="271" display="density-factor-churches" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-churches"></slider>
+    <slider x="2502" step="0.01" y="1123" max="1" width="271" display="density-factor-store" height="50" min="0" direction="Horizontal" default="0.7" variable="density-factor-store"></slider>
+    <slider x="2502" step="0.01" y="1055" max="1" width="271" display="density-factor-agriculture" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-agriculture"></slider>
+    <slider x="2502" step="0.01" y="988" max="1" width="271" display="density-factor-mines" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-mines"></slider>
+    <slider x="2502" step="0.01" y="917" max="1" width="271" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-schools"></slider>
+    <slider x="2502" step="0.01" y="850" max="1" width="271" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-hospitals"></slider>
+    <monitor x="2178" precision="17" y="844" height="60" fontSize="11" width="177">#hospital-workers</monitor>
+    <monitor x="2178" precision="17" y="1060" height="60" fontSize="11" width="177">#agriculture-workers</monitor>
+    <monitor x="2178" precision="17" y="919" height="60" fontSize="11" width="177">#school-workers</monitor>
+    <monitor x="2178" precision="17" y="993" height="60" fontSize="11" width="177">#mine-workers</monitor>
+    <monitor x="2178" precision="17" y="1269" height="60" fontSize="11" width="177">#market-workers</monitor>
+    <monitor x="2178" precision="17" y="1200" height="60" fontSize="11" width="177">#church-workers</monitor>
+    <monitor x="2178" precision="17" y="1131" height="60" fontSize="11" width="177">#store-workers</monitor>
+    <note x="2180" y="678" backgroundDark="0" fontSize="16" width="170" markdown="false" height="65" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
+    <switch x="2373" y="682" height="40" on="true" variable="bunia_proxemics" display="bunia_proxemics" width="142" sizeVersion="0"></switch>
+    <note x="2536" y="648" backgroundDark="0" fontSize="10" width="234" markdown="false" height="124" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
+As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
+    <note x="2370" y="743" backgroundDark="0" fontSize="10" width="144" markdown="false" height="75" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Density factors:
+Relative proximity between individuals within an activity type (impacts contamination risks).</note>
+    <monitor x="2801" precision="17" y="917" height="60" fontSize="11" width="126" display="#@school">count people with [[gathering-type] of current-activity = "school"]</monitor>
+    <monitor x="2801" precision="17" y="1022" height="60" fontSize="11" width="126" display="#@workplace">count people with [[gathering-type] of current-activity = "workplace"]</monitor>
+    <monitor x="2801" precision="17" y="783" height="60" fontSize="11" width="126" display="#@home">count people with [[gathering-type] of current-activity = "home"]</monitor>
+    <monitor x="2801" precision="17" y="850" height="60" fontSize="11" width="126" display="#@hospital">count people with [[gathering-type] of current-activity = "hospital"]</monitor>
+    <monitor x="2801" precision="17" y="1397" height="60" fontSize="11" width="126" display="#@leisure">count people with [member? "leisure" [gathering-type] of current-activity]</monitor>
+    <monitor x="2801" precision="17" y="683" height="60" fontSize="11" width="126" display="#away">count people with [is-away?]</monitor>
+    <monitor x="3016" precision="17" y="701" height="60" fontSize="11" width="291">#people-saved-by-hospitalization</monitor>
+    <monitor x="3016" precision="17" y="923" height="60" fontSize="11" width="291">#who-became-sick-while-travelling-locally</monitor>
+    <monitor x="3016" precision="17" y="854" height="60" fontSize="11" width="291">#people-dying-due-to-lack-of-hospitalization</monitor>
+    <monitor x="3016" precision="17" y="777" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
+    <monitor x="3016" precision="17" y="630" height="60" fontSize="11" width="117">#dead-people</monitor>
   </widgets>
   <info>## WHAT IS IT?
 
