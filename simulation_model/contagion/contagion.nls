@@ -160,7 +160,9 @@ end
 
 
 to-report density-factor-of [context]
+
   if is-gathering-point? context [
+    ;print context
     report [proximity-factor] of context
   ]
   if context = "walking outside" or context = "travelling outside"[report density-walking-outside]
@@ -173,14 +175,15 @@ end
 
 
 to contaminate [infector context]
-  if log? and log-contamination? [let infector-str "nobody"if infector != nobody [set infector-str [who] of infector] log-file-print (word "infection(" ticks "," who "," infector-str "," context ")")]
+     print "consider infected people"
+  ;if log? and log-contamination? [let infector-str "nobody"if infector != nobody [set infector-str [who] of infector] log-file-print (word "infection(" ticks "," who "," infector-str "," context ")")]
   
   if infector != nobody [
     if any? first-infected-people with [self = infector] [set #infected-by-first-infected-people  #infected-by-first-infected-people + 1]
     if [not is-contagious?] of infector [error "assertion error"]
     ask infector [set number-of-people-I-infected number-of-people-I-infected + 1]
   ]
-  
+  print "infector is nobody"
   add-to-contagion-tree infector self context
   set-contaminated-disease-status
 end

@@ -30,9 +30,9 @@ to-report my-preferred-available-activity-descriptor
 
 if (someone-died?)
   [
-    print (sentence "someone died, so I go to funeral")
+    ;print (sentence "someone died, so I go to funeral")
     let preferred-activity-descriptor  activity-descriptor funeral-cemetery funeral-motive
-    print (sentence "my preferred available activity descriptor is" location-of preferred-activity-descriptor motive-of preferred-activity-descriptor)
+    ;print (sentence "my preferred available activity descriptor is" location-of preferred-activity-descriptor motive-of preferred-activity-descriptor)
 
     report preferred-activity-descriptor
   ]
@@ -42,7 +42,7 @@ if (someone-died?)
   
   let activity-place location-of preferred-activity-descriptor
   let place-type [gathering-type] of activity-place
-  print (sentence "my preferred available activity descriptor is" place-type " " motive-of preferred-activity-descriptor)
+  ;print (sentence "my preferred available activity descriptor is" place-type " " motive-of preferred-activity-descriptor)
 
   
   

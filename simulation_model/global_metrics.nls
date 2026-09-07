@@ -177,7 +177,10 @@ end
 
 
 to add-to-contagion-tree [infector infectee context]
-  if contamination-network-table = 0 [set contamination-network-table table:make] 
+  if contamination-network-table = 0 
+  [
+    set contamination-network-table table:make
+  ] 
   let key infector
   ifelse infector != nobody 
   [set key [who] of infector]
@@ -223,7 +226,6 @@ to increment-#contacts-per-gathering-type-global-metrics [ts context]
   let #contacts-now (count ts * (count ts - 1))
   if is-gathering-point? context [
     let gt [gathering-type] of context
-    print gt
     
     if gt = hospital-gathering-type [set #contacts-in-hospitals #contacts-in-hospitals + #contacts-now stop]
     if gt = workplace-mine-gathering-type [set #contacts-in-mines #contacts-in-mines + #contacts-now stop]
