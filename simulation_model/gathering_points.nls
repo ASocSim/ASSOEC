@@ -26,7 +26,7 @@ globals [
    stores                      ;;< every store, as a turtle-set fixed at setup
    churches                    ;;< every church, as a turtle-set fixed at setup
    cemeteries                  ;;< every cemetery, as a turtle-set fixed at setup
-   leisure                     ;;< declared but never assigned; the Ebola setup creates no leisure venues
+   leisure-points                     ;;< declared but never assigned; the Ebola setup creates no leisure venues
 ]
 
 ;; A place people can go to: a home, hospital, school, mine, farm, store, market,
@@ -434,7 +434,7 @@ end
 ;; @return true if at least one person believes they are infected
 ;; @todo Should be refined once there is a reporting system, or once hospital care
 ;; determines who counts as officially sick.
-to-report  is-someone-officially-sick? 
+to-report is-someone-officially-sick? 
   report any? people with [is-believing-to-be-infected?]   
 end
 

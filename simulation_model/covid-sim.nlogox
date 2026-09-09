@@ -9,7 +9,7 @@ globals [
   day-of-the-week
   is-lockdown-active?
   current-day
- ;keep for now
+
   #dead-people
   #dead-retired
   #dead-workers
@@ -466,6 +466,14 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <setup></setup>
         <update>plot count people with [current-motivation = funeral-motive]</update>
       </pen>
+      <pen interval="1.0" mode="0" display="social" color="-7858858" legend="true">
+        <setup></setup>
+        <update>plot count people with [current-motivation = social-motive]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="leisure" color="-4757638" legend="true">
+        <setup></setup>
+        <update>plot count people with [current-motivation = leisure-motive]</update>
+      </pen>
     </plot>
     <plot x="1462" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1033" xMin="0.0" height="359" legend="true" xMax="10.0" yMin="0.0" width="512" display="contacts">
       <setup></setup>
@@ -511,7 +519,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <update>plot count people with [infection-status = "safe-burial"]</update>
       </pen>
     </plot>
-    <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
     <plot x="18" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="573" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction">
       <setup></setup>
       <update></update>
@@ -675,6 +682,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <monitor x="3016" precision="17" y="854" height="60" fontSize="11" width="291">#people-dying-due-to-lack-of-hospitalization</monitor>
     <monitor x="3016" precision="17" y="777" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
     <monitor x="3016" precision="17" y="630" height="60" fontSize="11" width="117">#dead-people</monitor>
+    <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
   </widgets>
   <info>## WHAT IS IT?
 

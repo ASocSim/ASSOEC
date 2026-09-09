@@ -410,6 +410,16 @@ to-report my-store
   report one-of my-stores
 end
 
+to-report my-leisure-point
+  let my-leisure-points gathering-link-neighbors with [gathering-type = "leisure"]
+  ifelse count my-leisure-points >= 1
+  [
+  report one-of my-leisure-points
+  ]
+  [
+    report nobody
+  ]
+end
 ;; The school this person is attached to.
 ;;
 ;; @context person

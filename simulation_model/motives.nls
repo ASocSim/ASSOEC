@@ -15,8 +15,13 @@ to-report spiritual-motive
   report "spirituality"
 end
 
+;might remove and merge with spiritual
 to-report grieving-motive
   report "grieving"
+end
+
+to-report funeral-motive
+  report "funeral"
 end
 
 to-report food-motive
@@ -37,10 +42,6 @@ end
 
 to-report learning-motive
   report "learning"
-end
-
-to-report funeral-motive
-  report "funeral"
 end
 
 to-report visit-motive

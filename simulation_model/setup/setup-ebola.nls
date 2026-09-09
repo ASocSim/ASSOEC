@@ -144,6 +144,7 @@ end
    set markets (turtle-set)
    set churches (turtle-set)
    set cemeteries (turtle-set)
+   set leisure-points (turtle-set)
   
  create-gathering-points #hospital-gp 
  [
@@ -179,6 +180,14 @@ end
     set stores (turtle-set stores self)
     set hired-workers (turtle-set)
     set gathering-type "store" set shape "cow" set color yellow
+  ]
+
+    create-gathering-points #leisure-gp 
+  [
+    set vacancies 1
+    set leisure-points (turtle-set stores self)
+    set hired-workers (turtle-set)
+    set gathering-type "leisure" set shape "circle" set color orange
   ]
   
   
@@ -462,6 +471,11 @@ to setup-relation-to-gathering-points
     [ 
       set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
     ]
+
+    create-gathering-link-to one-of leisure-points
+  [
+    set features (list "social status" "autonomy" "work")
+  ]
   ]
 
   if is-female? 
@@ -500,6 +514,10 @@ to setup-relation-to-gathering-points
     [ 
       set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
     ]
+      create-gathering-link-to one-of leisure-points
+  [
+    set features (list "social status" "autonomy" "work")
+  ]
   ]
  ]
 
@@ -567,6 +585,28 @@ to  setup-worker-relation-to-gathering-point
   [
     let hiring-market self
     set hired-workers (turtle-set people with [my-work = hiring-market])
+  ]
+
+
+    ask leisure-points
+  [ 
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = my-home and is-male?]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-leisure-point self
+      ask potential-worker [set my-work hiring-leisure-point]
+
+     ;set hired-workers fput potential-worker hired-workers
+     set vacancies vacancies - 1
+    ]
+  ]
+
+ask leisure-points
+  [
+    let hiring-leisure-point self
+    set hired-workers (turtle-set people with [my-work = hiring-leisure-point])
   ]
 
   ask stores

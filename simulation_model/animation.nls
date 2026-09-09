@@ -329,6 +329,7 @@ to layout-gathering-points
   let row-2 band-bounds bottom-edge top-edge 4 1
   let row-3 band-bounds bottom-edge top-edge 4 2
   let row-4 band-bounds bottom-edge top-edge 4 3
+  ;let row-5 band-bounds bottom-edge top-edge ? ?
 
   (place-district home-gathering-type "HOMES"
     left-edge quarter-edge bottom-edge top-edge green)
@@ -345,13 +346,18 @@ to layout-gathering-points
 
   (place-district school-gathering-type "SCHOOLS"
     (first column-a) (last column-a) (first row-2) (last row-2) pink)
+    
   (place-district churches-gathering-type "CHURCHES"
     (first column-b) (last column-b) (first row-2) (last row-2) sky)
 
   (place-district hospital-gathering-type "HOSPITALS"
     (first column-a) (last column-a) (first row-1) (last row-1) turquoise)
+
   (place-district cemeteries-gathering-type "CEMETERIES"
     (first column-b) (last column-b) (first row-1) (last row-1) violet)
+
+  ;(place-district cemeteries-gathering-type "LEISURE-points"
+  ;  (first column-b) (last column-a) (first row-5) (last row-5) red)
 
   let strays gathering-points with [not member? gathering-type districted-gathering-types]
   arrange-on-grid strays left-edge right-edge max-pycor max-pycor
@@ -362,7 +368,7 @@ end
 ;; @return a list of `gathering-type` strings
 to-report districted-gathering-types
   report ["home" "workplace-mine" "workplace-agriculture" "store" "market"
-          "school" "church" "hospital" "cemetery"]
+          "school" "church" "hospital" "cemetery" ] ; add "leisure"
 end
 
 ;; Tint one district, write its name on it, and fill it with its places.

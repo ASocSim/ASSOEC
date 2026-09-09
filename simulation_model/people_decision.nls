@@ -26,15 +26,12 @@ __includes ["need_management.nls" "country_specific_features/cultural_model.nls"
 ;; @see my-available-activity-descriptors
 to-report my-preferred-available-activity-descriptor 
 
- 
-
 if (someone-died?)
   [
     let preferred-activity-descriptor  activity-descriptor funeral-cemetery funeral-motive
     report preferred-activity-descriptor
   ]
 
-  
   let preferred-activity-descriptor item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
   
   let activity-place location-of preferred-activity-descriptor
@@ -179,7 +176,7 @@ to update-belief-based-on-current-activity
   [
     let colleagues-here count my-colleagues with [current-activity = [current-activity] of myself]
     if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]
-    if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
+    ;if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
   ]
 
   let friends-here count my-friends with [current-activity = [current-activity] of myself]

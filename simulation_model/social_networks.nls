@@ -163,21 +163,27 @@ to-report my-relatives
   report other [gatherers] of my-home
 end
 
+to-report my-sick-relatives
+  report my-relatives with [has-internally-visible-symptoms?] 
+end
+
+;wrong logic to placeholder for social networks
+to-report my-networks-homes
+  report [my-home] of my-relatives
+end
+
 ;; The other people hired by this person's workplace.
 ;;
 ;; @context person
 ;; @return agentset of people, excluding self; empty for anyone who is not a worker
-;; @note Gated on `is-worker?`, which tests `age = "worker"`. Nothing in the Ebola
-;; setup assigns `age`, so this currently always reports an empty set.
 to-report my-colleagues
-  if not is-worker? [report (turtle-set)]
-  report other [hired-workers] of my-work
+  ;report other [hired-workers] of my-work
   ;report workplace-colleague-link-neighbors
-  ;let my-wp  my-workplace
-  ;if my-wp != nobody [
-  ;   report other [gatherers with [my-workplace = my-wp]] of my-wp
-  ; ]
-  ; report (turtle-set nobody)
+  let my-wp  my-workplace
+  if my-wp != nobody [
+     report other [gatherers with [my-workplace = my-wp]] of my-wp
+   ]
+   report (turtle-set nobody)
 end
 
 ;; The people this person is linked to by `my-friends-links`.
@@ -255,11 +261,14 @@ end
 ;; True when this person is of the "worker" age class.
 ;;
 ;; @context person
-;; @return true if `age` is "worker"
-;; @note Never true in the current build: nothing assigns `age`, and `worker-age`
-;; is commented out in people/classes.nls.
+;; @return true unless unemployed
+;; @note Always true in the current build
+;; age is commented out in people/classes.nls.
 to-report is-worker?
-  report age = "worker"
+  ifelse my-work != nobody
+  [report true] [
+    error "behaviour for unenployed people not implemented"
+    ]
 end
 
 

@@ -107,19 +107,9 @@ to-report social-distancing-of [an-activity-descriptor]
   report item 2 an-activity-descriptor
 end
 
-;;MY INTENTION HERE IS TO TRACK THE NW OF DECEASED PEOPLE AND LET THEM ATTEND BURIAL RITES
-; to-report is-at-burial?
-;   report is-mourning and is-at-burial?
-;   error (sentence "dont know if mourning yet")
-; end
 
-;; True when this person is at their current place under compulsion.
-;;
-;; @context person
-;; @return true if `current-motivation` is the "mandatory" motive
-to-report is-forced-to-be-here?
-  ;report is-forced-motive? current-motivation
-  report true
+to-report is-caring-for-sick?
+  if current-motivation = "care for the sick"[report true]
 end
 
 ;; True when `a` is the abroad placeholder gathering point.
@@ -146,7 +136,8 @@ end
 ;; @note Never true in the current build: `work-motive` is "contractual
 ;; obligation" while `select-activity` records the motive as "work".
 to-report is-working?
-  report is-working-motive? current-motivation
+  ;report is-working-motive? current-motivation
+  report true
 end
 
 ;; True when `a-motive` is the work motive.
@@ -157,7 +148,7 @@ end
 ;; rather than calling `work-motive`.
 ;; @see is-contractual-obligation?
 to-report is-working-motive? [a-motive]
-  report a-motive = "contractual obligation"
+  report a-motive = "work-motive"
 end
 
 ;; How many workers are working right now, anywhere.
@@ -247,6 +238,9 @@ to-report #workers-working-at-house
   report count workers with [is-working? and [gathering-type] of my-work = "house"]
 end
 
+to-report #workers-working-at-leisure-point
+  report count workers with [is-working? and [gathering-type] of my-work = "leisure"]
+end
 
 
 ;; The motive recorded when a person tags along with whoever is looking after them.
@@ -263,9 +257,8 @@ end
 ;;
 ;; @context person
 ;; @return true if this person should be at work now
-;; @note Never true in the current build: nothing assigns `age`.
 to-report is-I-have-contractual-obligations?
-  report age = "worker" and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
+  report (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
   and not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
 end
 
@@ -431,9 +424,9 @@ end
 ;; True when `a-motive` is leisure.
 ;;
 ;; @param a-motive  the motive string to test
-;; @return true if the motive is "relaxing"
+;; @return true if the motive is "leisure"
 to-report is-a-leisure-motivation? [a-motive]
-  report a-motive = "relaxing"
+  report a-motive = "leisure"
 end
 
 ;; True when `a-motive` is the work motive.
