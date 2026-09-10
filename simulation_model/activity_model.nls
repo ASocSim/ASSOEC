@@ -324,7 +324,22 @@ to-report is-learning?
   report current-motivation = learning-motive
 end
 
+to-report is-caring-for-the-sick-at-home?
+  report current-motivation = care-motive and is-at-home?
+end
 
+to-report is-caring-for-the-sick-at-hospital?
+  report current-motivation = care-motive and is-at-hospital?
+end
+
+;check if they go to their hospital or other hospital
+to-report is-at-hospital?
+ report current-activity = my-hospital
+end
+
+to-report is-at-church?
+  report current-activity = my-church
+end
 
 ;; True when this person's current motive is being tested.
 ;;
@@ -346,8 +361,8 @@ end
 ;; @return work in progress
 ;; @todo Passes a motive to a predicate that names a gathering point. See
 ;; docs/WIP_ISSUES.md#is-performing-essential-shopping--and-is-essential-shop-gathering-point-.
-to-report is-performing-essential-shopping?
-  report is-essential-shop-gathering-point? current-motivation
+to-report is-getting-food?
+  report current-motivation = food-motive
 end
 
 ;; Work in progress.
