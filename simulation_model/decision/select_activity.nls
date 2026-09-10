@@ -103,18 +103,22 @@ to-report my-available-activity-descriptors
   ;logic here for hospital caring
 
 
-  ;visits
-  ;and leisure
+;leisure
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
     if my-leisure-point != nobody [
     set activities lput (activity-descriptor my-leisure-point leisure-motive) activities
     print "go to leisure point available"
     ]
-    set activities lput (activity-descriptor one-of homes social-motive) activities
   ]
 
-  
+;visits
+
+   if slice-of-the-day = "evening" 
+   [
+    set activities lput (activity-descriptor one-of homes social-motive) activities
+   ]
+
 
   let ret []
   foreach activities [ activity ->

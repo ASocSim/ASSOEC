@@ -26,7 +26,9 @@ globals [
    stores                      ;;< every store, as a turtle-set fixed at setup
    churches                    ;;< every church, as a turtle-set fixed at setup
    cemeteries                  ;;< every cemetery, as a turtle-set fixed at setup
-   leisure-points                     ;;< declared but never assigned; the Ebola setup creates no leisure venues
+   leisure-points              
+   traditional-healers
+   civil-societies
 ]
 
 ;; A place people can go to: a home, hospital, school, mine, farm, store, market,
@@ -114,6 +116,9 @@ to-report proximity-factor
   if gathering-type = "church" [report density-factor-churches]
   if gathering-type = "cemetery" [report density-factor-cemeteries]
   if gathering-type = "leisure" [report density-factor-leisure]
+  if gathering-type = "traditional healer" [report density-factor-traditional-healer]
+  if gathering-type = "civil society" [report density-factor-civil-society]
+
   
   error (word gathering-type " not defined")
 end

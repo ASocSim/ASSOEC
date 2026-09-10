@@ -446,15 +446,11 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <setup></setup>
         <update>plot count people with [current-motivation = treatment-motive]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Treated at home" color="-955883" legend="true">
-        <setup></setup>
-        <update>;plot count people with [current-motivation = "get treatment at home"]</update>
-      </pen>
       <pen interval="1.0" mode="0" display="getting food" color="-7500403" legend="true">
         <setup></setup>
         <update>plot count people with [current-motivation = food-motive]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="attend religious gathering" color="-15040220" legend="true">
+      <pen interval="1.0" mode="0" display="attend religious gathering" color="-13403783" legend="true">
         <setup></setup>
         <update>plot count people with [current-motivation = spiritual-motive]</update>
       </pen>
@@ -683,6 +679,10 @@ Relative proximity between individuals within an activity type (impacts contamin
     <monitor x="3016" precision="17" y="777" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
     <monitor x="3016" precision="17" y="630" height="60" fontSize="11" width="117">#dead-people</monitor>
     <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
+    <slider x="2499" step="0.01" y="1469" max="1" width="271" display="density-factor-traditional-healer" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-traditional-healer"></slider>
+    <input x="2370" multiline="false" y="1470" height="60" variable="#traditional-healer-gp" type="number" width="122">3.0</input>
+    <input x="2372" multiline="false" y="1536" height="60" variable="#civil-society" type="number" width="122">3.0</input>
+    <slider x="2501" step="0.01" y="1535" max="1" width="271" display="density-factor-civil-society" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-civil-society"></slider>
   </widgets>
   <info>## WHAT IS IT?
 

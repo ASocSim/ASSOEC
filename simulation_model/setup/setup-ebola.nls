@@ -145,7 +145,11 @@ end
    set churches (turtle-set)
    set cemeteries (turtle-set)
    set leisure-points (turtle-set)
-  
+   set traditional-healers (turtle-set)
+   set civil-societies (turtle-set)
+
+
+
  create-gathering-points #hospital-gp 
  [
     set vacancies 5
@@ -185,7 +189,7 @@ end
     create-gathering-points #leisure-gp 
   [
     set vacancies 1
-    set leisure-points (turtle-set stores self)
+    set leisure-points (turtle-set leisure-points self)
     set hired-workers (turtle-set)
     set gathering-type "leisure" set shape "circle" set color orange
   ]
@@ -219,8 +223,30 @@ end
     set hired-workers (turtle-set)
     set gathering-type "church" set shape "pentagon" set color sky]
 
+
+  create-gathering-points #traditional-healer-gp 
+ [
+    set vacancies 5
+    set traditional-healers (turtle-set traditional-healers self)
+    set hired-workers (turtle-set)
+    
+    set gathering-type "traditional healter" set shape "circle" set color blue set size 2
+  ]
+
+   create-gathering-points #civil-society
+ [
+    set vacancies 5
+    set civil-societies (turtle-set civil-societies self)
+    set hired-workers (turtle-set)
+    
+    set gathering-type "civil society" set shape "circle" set color violet set size 2
+  ]
+
+
   
   ask gathering-points [set hired-workers (turtle-set)]
+
+
 
 ; setup-economy
 
@@ -473,10 +499,21 @@ to setup-relation-to-gathering-points
     ]
 
     create-gathering-link-to one-of leisure-points
+    create-gathering-link-to one-of leisure-points
   [
     set features (list "social status" "autonomy" "work")
   ]
+
+    create-gathering-link-to one-of traditional-healers
+  [
+    set features (list "we havent modeled this yet")
+    ]
+  
+    create-gathering-link-to one-of civil-societies
+  [
+    set features (list "we havent modeled this yet")
   ]
+]
 
   if is-female? 
   [
@@ -515,11 +552,21 @@ to setup-relation-to-gathering-points
       set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
     ]
       create-gathering-link-to one-of leisure-points
+      create-gathering-link-to one-of leisure-points
+
   [
     set features (list "social status" "autonomy" "work")
   ]
+    create-gathering-link-to one-of traditional-healers
+  [
+    set features (list "we havent modeled this yet")
+    ]
   ]
- ]
+    create-gathering-link-to one-of civil-societies
+  [
+    set features (list "we havent modeled this yet")
+  ]
+]
 
 end
 
