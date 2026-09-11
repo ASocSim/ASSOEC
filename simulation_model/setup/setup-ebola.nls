@@ -63,7 +63,7 @@ to setup-ebola
 
   setup-gathering-point-capacities
   setup-person-values-and-needs
-  setup-social-networks
+  setup-social-network-ebola
   
    if with-infected? [
      set first-infected-people n-of (min list 3 count people) people

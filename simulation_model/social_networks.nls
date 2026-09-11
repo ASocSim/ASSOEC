@@ -24,6 +24,8 @@ directed-link-breed [dependable-adult-links dependable-adult-link]
 ;;
 ;; The only social tie stored as links: relatives and colleagues are derived on
 ;; demand from the gathering links instead.
+undirected-link-breed [my-kin-links my-kin-link]
+
 undirected-link-breed [my-friends-links my-friends-link]
 
 ;;this representation works as long as the workplace network does not become too large
@@ -39,9 +41,38 @@ undirected-link-breed [my-friends-links my-friends-link]
 ;; @todo Empty body and no callers; what it is meant to replace is undecided. See
 ;; docs/WIP_ISSUES.md#setup-social-network-ebola.
 to setup-social-network-ebola
-  
+  setup-kin-network
+  ;setup-friend-network
+  ;setup-civil-society-network
 end
 
+
+;displaced people will not have kin networks as extensive as non-displaced people
+
+to setup-kin-network
+ask people [
+  let me self
+  let cohabitants other [gatherers] of my-home
+  ask cohabitants [
+    if not my-kin-link-neighbor? me 
+    [create-my-kin-link-with me
+    ;print (word "i have kin link " self me)
+    ]
+  ]
+  let #kin-houses 5
+  repeat #kin-houses [
+   let kin other [gatherers] of one-of other homes
+    ask kin
+    [
+     if not my-kin-link-neighbor? me 
+     [
+      create-my-kin-link-with me
+    ;print (word "i have extended kin link " self me)
+     ]
+   ]
+ ]
+]
+end
 
 
 ;; Build the friendship network for the whole population.
@@ -160,14 +191,13 @@ end
 ;; @context person
 ;; @return agentset of people, excluding self
 to-report my-relatives
-  report other [gatherers] of my-home
+  report my-kin-link-neighbors
 end
 
 to-report my-sick-relatives
   report my-relatives with [has-internally-visible-symptoms?] 
 end
 
-;wrong logic to placeholder for social networks
 to-report my-networks-homes
   report [my-home] of my-relatives
 end
