@@ -26,7 +26,9 @@ globals [
    stores                      ;;< every store, as a turtle-set fixed at setup
    churches                    ;;< every church, as a turtle-set fixed at setup
    cemeteries                  ;;< every cemetery, as a turtle-set fixed at setup
-   leisure                     ;;< declared but never assigned; the Ebola setup creates no leisure venues
+   leisure-points              
+   traditional-healers
+   civil-societies
 ]
 
 ;; A place people can go to: a home, hospital, school, mine, farm, store, market,
@@ -114,7 +116,9 @@ to-report proximity-factor
   if gathering-type = "church" [report density-factor-churches]
   if gathering-type = "cemetery" [report density-factor-cemeteries]
   if gathering-type = "leisure" [report density-factor-leisure]
-  
+  if gathering-type = "traditional healer" [report density-factor-traditional-healer]
+  if gathering-type = "civil society" [report density-factor-civil-society]
+
   error (word gathering-type " not defined")
 end
 
@@ -176,28 +180,7 @@ to-report #sick-personel
   report count hired-workers with [has-internally-visible-symptoms?]
 end
 
-;; True when this place is a cemetery.
-;;
-;; @context gathering-point
-;; @return true if `gathering-type` is "cemetery"
-;; @note Named for the activity rather than the place, because burial rites are
-;; the only reason to be at a cemetery. A person-side reporter of the same name is
-;; sketched and commented out in activity_model.nls.
-to-report is-at-burial?
-  report gathering-type = "cemetery"
-end
 
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @return work in progress
-;; @todo Reads person variables from the gathering-points file; the agent context
-;; it is meant for is undecided. See docs/WIP_ISSUES.md#is-away--and-is-at-work-.
-to-report is-at-work?
-  report current-activity = my-work
-end
 
 ;; True when this place is a home.
 ;;
@@ -434,7 +417,7 @@ end
 ;; @return true if at least one person believes they are infected
 ;; @todo Should be refined once there is a reporting system, or once hospital care
 ;; determines who counts as officially sick.
-to-report  is-someone-officially-sick? 
+to-report is-someone-officially-sick? 
   report any? people with [is-believing-to-be-infected?]   
 end
 

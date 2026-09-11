@@ -17,24 +17,24 @@
 
 ;; Work in progress.
 ;;
-;; work in progress
-;;
 ;; @context work in progress
 ;; @return work in progress
 ;; @todo Operator precedence puts religious gatherings on every afternoon, and the
 ;; activities point at random places rather than this person's own. See
 ;; docs/WIP_ISSUES.md#my-available-activity-descriptors.
 to-report my-available-activity-descriptors
-    
   ;add resting at home for SLEEP need
   ;now the people actually go to their own home to sleep
   let activities (list (list my-home rest-motive))
 
+
+;;hacky funeral test
+;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
+;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
   if someone-died? 
   [
     set activities []
     set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
-
     print (sentence "someone died, so I go to funeral" funeral-cemetery)
 
     let ret []
@@ -43,10 +43,12 @@ to-report my-available-activity-descriptors
   ]
   report ret
   ]
-  
- ; set activities lput (list my-hospital "get treatment") activities
 
-  
+ ;enable one treatment motive at hospital
+ ;TODO add other gps where treatment can be had
+ ;if any? people with [infection-status = stage-two-infection-status] [
+ ; set activities lput (list my-hospital "get treatment") activities ] 
+
 
   ;get food
   ;from store any day except sundays
@@ -74,45 +76,50 @@ to-report my-available-activity-descriptors
   
   ;attend religious gathering,
   ;on sunday we can go to religious gathering 
-  if (day-of-the-week = "sunday" and slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
-    set activities (lput (activity-descriptor my-church spiritual-motive) activities)]
-  
-  ;organize funeral
-  if someone-died?
+  if (day-of-the-week = "sunday" and slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
   [
-    set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+    set activities (lput (activity-descriptor my-church spiritual-motive) activities)
   ]
   
   ;get treatment
 ;; THIS NEEDS TO BE EXPANDED FOR THE PIVOTAL CHOICE OF GOING TO HOSPITAL OR NOT
-;  if has-internally-visible-symptoms? or is-believing-to-be-infected?
+  if has-internally-visible-symptoms? or is-believing-to-be-infected?
   ;epistemic logic conditional here
- ; [ set activities lput activity-descriptor my-hospital treatment-motive activities ]
-  ;[ set activities lput activity-descriptor my-home treatment-motive activities ]
+  [
+    print "I am sick, I want to go to the hospital"
+    set activities lput activity-descriptor my-hospital treatment-motive activities
+    set activities lput activity-descriptor my-home treatment-motive activities
+  ]
   
   
   ;care for the sick
   ;if i have a sick relative, and I am female, I care for them (at home)
-  ;if any? my-relatives      [set activities lput (activity-descriptor my-home "care for the sick") activities]
+  ;note that networks homes now coincides with relatives, this is a placeholder for when we have social networks
+  if (any? my-sick-relatives) and is-female?
+  [
+    set activities lput (activity-descriptor one-of my-networks-homes "care for the sick") activities
+   ;print "I stay home to care for you"
+  ]
   ;logic here for hospital caring
-  
-  
-  ;visits
+
+
+;leisure
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
-    ;visit my own home
-    set activities lput (activity-descriptor one-of homes social-motive) activities
-    ;print "i go to visit family"
+    if my-leisure-point != nobody [
+    set activities lput (activity-descriptor my-leisure-point leisure-motive) activities
+    ;print "go to leisure point available"
+    ]
   ]
- 
-  
 
-;;hacky funeral test
-;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
-;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
+;visits
+;go visit your relatives, sometimes the ones who already live with you
+   if slice-of-the-day = "evening" 
+   [
+    set activities lput (activity-descriptor [my-home] of one-of my-relatives social-motive) activities
+    print "add visits to list of possible actv"
+   ]
 
-  
- ; set activities lput (list my-hospital "get treatment") activities
 
   let ret []
   foreach activities [ activity ->
@@ -140,6 +147,14 @@ to select-activity
   let motive motive-of c-a
   let schedule-entry (list loc motive slice-of-the-day day-of-the-week)
   set schedule lput schedule-entry schedule
+
+if (motive = social-motive) 
+[
+ if ([gathering-type] of loc = "home")
+ [
+  print "i am visiting kin even if they are not sick"
+ ]
+]
   ;print (sentence "my preferred activity is" c-a)
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [

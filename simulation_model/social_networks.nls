@@ -24,6 +24,8 @@ directed-link-breed [dependable-adult-links dependable-adult-link]
 ;;
 ;; The only social tie stored as links: relatives and colleagues are derived on
 ;; demand from the gathering links instead.
+undirected-link-breed [my-kin-links my-kin-link]
+
 undirected-link-breed [my-friends-links my-friends-link]
 
 ;;this representation works as long as the workplace network does not become too large
@@ -39,9 +41,38 @@ undirected-link-breed [my-friends-links my-friends-link]
 ;; @todo Empty body and no callers; what it is meant to replace is undecided. See
 ;; docs/WIP_ISSUES.md#setup-social-network-ebola.
 to setup-social-network-ebola
-  
+  setup-kin-network
+  ;setup-friend-network
+  ;setup-civil-society-network
 end
 
+
+;displaced people will not have kin networks as extensive as non-displaced people
+
+to setup-kin-network
+ask people [
+  let me self
+  let cohabitants other [gatherers] of my-home
+  ask cohabitants [
+    if not my-kin-link-neighbor? me 
+    [create-my-kin-link-with me
+    ;print (word "i have kin link " self me)
+    ]
+  ]
+  let #kin-houses 5
+  repeat #kin-houses [
+   let kin other [gatherers] of one-of other homes
+    ask kin
+    [
+     if not my-kin-link-neighbor? me 
+     [
+      create-my-kin-link-with me
+    ;print (word "i have extended kin link " self me)
+     ]
+   ]
+ ]
+]
+end
 
 
 ;; Build the friendship network for the whole population.
@@ -160,24 +191,29 @@ end
 ;; @context person
 ;; @return agentset of people, excluding self
 to-report my-relatives
-  report other [gatherers] of my-home
+  report my-kin-link-neighbors
+end
+
+to-report my-sick-relatives
+  report my-relatives with [has-internally-visible-symptoms?] 
+end
+
+to-report my-networks-homes
+  report [my-home] of my-relatives
 end
 
 ;; The other people hired by this person's workplace.
 ;;
 ;; @context person
 ;; @return agentset of people, excluding self; empty for anyone who is not a worker
-;; @note Gated on `is-worker?`, which tests `age = "worker"`. Nothing in the Ebola
-;; setup assigns `age`, so this currently always reports an empty set.
 to-report my-colleagues
-  if not is-worker? [report (turtle-set)]
-  report other [hired-workers] of my-work
+  ;report other [hired-workers] of my-work
   ;report workplace-colleague-link-neighbors
-  ;let my-wp  my-workplace
-  ;if my-wp != nobody [
-  ;   report other [gatherers with [my-workplace = my-wp]] of my-wp
-  ; ]
-  ; report (turtle-set nobody)
+  let my-wp  my-workplace
+  if my-wp != nobody [
+     report other [gatherers with [my-workplace = my-wp]] of my-wp
+   ]
+   report (turtle-set nobody)
 end
 
 ;; The people this person is linked to by `my-friends-links`.
@@ -255,11 +291,14 @@ end
 ;; True when this person is of the "worker" age class.
 ;;
 ;; @context person
-;; @return true if `age` is "worker"
-;; @note Never true in the current build: nothing assigns `age`, and `worker-age`
-;; is commented out in people/classes.nls.
+;; @return true unless unemployed
+;; @note Always true in the current build
+;; age is commented out in people/classes.nls.
 to-report is-worker?
-  report age = "worker"
+  ifelse my-work != nobody
+  [report true] [
+    error "behaviour for unenployed people not implemented"
+    ]
 end
 
 

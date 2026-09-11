@@ -157,8 +157,9 @@ to-report is-observing-critical-symptoms?
   or infection-status = "dead-infectious"
   or infection-status = "safe-burial" ;Emil added
   or infection-status = "unsafe-burial" ;Emil added
-    or infection-status = "h-to-immune"
+  or infection-status = "h-to-immune"
   or infection-status = "immune"
+  or infection-status = "healthy"
   [report false]
   
   
