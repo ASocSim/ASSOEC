@@ -152,7 +152,7 @@ end
 
  create-gathering-points #hospital-gp 
  [
-    set vacancies 5
+    set vacancies 2
     set hospitals (turtle-set  hospitals self)
     set hired-workers (turtle-set)
     
@@ -188,7 +188,7 @@ end
 
     create-gathering-points #leisure-gp 
   [
-    set vacancies 1
+    set vacancies 2
     set leisure-points (turtle-set leisure-points self)
     set hired-workers (turtle-set)
     set gathering-type "leisure" set shape "circle" set color orange
@@ -226,16 +226,16 @@ end
 
   create-gathering-points #traditional-healer-gp 
  [
-    set vacancies 5
+    set vacancies 1
     set traditional-healers (turtle-set traditional-healers self)
     set hired-workers (turtle-set)
     
-    set gathering-type "traditional healter" set shape "circle" set color blue set size 2
+    set gathering-type "traditional healer" set shape "circle" set color blue set size 2
   ]
 
    create-gathering-points #civil-society
  [
-    set vacancies 5
+    set vacancies 2
     set civil-societies (turtle-set civil-societies self)
     set hired-workers (turtle-set)
     
@@ -582,13 +582,13 @@ end
 ;; @side-effects sets `my-work` on people and `hired-workers` on places
 ;; @todo Vacancies are hardcoded per place type at creation, and there is no
 ;; filter for working age.
+;;remember women are assigned my-work as my-home by default at creation, men who have no work yet have my-work = 0
 to  setup-worker-relation-to-gathering-point
   
   ;;TODO add filter to only people of working age
 
   ask hospitals
   [ 
-    ;print "I am a hospital and I am hiring"
     let hiring-hospital self
 
     ;;TODO declare vacancies where it makes sense, this is just a hack for now
@@ -598,8 +598,6 @@ to  setup-worker-relation-to-gathering-point
       if (count potential-workers = 0) [stop]
       let potential-worker one-of potential-workers
       ask potential-worker [set my-work hiring-hospital]
-
-     ;set hired-workers fput potential-worker hired-workers
      set vacancies vacancies - 1
     ]
   ]
@@ -614,16 +612,14 @@ to  setup-worker-relation-to-gathering-point
 
   ask markets
   [ 
-    ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
     [
-      let potential-workers people with [my-work = my-home and is-female?]
+      let potential-workers people with [my-work = my-home ]
       if (count potential-workers = 0) [stop]
       let potential-worker one-of potential-workers
       let hiring-market self
       ask potential-worker [set my-work hiring-market]
 
-     ;set hired-workers fput potential-worker hired-workers
      set vacancies vacancies - 1
     ]
   ]
@@ -639,26 +635,63 @@ to  setup-worker-relation-to-gathering-point
   [ 
     while [vacancies > 0]
     [
-      let potential-workers people with [my-work = my-home and is-male?]
+      let potential-workers people with [my-work = 0]
       if (count potential-workers = 0) [stop]
       let potential-worker one-of potential-workers
       let hiring-leisure-point self
       ask potential-worker [set my-work hiring-leisure-point]
 
-     ;set hired-workers fput potential-worker hired-workers
      set vacancies vacancies - 1
     ]
   ]
-
-ask leisure-points
+  ask leisure-points
   [
     let hiring-leisure-point self
     set hired-workers (turtle-set people with [my-work = hiring-leisure-point])
   ]
 
+
+      ask traditional-healers
+  [ 
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = my-home]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-traditional-healer self
+      ask potential-worker [set my-work hiring-traditional-healer]
+     set vacancies vacancies - 1
+    ]
+  ]
+ask traditional-healers
+  [
+    let hiring-traditional-healer self
+    set hired-workers (turtle-set people with [my-work = hiring-traditional-healer])
+  ]
+
+
+
+      ask civil-societies
+  [ 
+    while [vacancies > 0]
+    [
+      let potential-workers people with [my-work = 0]
+      if (count potential-workers = 0) [stop]
+      let potential-worker one-of potential-workers
+      let hiring-civil-society self
+      ask potential-worker [set my-work hiring-civil-society]
+     set vacancies vacancies - 1
+    ]
+  ]
+ask civil-societies
+  [
+    let hiring-civil-society self
+    set hired-workers (turtle-set people with [my-work = hiring-civil-society])
+  ]
+
+
   ask stores
   [ 
-    ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
     [
       let potential-workers people with [my-work = 0 and is-male?]
@@ -666,7 +699,6 @@ ask leisure-points
       let potential-worker one-of potential-workers
       let hiring-store self
       ask potential-worker [set my-work hiring-store]
-      ;set hired-workers fput potential-worker hired-workers
       set vacancies vacancies - 1
     ]
   ]
@@ -679,7 +711,6 @@ ask leisure-points
   
   ask churches
   [ 
-    ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
 
     [
@@ -688,7 +719,6 @@ ask leisure-points
       let potential-worker one-of potential-workers
       let hiring-church self
       ask potential-worker [set my-work hiring-church]
-      ;set hired-workers fput potential-worker hired-workers
       set vacancies vacancies - 1
     ]
   ]
@@ -698,9 +728,9 @@ ask leisure-points
     let hiring-church self
     set hired-workers (turtle-set people with [my-work = hiring-church])
   ]
+
   ask cemeteries
   [ 
-    ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
 
     [
@@ -709,7 +739,6 @@ ask leisure-points
       let potential-worker one-of potential-workers
       let hiring-cemetery self
       ask potential-worker [set my-work hiring-cemetery]
-      ;set hired-workers fput potential-worker hired-workers
       set vacancies vacancies - 1
     ]
   ]
@@ -722,7 +751,6 @@ ask leisure-points
 
   ask schools
   [ 
-    ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
     [
       let potential-workers people with [my-work = 0 and is-male?]
@@ -730,7 +758,6 @@ ask leisure-points
       let potential-worker one-of potential-workers
       let hiring-school self
       ask potential-worker [set my-work hiring-school]
-      ;set hired-workers fput potential-worker hired-workers
       set vacancies vacancies - 1
     ]
   ]
@@ -743,16 +770,13 @@ ask leisure-points
   
   ask workplace-agriculture
   [ 
-    ;;TODO declare vacancies where it makes sense, this is just a hack for now
     while [vacancies > 0]
     [
-      let potential-workers people with [my-work = 0 ] ;and is-female?
-      ; print "I am unemployed, can I work in agriculture?"
+      let potential-workers people with [my-work = 0 or my-work = my-home]
       if (count potential-workers = 0) [stop]
       let potential-worker one-of potential-workers
       let hiring-agriculture self
       ask potential-worker [set my-work hiring-agriculture]
-      ;set hired-workers fput potential-worker hired-workers
       set vacancies vacancies - 1
     ]
   ]
@@ -764,7 +788,7 @@ ask leisure-points
   ]
 
 
-  ask people with [my-work = 0 ];and is-male?
+  ask people with [my-work = 0 ]
   [
     ;print "I am unemployed, can I work in mine?"
     let mine one-of workplace-mines

@@ -434,43 +434,43 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <plot x="929" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1034" xMin="0.0" height="361" legend="true" xMax="10.0" yMin="0.0" width="510" display="Activities">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="@Work" color="-14070903" legend="true">
+      <pen interval="1.0" mode="1" display="@Work" color="-14070903" legend="true">
         <setup></setup>
         <update>plot count people with [is-at-work?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="@Home" color="-14439633" legend="true">
+      <pen interval="1.0" mode="1" display="@Home" color="-14439633" legend="true">
         <setup></setup>
         <update>plot count people with [is-at-home?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Treated at hospital" color="-6459832" legend="true">
+      <pen interval="1.0" mode="1" display="Treated at hospital" color="-6459832" legend="true">
         <setup></setup>
         <update>plot count people with [current-motivation = treatment-motive]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="getting food" color="-7500403" legend="true">
+      <pen interval="1.0" mode="1" display="getting food" color="-7500403" legend="true">
         <setup></setup>
         <update>plot count people with [is-getting-food?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="attend religious gathering" color="-13403783" legend="true">
+      <pen interval="1.0" mode="1" display="attend religious gathering" color="-13403783" legend="true">
         <setup></setup>
         <update>plot count people with [is-at-church?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="care for sick at hospital" color="-2674135" legend="true">
+      <pen interval="1.0" mode="1" display="care for sick at hospital" color="-2674135" legend="true">
         <setup></setup>
         <update>plot count people with [is-caring-for-the-sick-at-hospital?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="funeral rite" color="-1184463" legend="true">
+      <pen interval="1.0" mode="1" display="funeral rite" color="-1184463" legend="true">
         <setup></setup>
         <update>plot count people with [current-motivation = funeral-motive]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="social" color="-7858858" legend="true">
+      <pen interval="1.0" mode="1" display="social" color="-7858858" legend="true">
         <setup></setup>
-        <update>plot count people with [current-motivation = social-motive]</update>
+        <update>plot count people with [is-visiting?]</update>
       </pen>
       <pen interval="1.0" mode="0" display="leisure" color="-4757638" legend="true">
         <setup></setup>
-        <update>plot count people with [current-motivation = leisure-motive]</update>
+        <update>plot count people with [is-at-leisure-point?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="care at home" color="-955883" legend="true">
+      <pen interval="1.0" mode="1" display="care at home" color="-955883" legend="true">
         <setup></setup>
         <update>plot count people with [is-caring-for-the-sick-at-home?]</update>
       </pen>
@@ -687,14 +687,6 @@ Relative proximity between individuals within an activity type (impacts contamin
     <input x="2370" multiline="false" y="1470" height="60" variable="#traditional-healer-gp" type="number" width="122">3.0</input>
     <input x="2372" multiline="false" y="1536" height="60" variable="#civil-society" type="number" width="122">3.0</input>
     <slider x="2501" step="0.01" y="1535" max="1" width="271" display="density-factor-civil-society" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-civil-society"></slider>
-    <plot x="601" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1085" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="230" display="plot 1">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="default" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot count turtles</update>
-      </pen>
-    </plot>
   </widgets>
   <info>## WHAT IS IT?
 
