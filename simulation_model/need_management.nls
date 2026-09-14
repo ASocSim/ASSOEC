@@ -258,32 +258,17 @@ end
 
 
 
-;financial survival
-;; Work in progress.
-;;
-;; work in progress
-;;
+
 ;; @param ad  work in progress
 ;; @context work in progress
 ;; @return work in progress
 ;; @todo A reporter that writes: it sets `my-expected-income` on every person in
 ;; the world on each call. See docs/WIP_ISSUES.md#sue-financial-survival.
 to-report SUE-financial-survival [ad]
- 
-  ask people [set my-expected-income 10]
   
     let gp location-of ad
     let motive motive-of ad
-    let eating-costs price-of-rations-in-essential-shops * amount-of-rations-I-buy-when-going-to-essential-shops
-
-;   print "rations price"
-;   print price-of-rations-in-essential-shops
-;   print "amount rations"
-;   print amount-of-rations-I-buy-when-going-to-essential-shops
-;   print "eating costs"
-;   print eating-costs
-;   print "exp income"
-;   print my-expected-income
+    let eating-costs price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets
 
   
     if motive = work-motive

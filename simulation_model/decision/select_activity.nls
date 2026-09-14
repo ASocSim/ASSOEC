@@ -177,9 +177,8 @@ if (motive = social-motive)
 ;       print "hello after if sats"
 ;     set c-a (list away-gathering-point travelling-motive false)
 ;   ]
-if motive = work-motive and gathering-type of loc = my-work [
-  gain-money
-]
+
+    update-resources-based-on-current-activity c-a
 
   select-activity-wtf? loc
   set current-activity loc
@@ -188,6 +187,8 @@ if motive = work-motive and gathering-type of loc = my-work [
  ; if current-activity != away-gathering-point and current-motivation = travelling-motive [error "wrong place while travelling"]
   
 end
+
+
 
 
 ;; Record whether reaching `loc` means leaving where this person already is.

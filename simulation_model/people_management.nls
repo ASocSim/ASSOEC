@@ -183,15 +183,11 @@ people-own [
   days-since-seen-friends     ;;< ticks since more than half this person's friends were in the same place
 
 
-  ;;L: this dichotomy is conceptually discussable: the evaluation of safety is BASED on these variables;
-  ;;but, in principles, these variables are not there for evaluating safety and they are/can/should influence other aspects (including other needs).
-  ;;same for all variables
 ;; @group Money
-  my-amount-of-capital        ;;< money this person holds, in currency units; starts at 100
-  my-target-amount-of-capital ;;< the balance this person is trying to hold
   my-current-income           ;;< income received this tick; part of the dormant COVID economy
   my-expected-income          ;;< income this person expects from working, used by `SUE-financial-survival`
   
+
 ;; @group Display
 ;;
 ;; Where the view should draw this person: the spot in the crowd at their
@@ -324,46 +320,7 @@ to-report is-young?
   report true
 end
 
-;; All the money held by the population.
-;;
-;; @return the sum of `my-amount-of-capital` over every person
-to-report total-amount-of-capital
-  report sum [my-amount-of-capital] of people
-end
 
-;; Mean money held by retired people.
-;;
-;; @return an amount of capital
-;; @note Divides by zero when nobody is retired, which is always in the Ebola
-;; build: nothing assigns `age`. The same holds for the student, young and worker
-;; variants below.
-to-report retirees-average-amount-of-capital
-  report (sum [my-amount-of-capital] of people with [age = "retired"]) / (count people with [age = "retired"])
-end
-
-;; Mean money held by working-age people.
-;;
-;; @return an amount of capital
-;; @see retirees-average-amount-of-capital
-to-report workers-average-amount-of-capital
-  report mean [my-amount-of-capital] of workers
-end
-
-;; Mean money held by students.
-;;
-;; @return an amount of capital
-;; @see retirees-average-amount-of-capital
-to-report students-average-amount-of-capital
-  report (sum [my-amount-of-capital] of people with [age = "student"]) / (count people with [age = "student"])
-end
-
-;; Mean money held by young people.
-;;
-;; @return an amount of capital
-;; @see retirees-average-amount-of-capital
-to-report young-average-amount-of-capital
-  report (sum [my-amount-of-capital] of people with [age = "young"]) / (count people with [age = "young"])
-end
 
 
 ;; True when anyone in this person's household believes themselves to be infected.

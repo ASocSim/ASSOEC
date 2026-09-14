@@ -405,9 +405,9 @@ end
 to load-default-economic-parameters
 
   set workers-wages 12.5
-  set price-of-rations-in-essential-shops 2.8
+;  set price-of-rations-in-essential-shops 2.8
   set days-of-rations-bought 2
-  set price-of-rations-in-non-essential-shops 4.0
+;  set price-of-rations-in-stores 1.0
   
 ;   set ratio-tax-on-essential-shops 0.76
 ;   set ratio-tax-on-non-essential-shops 0.85
