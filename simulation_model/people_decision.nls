@@ -26,7 +26,7 @@ __includes ["need_management.nls" "country_specific_features/cultural_model.nls"
 ;; @see my-available-activity-descriptors
 to-report my-preferred-available-activity-descriptor 
 
-if (someone-died?)
+if (am-I-mourning?)
   [
     let preferred-activity-descriptor  activity-descriptor funeral-cemetery funeral-motive
     report preferred-activity-descriptor

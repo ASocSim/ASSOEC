@@ -19,6 +19,10 @@ to-report funeral-motive
   report "funeral"
 end
 
+to-report SDB-motive
+  report "SDB"
+end
+
 to-report food-motive
  report "get food"
 end

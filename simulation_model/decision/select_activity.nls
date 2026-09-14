@@ -31,11 +31,11 @@ to-report my-available-activity-descriptors
 ;;hacky funeral test
 ;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
 ;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
-  if someone-died? 
+  if am-I-mourning? and not enforce-SDB?
   [
     set activities []
     set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
-    print (sentence "someone died, so I go to funeral" funeral-cemetery)
+    print (sentence "someone died, so I go to traditional funeral" funeral-cemetery)
 
     let ret []
     foreach activities [ activity ->
@@ -43,6 +43,22 @@ to-report my-available-activity-descriptors
   ]
   report ret
   ]
+
+  if am-I-mourning? and enforce-SDB?
+  [
+    set activities []
+    ;assuming 100% compliance with SDB
+    set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
+    print (sentence "someone died, so I go to SDB" funeral-cemetery)
+
+    let ret []
+    foreach activities [ activity ->
+      set ret fput (lput false activity) ret
+  ]
+  report ret
+
+  ]
+
 
  ;enable one treatment motive at hospital
  ;TODO add other gps where treatment can be had
@@ -86,7 +102,7 @@ to-report my-available-activity-descriptors
   if has-internally-visible-symptoms? or is-believing-to-be-infected?
   ;epistemic logic conditional here
   [
-    print "I am sick, I want to go to the hospital"
+    ;print "I am sick, I want to go to the hospital"
     set activities lput activity-descriptor my-hospital treatment-motive activities
     set activities lput activity-descriptor my-home treatment-motive activities
   ]
@@ -117,7 +133,7 @@ to-report my-available-activity-descriptors
    if slice-of-the-day = "evening" 
    [
     set activities lput (activity-descriptor [my-home] of one-of my-relatives social-motive) activities
-    print "add visits to list of possible actv"
+    ;print "add visits to list of possible actv"
    ]
 
 
@@ -162,6 +178,8 @@ if (motive = social-motive)
 ;     set c-a (list away-gathering-point travelling-motive false)
 ;   ]
 
+    update-resources-based-on-current-activity c-a
+
   select-activity-wtf? loc
   set current-activity loc
   set current-motivation motive-of c-a
@@ -169,6 +187,8 @@ if (motive = social-motive)
  ; if current-activity != away-gathering-point and current-motivation = travelling-motive [error "wrong place while travelling"]
   
 end
+
+
 
 
 ;; Record whether reaching `loc` means leaving where this person already is.

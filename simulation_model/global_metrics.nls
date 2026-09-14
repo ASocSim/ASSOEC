@@ -1,5 +1,7 @@
 globals
 [
+  price-of-rations
+
   #infected-times-ticks
   #delivered-supply-proposed-this-tick
   when-has-2%-infected-threshold-first-been-met?
@@ -159,7 +161,6 @@ end
 to-report ratio-of-females-at-start
   report #females-at-start / #people-at-start
 end
-
 
 to-report ratio-of-males-at-start
   report #males-at-start / #people-at-start

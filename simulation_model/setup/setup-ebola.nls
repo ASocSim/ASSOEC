@@ -45,13 +45,13 @@ to setup-ebola
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
+  set price-of-rations 1
+
   
   set was-social-distancing-enforced? false
   set when-has-2%-infected-threshold-first-been-met? "never"
   set when-has-5%-infected-threshold-first-been-met? "never"
   set start-tick-of-global-quarantine "never"
-
-  
 
   
   setup-gathering-points-as-turtle-sets
@@ -394,19 +394,25 @@ to setup-person [current-home l-sex]
   [
     set sex l-sex
     set time-when-infected "never"
-
     set has-been-tested-infected? false
-    set my-amount-of-capital 100 ;my-starting-amount-of-capital
+
+    set am-I-mourning? false
+    
+    ;;money handling
+    set my-current-income 0
+    set my-expected-income 45          ;;< income this person expects from working, used by `SUE-financial-survival`
+
     set current-activity current-home
     set my-home current-home
     set schedule (list "hello" "its a-meeee, maaaaario")
     
     if (sex = "female" )
     [
+      set my-current-income 0
+      set my-expected-income 0
       set my-work current-home
     ]
 
-    set my-target-amount-of-capital my-amount-of-capital
     set has-been-tested-immune? false
 
     create-gathering-link-to current-home [set features (list "rest" "visits" "work" "care for the sick" "get treatment" "family belonging" "group belonging")]

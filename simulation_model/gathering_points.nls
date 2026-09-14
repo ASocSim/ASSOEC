@@ -39,7 +39,7 @@ gathering-points-own [
   gathering-type              ;;< which kind of place this is, as a string; see gathering_points/gathering_types.nls
   available-food-rations      ;;< rations of food held here, in person-days; mostly relevant for homes
 
-  amount-of-capital           ;;< money the place holds, in currency units
+  amount-of-household-capital           ;;< money the place holds, in currency units
   
   hired-workers               ;;< turtle-set of the people employed here, rebuilt by `setup-worker-relation-to-gathering-point`
   stock-of-goods              ;;< goods available to sell; part of the dormant COVID economy
