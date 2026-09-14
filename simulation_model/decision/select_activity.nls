@@ -31,7 +31,7 @@ to-report my-available-activity-descriptors
 ;;hacky funeral test
 ;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
 ;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
-  if someone-died? and not enforce-SDB?
+  if am-I-mourning? and not enforce-SDB?
   [
     set activities []
     set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
@@ -44,7 +44,7 @@ to-report my-available-activity-descriptors
   report ret
   ]
 
-  if someone-died? and enforce-SDB?
+  if am-I-mourning? and enforce-SDB?
   [
     set activities []
     ;assuming 100% compliance with SDB

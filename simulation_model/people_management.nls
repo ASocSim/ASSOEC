@@ -53,6 +53,7 @@ people-own [
 ;; @group Network memory
   what-my-network-did-week-day ;;< the most common (place type, motive) among this person's network, one entry per weekday tick, oldest first
   what-my-network-did-weekend ;;< the same for weekend ticks
+  am-I-mourning?
 
 ;; @group Attachments
   my-home                     ;;< the gathering point this person lives at
@@ -260,7 +261,11 @@ to update-alive-status
 
     set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
 
-    ask one-of people [ die ]    
+    let deceased one-of people 
+    ask [my-kin-link-neighbors] of deceased [set am-I-mourning? true]
+
+    ask deceased
+    [ die ]    
   ]
   
 end

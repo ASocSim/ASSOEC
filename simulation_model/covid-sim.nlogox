@@ -39,6 +39,8 @@ to go
   
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)
   perform-people-activities
+  ask people [set am-I-mourning? false]
+
 
   update-display
   ;inspect-agents
@@ -77,7 +79,7 @@ to-report epistemic-false-positive-error-ratio report count people with [is-beli
 to-report epistemic-error-of-ignored-immunity-ratio report count people with [not is-believing-to-be-immune? and not is-immune?] / count people end
   ]]></code>
   <widgets>
-    <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="false" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="0" maxPxcor="69" minPxcor="0"></view>
+    <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="true" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="0" maxPxcor="69" minPxcor="0"></view>
     <switch x="138" y="490" height="40" on="false" variable="show-social-links?" width="196" display="show-social-links?"></switch>
     <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
@@ -179,7 +181,7 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
       <choice type="string" value="no displaced"></choice>
     </chooser>
     <monitor x="578" precision="17" y="148" height="60" fontSize="11" width="100" display="#people">count people</monitor>
-    <input x="578" multiline="false" y="220" height="63" variable="#households" type="number" width="100">100.0</input>
+    <input x="578" multiline="false" y="220" height="63" variable="#households" type="number" width="100">200.0</input>
     <slider x="700" step="0.01" y="334" max="1" width="248" display="ratio-displaced-homes" height="50" min="0" direction="Horizontal" default="0.07" variable="ratio-displaced-homes"></slider>
     <monitor x="844" precision="17" y="153" height="60" fontSize="11" width="100" display="#males">count male-agentset</monitor>
     <monitor x="843" precision="17" y="84" height="60" fontSize="11" width="100" display="#females">count female-agentset</monitor>
@@ -636,7 +638,7 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
       </pen>
     </plot>
     <note x="22" y="13" backgroundDark="0" fontSize="32" width="271" markdown="false" height="42" textColorDark="-1" textColorLight="-5298144" backgroundLight="0">ASSOEC</note>
-    <switch x="352" y="493" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
+    <switch x="352" y="493" height="40" on="false" variable="with-infected?" width="139" display="with-infected?"></switch>
     <input x="2369" multiline="false" y="847" height="60" variable="#hospital-gp" type="number" width="122">2.0</input>
     <input x="2369" multiline="false" y="916" height="60" variable="#schools-gp" type="number" width="122">2.0</input>
     <input x="2369" multiline="false" y="988" height="60" variable="#mines-gp" type="number" width="122">10.0</input>
@@ -687,7 +689,7 @@ Relative proximity between individuals within an activity type (impacts contamin
     <slider x="2501" step="0.01" y="1535" max="1" width="271" display="density-factor-civil-society" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-civil-society"></slider>
     <slider x="995" step="0.01" y="76" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.38" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
     <slider x="996" step="0.1" y="130" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.5" variable="trust-in-institutions"></slider>
-    <switch x="517" y="492" height="40" on="true" variable="enforce-SDB?" width="109" display="enforce-SDB?"></switch>
+    <switch x="517" y="492" height="40" on="false" variable="enforce-SDB?" width="109" display="enforce-SDB?"></switch>
     <plot x="998" autoPlotX="true" yMax="10.0" autoPlotY="true" y="308" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="230" display="plot 1">
       <setup></setup>
       <update></update>
