@@ -141,6 +141,8 @@ end
    set stores (turtle-set)
    set schools (turtle-set)
    set homes (turtle-set)
+   set family-homes (turtle-set)
+   set male-only-homes (turtle-set)
    set markets (turtle-set)
    set churches (turtle-set)
    set cemeteries (turtle-set)
@@ -233,7 +235,7 @@ end
     set gathering-type "traditional healer" set shape "circle" set color blue set size 2
   ]
 
-   create-gathering-points #civil-society
+   create-gathering-points #civil-society-gp
  [
     set vacancies 2
     set civil-societies (turtle-set civil-societies self)
@@ -278,9 +280,8 @@ end
 to create-all-households
   load-population-profile-based-on-current-preset-profile
 
-  let #adults-homes floor (#households * ratio-adults-homes)
   let #family-homes floor (#households * ratio-family-homes)
-  let #displaced-homes #households - (#adults-homes + #family-homes) ;+ #retired-couple-homes + #multigenerational-homes
+  let #displaced-homes #households - #family-homes ;+ #retired-couple-homes + #multigenerational-homes
 
 ;  repeat #adults-homes [create-household "adult"]
   repeat #family-homes [create-household "family"]
@@ -314,10 +315,22 @@ to create-household [t]
     set current-home self
     set homes (turtle-set homes self)
     set gathering-type "home"
+
+   
+
     setup-GUI-household
   ]
   
 ;;need more info on household composition, how many in a family home?
+    if t = "family"
+    [
+      set family-homes (turtle-set family-homes current-home)
+    ]
+
+    if t = "displaced"
+    [
+      set male-only-homes (turtle-set male-only-homes current-home)
+    ]
 
   if t = "family"
   [
@@ -325,7 +338,7 @@ to create-household [t]
     let women random 3 + 1
 
     setup-home current-home men women
-
+    
     stop
   ]
 
@@ -333,6 +346,8 @@ to create-household [t]
   [
     let men random 2 + 3
     setup-home current-home men 0
+
+
     stop
   ]
 
@@ -406,12 +421,11 @@ to setup-person [current-home l-sex]
     set my-home current-home
     set schedule (list "hello" "its a-meeee, maaaaario")
     
-    if (sex = "female" )
+    if(sex = "female")
     [
-      set my-current-income 0
-      set my-expected-income 0
       set my-work current-home
     ]
+
 
     set has-been-tested-immune? false
 
@@ -447,10 +461,16 @@ end
 
 ;; Attach every person to the places they may use, and record why they would go.
 ;;
-;; Everyone gets one hospital, and one of each of market, store, church, school,
-;; mine, farm and cemetery. The choice of place is random; what differs by sex is
-;; the list of reasons on the link, which is what makes men and women value the
-;; same place differently later.
+;; Everyone gets exactly one of every kind of place: a hospital, a leisure venue, a
+;; traditional healer and a civil society organisation regardless of sex, then one
+;; each of market, store, church, school, mine, farm and cemetery from the branch
+;; for their sex. The choice of place is random; what differs by sex is the list of
+;; reasons on the link, which is what makes men and women value the same place
+;; differently later.
+;;
+;; Exactly one link per kind matters: the `my-...` reporters in people_management.nls
+;; pick the person's own place out of these links, so a second link of the same kind
+;; would give them two places to be drawn at.
 ;;
 ;; @context observer
 ;; @side-effects creates gathering links from every person
@@ -464,6 +484,34 @@ to setup-relation-to-gathering-points
   create-gathering-link-to one-of hospitals
   [
     set features (list "get treatment" "care for the sick" "work")
+  ]
+
+  ;;so do leisure venues, traditional healers and civil society organisations, so
+  ;;they are wired up here rather than once per sex. Each is guarded: the count of
+  ;;each is an interface setting and may legitimately be 0, and
+  ;;`create-gathering-link-to nobody` is a runtime error.
+  if any? leisure-points
+  [
+    create-gathering-link-to one-of leisure-points
+    [
+      set features (list "social status" "autonomy" "work")
+    ]
+  ]
+
+  if any? traditional-healers
+  [
+    create-gathering-link-to one-of traditional-healers
+    [
+      set features (list "we havent modeled this yet")
+    ]
+  ]
+
+  if any? civil-societies
+  [
+    create-gathering-link-to one-of civil-societies
+    [
+      set features (list "we havent modeled this yet")
+    ]
   ]
 
   ;;men go to markets, stores, churches, schools, mines, agriculture and cemeteries for different reasons than women
@@ -504,22 +552,7 @@ to setup-relation-to-gathering-points
       set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
     ]
 
-    create-gathering-link-to one-of leisure-points
-    create-gathering-link-to one-of leisure-points
-  [
-    set features (list "social status" "autonomy" "work")
   ]
-
-    create-gathering-link-to one-of traditional-healers
-  [
-    set features (list "we havent modeled this yet")
-    ]
-  
-    create-gathering-link-to one-of civil-societies
-  [
-    set features (list "we havent modeled this yet")
-  ]
-]
 
   if is-female? 
   [
@@ -557,20 +590,6 @@ to setup-relation-to-gathering-points
     [ 
       set features (list "group belonging" "family belonging" "work" "social status" "autonomy")
     ]
-      create-gathering-link-to one-of leisure-points
-      create-gathering-link-to one-of leisure-points
-
-  [
-    set features (list "social status" "autonomy" "work")
-  ]
-    create-gathering-link-to one-of traditional-healers
-  [
-    set features (list "we havent modeled this yet")
-    ]
-  ]
-    create-gathering-link-to one-of civil-societies
-  [
-    set features (list "we havent modeled this yet")
   ]
 ]
 
@@ -806,6 +825,14 @@ ask civil-societies
     let hiring-mine self
     set hired-workers (turtle-set people with [my-work = hiring-mine])
   ]
+
+  ask people 
+    [if (my-work = my-home)
+    [
+      set my-current-income 0
+      set my-expected-income 0
+    ]
+    ]
   
 end
 

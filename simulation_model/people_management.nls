@@ -339,12 +339,32 @@ to-report might-I-be-contagious?
   report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
 end
 
+;; The one place of kind `a-gathering-type` this person is attached to.
+;;
+;; Every `my-...` reporter below goes through this, and every one of them is read
+;; twice for the same tick - once by `select-activity` to decide where to go, and
+;; again by predicates such as `is-at-church?` and by the Activities plot to ask
+;; where the person went. Both readings have to name the same place, so the choice
+;; is made by lowest `who` rather than by `one-of`: a person linked to two places of
+;; a kind would otherwise be sent to one and looked for at the other.
+;;
+;; `setup-relation-to-gathering-points` creates exactly one link per kind, so the
+;; tie-break should never come up; it is here so that the display cannot go wrong
+;; again if a second link is ever added.
+;;
+;; @param a-gathering-type  the kind of place wanted, as a `gathering-type` string
+;; @context person
+;; @return a gathering point, or `nobody` if none of that kind is linked
+to-report my-gathering-point-of-type [a-gathering-type]
+  report min-one-of (gathering-link-neighbors with [gathering-type = a-gathering-type]) [who]
+end
+
 ;; The hospital this person is attached to.
 ;;
 ;; @context person
 ;; @return a gathering point, or `nobody` if none is linked
 to-report my-hospital
-  report one-of gathering-link-neighbors with [gathering-type = "hospital"]
+  report my-gathering-point-of-type "hospital"
 end
 
 ;; The market this person is attached to.
@@ -352,7 +372,7 @@ end
 ;; @context person
 ;; @return a gathering point, or `nobody` if none is linked
 to-report my-market
-  report one-of gathering-link-neighbors with [gathering-type = "market"]
+  report my-gathering-point-of-type "market"
 end
 
 ;; The church this person is attached to.
@@ -360,34 +380,51 @@ end
 ;; @context person
 ;; @return a gathering point, or `nobody` if none is linked
 to-report my-church
-  report one-of gathering-link-neighbors  with [gathering-type = "church"]
+  report my-gathering-point-of-type "church"
 end
 
-;; The store this person shops at, excluding the one they work at.
+;; The store this person shops at.
 ;;
 ;; @context person
-;; @return a gathering point, or `nobody` if the only linked store is their workplace
+;; @return a gathering point, or `nobody` if none is linked
 to-report my-store
-  let my-stores gathering-link-neighbors with [gathering-type = "store"]
-  report one-of my-stores
+  report my-gathering-point-of-type "store"
 end
 
+;; The leisure venue this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked - which is what happens
+;; when `#leisure-gp` is 0, and is why `select-activity` checks before offering it
 to-report my-leisure-point
-  let my-leisure-points gathering-link-neighbors with [gathering-type = "leisure"]
-  ifelse count my-leisure-points >= 1
-  [
-  report one-of my-leisure-points
-  ]
-  [
-    report nobody
-  ]
+  report my-gathering-point-of-type "leisure"
 end
+
+;; The traditional healer this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked
+;; @note Nothing offers *visiting* a healer as an activity yet - people are only
+;; ever there to work. The link exists so the place has a population attached to it.
+to-report my-traditional-healer
+  report my-gathering-point-of-type "traditional healer"
+end
+
+;; The civil society organisation this person is attached to.
+;;
+;; @context person
+;; @return a gathering point, or `nobody` if none is linked
+;; @note As `my-traditional-healer`: staffed, but never visited.
+to-report my-civil-society
+  report my-gathering-point-of-type "civil society"
+end
+
 ;; The school this person is attached to.
 ;;
 ;; @context person
 ;; @return a gathering point, or `nobody` if none is linked
 to-report my-school
-  report one-of gathering-link-neighbors with [gathering-type = "school"]
+  report my-gathering-point-of-type "school"
 end
 
 ;; Where this person works.

@@ -110,23 +110,36 @@ end
 ;; A person whose activity is not a place - which should not happen, but does not
 ;; deserve a crash in display code - is left where they already are.
 ;;
+;; How tightly a crowd is packed depends on how big it is, so each place is counted
+;; before anybody is seated: a place drawing 170 people has to fit them in the same
+;; room as one drawing four, and the ring spacing and the size people are drawn at
+;; are what give way.
+;;
 ;; @context observer
-;; @side-effects sets `display-target-xcor` and `display-target-ycor` on every
-;; person, and resets `crowd-slots-taken` on every gathering point
+;; @side-effects sets `display-target-xcor`, `display-target-ycor` and `size` on
+;; every person, and resets `crowd-slots-taken` and `crowd-size` on every gathering
+;; point
 ;; @see crowd-offset
 to assign-crowd-positions
-  ask gathering-points [set crowd-slots-taken 0]
+  ask gathering-points [set crowd-slots-taken 0 set crowd-size 0]
+  ask people [
+    if is-gathering-point? current-activity
+    [ ask current-activity [set crowd-size crowd-size + 1] ]
+  ]
 
   foreach sort people [ a-person ->
     ask a-person [
       ifelse is-gathering-point? current-activity
       [
         let slot 0
+        let spacing 0
         ask current-activity [
           set slot crowd-slots-taken
           set crowd-slots-taken crowd-slots-taken + 1
+          set spacing crowd-ring-spacing
         ]
-        let shift crowd-offset slot
+        set size min (list person-marker-size (1.1 * spacing))
+        let shift crowd-offset slot spacing
         set display-target-xcor (clamped min-pxcor max-pxcor ([xcor] of current-activity + first shift))
         set display-target-ycor (clamped min-pycor max-pycor ([ycor] of current-activity + last shift))
       ]
@@ -143,13 +156,17 @@ end
 ;; Slots fill outwards in rings around the place, six slots to the first ring and
 ;; six more to each ring after it. Slot 0 is on the first ring rather than dead
 ;; centre, so that the marker for the place itself stays visible under the crowd.
-;; Rings stop growing at `max-crowd-radius`, which keeps a large gathering from
-;; spilling over its neighbours.
 ;;
-;; @param slot  the person's index in the crowd, counting from 0
+;; Every ring the crowd needs fits inside the place's own `crowd-radius`, because
+;; `crowd-ring-spacing` divides that radius by the number of rings rather than
+;; clamping at it - clamping is what used to pile every outer ring onto the same
+;; circle and turn a large crowd into a solid disc.
+;;
+;; @param slot     the person's index in the crowd, counting from 0
+;; @param spacing  the distance between two rings here, from `crowd-ring-spacing`
 ;; @return the offset from the place, as a two-element list (dx, dy)
 ;; @see crowd-ring-slots
-to-report crowd-offset [slot]
+to-report crowd-offset [slot spacing]
   let ring 1
   let index slot
   while [index >= crowd-ring-slots ring] [
@@ -158,7 +175,7 @@ to-report crowd-offset [slot]
   ]
 
   let angle 360 * index / crowd-ring-slots ring
-  let radius min (list max-crowd-radius (crowd-ring-spacing * ring))
+  let radius spacing * ring
   report (list (radius * sin angle) (radius * cos angle))
 end
 
@@ -170,21 +187,31 @@ to-report crowd-ring-slots [ring]
   report 6 * ring
 end
 
-;; How far apart the rings of a crowd are.
+;; How far apart the rings of this place's crowd are, this tick.
 ;;
+;; Whichever is tighter: the spacing a small crowd is drawn at, or the spacing that
+;; gets every ring this crowd needs inside `crowd-radius`.
+;;
+;; @context gathering-point
 ;; @return a distance in patches
+;; @see #crowd-rings
 to-report crowd-ring-spacing
-  report 0.4 * display-scale
+  report min (list (0.4 * display-scale) (crowd-radius / #crowd-rings))
 end
 
-;; How far from its place a crowd is allowed to spread.
+;; How many rings this place's crowd takes up.
 ;;
-;; Chosen against the district grids in `layout-gathering-points`: it is under half
-;; the spacing between two places of the same kind, so two crowds never merge.
-;;
-;; @return a distance in patches
-to-report max-crowd-radius
-  report 1.2 * display-scale
+;; @context gathering-point
+;; @return a count of rings, at least one
+;; @see crowd-ring-slots
+to-report #crowd-rings
+  let ring 0
+  let seated 0
+  while [seated < crowd-size] [
+    set ring ring + 1
+    set seated seated + crowd-ring-slots ring
+  ]
+  report max (list 1 ring)
 end
 
 ;#endregion
@@ -289,10 +316,11 @@ end
 ;; Arrange every place in the world into one district per kind of place.
 ;;
 ;; The residential quarter takes the left of the world, since there are more homes
-;; than anything else; the right is split into two columns and four rows, which
-;; gives the eight other kinds of place a district each, paired by what they are
-;; for - work at the top, then trade, then the civic places, and at the bottom the
-;; two places people end up at when things go wrong.
+;; than anything else; the right is cut into four rows. The top row carries the two
+;; workplace districts side by side; the three rows below it are cut into three
+;; columns each, which gives the remaining nine kinds of place a district apiece,
+;; grouped by what they are for - the places people go out to, then the civic
+;; places, and at the bottom the three places people end up at when things go wrong.
 ;;
 ;; Every district is separated from its neighbours by a lane of `district-gutter`
 ;; patches painted `district-lane-color`, so no two districts ever share a border
@@ -300,8 +328,8 @@ end
 ;; tint. Each district is then tinted, given a header strip carrying its name, and
 ;; its places are spread over an even grid filling the rest of it.
 ;;
-;; Any kind of place with no district of its own - the `away` placeholder, and
-;; leisure venues if they are ever built - is put along the top margin.
+;; Any kind of place with no district of its own - only the `away` placeholder, now
+;; that every kind the setup creates has one - is put along the top margin.
 ;;
 ;; Must run after `create-all-households`, or the homes will not exist yet to be
 ;; placed.
@@ -320,44 +348,50 @@ to layout-gathering-points
   let bottom-edge min-pycor + 1
   let top-edge max-pycor - 1
 
-  ; the residential quarter, then a lane, then two equal service columns
-  let quarter-edge left-edge + round (0.42 * (right-edge - left-edge))
-  let column-a band-bounds (quarter-edge + 1 + district-gutter) right-edge 2 0
-  let column-b band-bounds (quarter-edge + 1 + district-gutter) right-edge 2 1
+  ; the residential quarter, then a lane, then the service half of the world
+  let quarter-edge left-edge + round (0.36 * (right-edge - left-edge))
+  let services-edge quarter-edge + 1 + district-gutter
+
+  ; the top row is cut in two, for the two workplace districts; the rest in three
+  let wide-a band-bounds services-edge right-edge 2 0
+  let wide-b band-bounds services-edge right-edge 2 1
+  let column-a band-bounds services-edge right-edge 3 0
+  let column-b band-bounds services-edge right-edge 3 1
+  let column-c band-bounds services-edge right-edge 3 2
 
   let row-1 band-bounds bottom-edge top-edge 4 0
   let row-2 band-bounds bottom-edge top-edge 4 1
   let row-3 band-bounds bottom-edge top-edge 4 2
   let row-4 band-bounds bottom-edge top-edge 4 3
-  ;let row-5 band-bounds bottom-edge top-edge ? ?
 
   (place-district home-gathering-type "HOMES"
     left-edge quarter-edge bottom-edge top-edge green)
 
   (place-district workplace-mine-gathering-type "MINES"
-    (first column-a) (last column-a) (first row-4) (last row-4) brown)
+    (first wide-a) (last wide-a) (first row-4) (last row-4) brown)
   (place-district workplace-agriculture-gathering-type "FARMS"
-    (first column-b) (last column-b) (first row-4) (last row-4) lime)
+    (first wide-b) (last wide-b) (first row-4) (last row-4) lime)
 
   (place-district stores-gathering-type "SHOPS"
     (first column-a) (last column-a) (first row-3) (last row-3) yellow)
   (place-district markets-gathering-type "MARKETS"
     (first column-b) (last column-b) (first row-3) (last row-3) orange)
+  (place-district leisure-gathering-type "LEISURE"
+    (first column-c) (last column-c) (first row-3) (last row-3) red)
 
   (place-district school-gathering-type "SCHOOLS"
     (first column-a) (last column-a) (first row-2) (last row-2) pink)
-    
   (place-district churches-gathering-type "CHURCHES"
     (first column-b) (last column-b) (first row-2) (last row-2) sky)
+  (place-district civil-society-gathering-type "CIVIL SOC."
+    (first column-c) (last column-c) (first row-2) (last row-2) magenta)
 
   (place-district hospital-gathering-type "HOSPITALS"
     (first column-a) (last column-a) (first row-1) (last row-1) turquoise)
-
+  (place-district traditional-healer-gathering-type "HEALERS"
+    (first column-b) (last column-b) (first row-1) (last row-1) blue)
   (place-district cemeteries-gathering-type "CEMETERIES"
-    (first column-b) (last column-b) (first row-1) (last row-1) violet)
-
-  ;(place-district cemeteries-gathering-type "LEISURE-points"
-  ;  (first column-b) (last column-a) (first row-5) (last row-5) red)
+    (first column-c) (last column-c) (first row-1) (last row-1) violet)
 
   let strays gathering-points with [not member? gathering-type districted-gathering-types]
   arrange-on-grid strays left-edge right-edge max-pycor max-pycor
@@ -368,7 +402,8 @@ end
 ;; @return a list of `gathering-type` strings
 to-report districted-gathering-types
   report ["home" "workplace-mine" "workplace-agriculture" "store" "market"
-          "school" "church" "hospital" "cemetery" ] ; add "leisure"
+          "leisure" "school" "church" "civil society" "hospital"
+          "traditional healer" "cemetery"]
 end
 
 ;; Tint one district, write its name on it, and fill it with its places.
@@ -423,8 +458,10 @@ end
 ;;
 ;; Markers are also shrunk to fit: a place is never drawn wider than four fifths of
 ;; the smaller side of its cell, so a district holding many places packs tighter
-;; instead of overlapping. Places are taken in `who` order, so a district always
-;; fills the same way.
+;; instead of overlapping. Each place is told how far its crowd may spread at the
+;; same time, as a shade under half that cell, which is what stops the crowds of two
+;; neighbouring places merging however many people turn up. Places are taken in
+;; `who` order, so a district always fills the same way.
 ;;
 ;; @param gps  the places to arrange; may be empty
 ;; @param x0   leftmost patch column of the rectangle
@@ -432,8 +469,9 @@ end
 ;; @param y0   bottom patch row
 ;; @param y1   top patch row
 ;; @context observer
-;; @side-effects moves and resizes every place in `gps`
+;; @side-effects moves and resizes every place in `gps`, and sets their `crowd-radius`
 ;; @see place-marker-size
+;; @see crowd-ring-spacing
 to arrange-on-grid [gps x0 x1 y0 y1]
   let #places count gps
   if #places = 0 [stop]
@@ -447,8 +485,10 @@ to arrange-on-grid [gps x0 x1 y0 y1]
   let column-spacing usable-width / #columns
   let row-spacing usable-height / #rows
 
+  let cell-size min (list column-spacing row-spacing)
   ask gps [
-    set size min (list place-marker-size (0.8 * min (list column-spacing row-spacing)))
+    set size min (list place-marker-size (0.8 * cell-size))
+    set crowd-radius 0.45 * cell-size
   ]
 
   let index 0

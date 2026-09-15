@@ -65,14 +65,25 @@ to update-resources-based-on-current-activity [c-a]
   if (motive = work-motive and [gathering-type] of loc = [gathering-type] of my-work)
   [
       set my-current-income my-current-income + my-expected-income
-      earn-household-capital my-expected-income
+
+      if(not member? my-home male-only-homes)
+      [
+        earn-household-capital my-expected-income
+        set my-current-income 0
+      ]
 
 ]
     if (motive = food-motive) [
-    if ([gathering-type] of loc = [gathering-type] of my-store or [gathering-type] of loc = [gathering-type] of my-market)[
+    if ([gathering-type] of loc = [gathering-type] of my-store or [gathering-type] of loc = [gathering-type] of my-market)
+    [
+      
       let expense amount-of-rations-I-buy-when-going-to-stores-or-markets * price-of-rations
       set my-current-income my-current-income - expense
-      depleat-household-capital expense
+      
+      if(not member? my-home male-only-homes)
+      [
+        depleat-household-capital expense
+      ]
     ]
     ]
 end
@@ -80,7 +91,7 @@ end
 to earn-household-capital [earnings]
       ask my-home
       [
-      set amount-of-household-capital amount-of-household-capital + earnings
+        set amount-of-household-capital amount-of-household-capital + earnings
       ]
 end
 
@@ -187,15 +198,12 @@ to-report #workers-working-at-hospital
   report count workers with [is-at-work? and [gathering-type] of my-work = "hospital"]
 end
 
-;; Work in progress.
+;; How many workers are working at a mine right now.
 ;;
-;; work in progress
-;;
-;; @return work in progress
-;; @todo Tests the gathering type "workplace-mines"; the type created at setup is
-;; "workplace-mine". See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-mine
-  report count workers with [is-at-work? and [gathering-type] of my-work = "workplace-mines"]
+  report count workers with [is-at-work? and [gathering-type] of my-work = "workplace-mine"]
 end
 
 ;; How many workers are working at a school right now.
@@ -223,15 +231,12 @@ to-report #workers-working-at-market
 end
 
 
-;; Work in progress.
+;; How many workers are working at an agricultural workplace right now.
 ;;
-;; work in progress
-;;
-;; @return work in progress
-;; @todo Tests the gathering type "agriculture"; the type created at setup is
-;; "workplace-agriculture". See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-agriculture
-  report count workers with [is-at-work? and [gathering-type] of my-work = "agriculture"]
+  report count workers with [is-at-work? and [gathering-type] of my-work = "workplace-agriculture"]
 end
 
 ;; How many workers are working at a church right now.
@@ -242,15 +247,12 @@ to-report #workers-working-at-church
   report count workers with [is-at-work? and [gathering-type] of my-work = "church"]
 end
 
-;; Work in progress.
+;; How many workers are working from their own home right now.
 ;;
-;; work in progress
-;;
-;; @return work in progress
-;; @todo Tests the gathering type "house"; the type created at setup is "home".
-;; See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-house
-  report count workers with [is-at-work? and [gathering-type] of my-work = "house"]
+  report count workers with [is-at-work? and [gathering-type] of my-work = "home"]
 end
 
 to-report #workers-working-at-leisure-point
@@ -398,7 +400,14 @@ end
 ;; @return a number of rations
 ;; @unit person-days of food
 to-report amount-of-rations-I-buy-when-going-to-stores-or-markets
-  report days-of-rations-bought * count [gatherers] of my-home
+
+
+  if(not member? my-home houses-hosting-males)
+  [
+    report days-of-rations-bought * count [gatherers] of my-home
+  ]
+
+  report days-of-rations-bought
 end
 
 ;; True when `a-motive` is leisure.
@@ -491,7 +500,9 @@ to perform-people-activities
   ask gathering-points with [capacity != disabled-capacity] [
     ;error "why?"
     ;ask gatherers [show myself show current-activity]
-    let all-people (gatherers with [current-activity != myself])
+    ; everyone actually standing here this tick - `gatherers` is everyone attached to
+    ; the place whether they came or not, which is not who the cap applies to
+    let all-people current-gatherers
     ifelse count all-people > current-capacity [
       let succesful-people n-of current-capacity all-people
       ask succesful-people [set is-activity-successful? true]

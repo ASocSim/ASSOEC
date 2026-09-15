@@ -10,6 +10,8 @@
 ;; @note The names are inconsistent about plurals: `home-gathering-type` and
 ;; `school-gathering-type` are singular where `stores-gathering-type` and
 ;; `markets-gathering-type` are plural. Every one of them reports an agentset.
+;; @note Two of the `gathering-type` strings contain a space - "traditional healer"
+;; and "civil society" - so they cannot be matched by a bare word anywhere.
 ;; @see gathering_points.nls
 
 ;; Every hospital.
@@ -81,8 +83,23 @@ end
 ;; Every leisure venue.
 ;;
 ;; @return agentset of gathering points with `gathering-type` "leisure"
-;; @note The Ebola setup never creates a leisure gathering point, so this reports
-;; an empty agentset in every current scenario.
 to-report leisure-gathering-type
   report gathering-points with [gathering-type = "leisure"]
+end
+
+;; Every traditional healer.
+;;
+;; @return agentset of gathering points with `gathering-type` "traditional healer"
+;; @note Healers are staffed, so their district holds their workers during working
+;; hours, but nothing offers *visiting* a healer as an activity yet.
+to-report traditional-healer-gathering-type
+  report gathering-points with [gathering-type = "traditional healer"]
+end
+
+;; Every civil society organisation.
+;;
+;; @return agentset of gathering points with `gathering-type` "civil society"
+;; @note As `traditional-healer-gathering-type`: staffed, but never visited yet.
+to-report civil-society-gathering-type
+  report gathering-points with [gathering-type = "civil society"]
 end
