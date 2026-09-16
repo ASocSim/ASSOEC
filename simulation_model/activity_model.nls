@@ -65,22 +65,63 @@ to update-resources-based-on-current-activity [c-a]
   if (motive = work-motive and [gathering-type] of loc = [gathering-type] of my-work)
   [
       set my-current-income my-current-income + my-expected-income
-      earn-household-capital my-expected-income
+
+      if(not member? my-home male-only-homes)
+      [
+        earn-household-capital my-expected-income
+        set my-current-income 0
+      ]
 
 ]
-    if (motive = food-motive) [
-    if ([gathering-type] of loc = [gathering-type] of my-store or [gathering-type] of loc = [gathering-type] of my-market)[
+    if (motive = food-motive)
+[
+    if ([gathering-type] of loc = [gathering-type] of my-store or [gathering-type] of loc = [gathering-type] of my-market)
+    [
+;;also handles gain of working in farms
+;;this could be adapted to decreasing food rations to be bought, but for now it will do      
       let expense amount-of-rations-I-buy-when-going-to-stores-or-markets * price-of-rations
       set my-current-income my-current-income - expense
-      depleat-household-capital expense
+      
+      if(not member? my-home male-only-homes)
+      [
+        depleat-household-capital expense
+      ]
     ]
-    ]
+]
+;;placeholder costs of funeral rites
+  if (motive = funeral-motive) [
+    let cost-of-funeral 100
+    depleat-household-capital cost-of-funeral
+  ]
+
+;;placeholder costs of going to hospital (e.g. travel, we know ebola care should be free)
+  if (motive = treatment-motive) [
+    if ([gathering-type] of loc = [gathering-type] of my-hospital)[
+      let hospital-stay-costs 50
+      depleat-household-capital hospital-stay-costs
+    ] 
+  ]
+;;placeholder costs of going to leisure place
+if (motive = leisure-motive) [
+  if ([gathering-type] of loc = [gathering-type] of my-leisure-point) [
+    let cost-of-leisure 20
+    depleat-household-capital cost-of-leisure
+  ] 
+;;placeholder costs of sending children to school
+;wait for children
+
+
+
+
+
+]
+
 end
 
 to earn-household-capital [earnings]
       ask my-home
       [
-      set amount-of-household-capital amount-of-household-capital + earnings
+        set amount-of-household-capital amount-of-household-capital + earnings
       ]
 end
 
@@ -187,15 +228,12 @@ to-report #workers-working-at-hospital
   report count workers with [is-at-work? and [gathering-type] of my-work = "hospital"]
 end
 
-;; Work in progress.
+;; How many workers are working at a mine right now.
 ;;
-;; work in progress
-;;
-;; @return work in progress
-;; @todo Tests the gathering type "workplace-mines"; the type created at setup is
-;; "workplace-mine". See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-mine
-  report count workers with [is-at-work? and [gathering-type] of my-work = "workplace-mines"]
+  report count workers with [is-at-work? and [gathering-type] of my-work = "workplace-mine"]
 end
 
 ;; How many workers are working at a school right now.
@@ -223,15 +261,12 @@ to-report #workers-working-at-market
 end
 
 
-;; Work in progress.
+;; How many workers are working at an agricultural workplace right now.
 ;;
-;; work in progress
-;;
-;; @return work in progress
-;; @todo Tests the gathering type "agriculture"; the type created at setup is
-;; "workplace-agriculture". See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-agriculture
-  report count workers with [is-at-work? and [gathering-type] of my-work = "agriculture"]
+  report count workers with [is-at-work? and [gathering-type] of my-work = "workplace-agriculture"]
 end
 
 ;; How many workers are working at a church right now.
@@ -242,15 +277,12 @@ to-report #workers-working-at-church
   report count workers with [is-at-work? and [gathering-type] of my-work = "church"]
 end
 
-;; Work in progress.
+;; How many workers are working from their own home right now.
 ;;
-;; work in progress
-;;
-;; @return work in progress
-;; @todo Tests the gathering type "house"; the type created at setup is "home".
-;; See docs/WIP_ISSUES.md#workers-working-at-mine-agriculture-house.
+;; @return a count of people
+;; @see #workers-working
 to-report #workers-working-at-house
-  report count workers with [is-at-work? and [gathering-type] of my-work = "house"]
+  report count workers with [is-at-work? and [gathering-type] of my-work = "home"]
 end
 
 to-report #workers-working-at-leisure-point
@@ -398,7 +430,14 @@ end
 ;; @return a number of rations
 ;; @unit person-days of food
 to-report amount-of-rations-I-buy-when-going-to-stores-or-markets
-  report days-of-rations-bought * count [gatherers] of my-home
+
+
+  if(not member? my-home houses-hosting-males)
+  [
+    report days-of-rations-bought * count [gatherers] of my-home
+  ]
+
+  report days-of-rations-bought
 end
 
 ;; True when `a-motive` is leisure.
@@ -491,7 +530,9 @@ to perform-people-activities
   ask gathering-points with [capacity != disabled-capacity] [
     ;error "why?"
     ;ask gatherers [show myself show current-activity]
-    let all-people (gatherers with [current-activity != myself])
+    ; everyone actually standing here this tick - `gatherers` is everyone attached to
+    ; the place whether they came or not, which is not who the cap applies to
+    let all-people current-gatherers
     ifelse count all-people > current-capacity [
       let succesful-people n-of current-capacity all-people
       ask succesful-people [set is-activity-successful? true]
@@ -532,99 +573,3 @@ to-report is-operating?
   report any? hired-workers
 end
 
-
-
-
-
-
-
-
-
-
-
-;;;,;;;;;;;,,LEGACY COVID
-
-
-
-; to update-resources-based-on-current-activity
-;   if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
-;   if current-activity = 0 [error "failed to select an activity"]
-
-;   if current-motivation = follow-person-in-charge-motive [stop]
-
-
-;   ;if is-at-home? [stop]
-
-;   if is-forced-to-be-in-school? or is-learning? or is-getting-tested? or is-resting? or is-relaxing?
-;   or (is-at-home? and is-forced-to-be-here?) [stop]
-
-;   if is-working?
-;   [
-;     let amount-to-earn workers-wages
-
-;     let amount-earned min (list amount-to-earn max (list [amount-of-capital] of my-work 0))
-;     if amount-earned > 0
-;     [
-;       perform-transaction self my-work (list "salary" amount-earned) (list "work")
-;     ]
-
-;     if government-pays-wages?
-;     [
-;       if amount-earned < amount-to-earn
-;       [
-;         let worker-subsidy ratio-of-wage-paid-by-the-government * (amount-to-earn - amount-earned)
-;         perform-transaction self "government" (list "subsidy" worker-subsidy) (list "nothing")
-;       ]
-;     ]
-
-;     stop
-;   ]
-
-;   if is-performing-essential-shopping?
-;   [
-;     let max-amount-of-rations-I-can-buy (floor my-amount-of-capital / price-of-rations-in-essential-shops)
-;     let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-essential-shops max (list max-amount-of-rations-I-can-buy 0))
-    
-    
-      
-;     ;let picked-essential-shop max-one-of essential-shops [stock-of-goods]
-
-;     let available-goods-in-my-essential-shop max (list [stock-of-goods] of current-activity 0)
-    
-;     ;show (sentence my-amount-of-capital  max-amount-of-rations-I-can-buy amount-of-rations-to-buy available-goods-in-my-essential-shop)
-
-;     set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-essential-shop)
-
-;     let amount-spent amount-of-rations-to-buy * price-of-rations-in-essential-shops * my-wealth-price-increase-factor
-
-;     perform-transaction self current-activity (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
-    
-;   ;  show (sentence "buying food:" self current-activity  amount-of-rations-I-buy-when-going-to-essential-shops (to-deliver-counterpart amount-of-rations-to-buy) (to-monetary-counterpart amount-spent) essential-shop-amount-of-capital)
-
-;     stop
-;   ]
-
-;   if is-performing-non-essential-shopping?
-;   [
-;     if not closed-non-essential?
-;     [
-;       let max-amount-of-rations-I-can-buy my-amount-of-capital / price-of-rations-in-non-essential-shops
-;       let amount-of-rations-to-buy min (list amount-of-rations-I-buy-when-going-to-shops max (list max-amount-of-rations-I-can-buy 0))
-
-;       let available-goods-in-my-non-essential-shop max (list [stock-of-goods] of current-activity 0)
-
-;       set amount-of-rations-to-buy min (list amount-of-rations-to-buy available-goods-in-my-non-essential-shop)
-
-;       set amount-of-last-luxury-items-bought amount-of-rations-to-buy
-;       let amount-spent amount-of-rations-to-buy * price-of-rations-in-non-essential-shops
-
-;       perform-transaction self current-activity (to-enjoy-luxury-good amount-of-rations-to-buy) (to-monetary-counterpart amount-spent)
-;     ]
-;     stop
-;   ]
-
-;   if is-being-away? current-activity [stop]
-;   if current-motivation = treatment-motive [stop];;let's assume being treated is free for now
-
-;   error (sentence "not implemented" [gathering-type] of current-activity current-motivation)
-; end

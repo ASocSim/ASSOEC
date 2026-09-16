@@ -23,10 +23,9 @@
 ;; activities point at random places rather than this person's own. See
 ;; docs/WIP_ISSUES.md#my-available-activity-descriptors.
 to-report my-available-activity-descriptors
-  ;add resting at home for SLEEP need
-  ;now the people actually go to their own home to sleep
-  let activities (list (list my-home rest-motive))
 
+  ;add resting at home for SLEEP need
+  let activities (list (list my-home rest-motive))
 
 ;;hacky funeral test
 ;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
@@ -56,14 +55,22 @@ to-report my-available-activity-descriptors
       set ret fput (lput false activity) ret
   ]
   report ret
-
   ]
 
 
  ;enable one treatment motive at hospital
  ;TODO add other gps where treatment can be had
- ;if any? people with [infection-status = stage-two-infection-status] [
- ; set activities lput (list my-hospital "get treatment") activities ] 
+ if infection-status = stage-two-infection-status [
+  set activities lput (list my-hospital "get treatment") activities
+  set activities lput (list my-traditional-healer "get treatment") activities
+    print "very sick"
+  ] 
+
+;if infection-status = in-hospital-infection-status [
+;  set activities []
+;      print "very sick, I stay in the hospital"
+;  set activities lput (list my-hospital "get treatment") activities
+;  ] 
 
 
   ;get food
@@ -174,7 +181,6 @@ if (motive = social-motive)
   ;print (sentence "my preferred activity is" c-a)
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [
-;       print "hello after if sats"
 ;     set c-a (list away-gathering-point travelling-motive false)
 ;   ]
 
