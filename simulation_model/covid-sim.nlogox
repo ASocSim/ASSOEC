@@ -79,7 +79,6 @@ to-report epistemic-error-of-ignored-immunity-ratio report count people with [no
     <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
 while [current-day <= end-day] [ go ]]]></button>
-    <note x="2819" y="23" backgroundDark="0" fontSize="16" width="508" markdown="false" height="21" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Country-Specific Features Model: Culture, Values, Needs</note>
     <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="go once">go</button>
     <button x="10" actionKey="I" y="361" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="inspect person">inspect one-of people</button>
     <button x="10" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Day run">if slice-of-the-day = "morning" [go]
@@ -710,10 +709,6 @@ Relative proximity between individuals within an activity type (impacts contamin
     </plot>
     <monitor x="3015" precision="17" y="563" height="60" fontSize="11" width="117">#dead-females</monitor>
     <monitor x="3012" precision="17" y="496" height="60" fontSize="11" width="117">#dead-people</monitor>
-    <chooser x="2820" y="60" height="60" variable="load-country-specific-settings" current="0" width="217" display="load-country-specific-settings">
-      <choice type="string" value="DRC"></choice>
-      <choice type="string" value="Custom"></choice>
-    </chooser>
   </widgets>
   <info>## WHAT IS IT?
 

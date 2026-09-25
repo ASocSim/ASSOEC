@@ -16,7 +16,7 @@ to load-scenario
   ;the general process lies in adapting your scenario from the baseline
   load-baseline-parameter-settings
   ;optionally overwrite baseline parameter settings with scenario specific adjustments to model parameter settings
-  load-scenario-specifics
+  ;load-scenario-specifics
 end
 
 to-report is-test-scenario? [s]
@@ -277,13 +277,13 @@ end
 
 
 to load-scenario-7-cultural-model  
-  ;overwrite some of the baseline settings according to what we judge as proper for the cultural scenario
-  set #households 400
-  load-number-of-gathering-points-based-on-number-of-households #households
-  ;Country specified in cultural setting must be the same for calibrating household profiles
-  ;'load-country-specific-settings' will be manipulated within behaviorspace
-  set household-profiles load-country-specific-settings
-  set migration? false
+;   ;overwrite some of the baseline settings according to what we judge as proper for the cultural scenario
+;   set #households 400
+;   load-number-of-gathering-points-based-on-number-of-households #households
+;   ;Country specified in cultural setting must be the same for calibrating household profiles
+;   ;'load-country-specific-settings' will be manipulated within behaviorspace
+;   set household-profiles load-country-specific-settings
+;   set migration? false
 end
 
 
@@ -438,46 +438,17 @@ to load-default-household-profiles
 end
 
 to load-population-profile-based-on-current-preset-profile
+  
   if household-profiles = "custom" [
     set ratio-adults-homes ratio-adults-homes
- ;   set ratio-retired-couple-homes ratio-retired-couple-homes
     set ratio-family-homes ratio-family-homes
     set ratio-displaced-homes ratio-displaced-homes
     stop
   ]
-  
- let country-specific-data-list []
-    file-open "country-specific-data.csv"
-  
 
-  while [not file-at-end? ] [
-    let csv file-read-line
-    set csv word csv ";"  ; add comma for loop termination 
-
-    let mylist []  ; list of values 
-    while [not empty? csv] 
-    [
-      let $x position ";" csv 
-      let $item substring csv 0 $x  ; extract item 
-      carefully [set $item read-from-string $item][] ; convert if number 
-      set mylist lput $item mylist  ; append to list 
-      set csv substring csv ($x + 1) length csv  ; remove item and comma 
-    ] 
-    if first mylist = household-profiles [
-      set country-specific-data-list but-first mylist ]
-  ]
-  if empty? country-specific-data-list [error (sentence "Country is not in country-specific-data.csv file" household-profiles)]
-  file-close
-  
-  set ratio-adults-homes first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list  
-;  set ratio-retired-couple-homes first country-specific-data-list
-;  set country-specific-data-list but-first country-specific-data-list
-  set ratio-family-homes first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  set ratio-displaced-homes first country-specific-data-list
-  set country-specific-data-list but-first country-specific-data-list
-  
+ if household-profiles = "no displaced" [
+  error (sentence "not implemented")
+ ]
 
 end
 
