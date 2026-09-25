@@ -26,7 +26,6 @@
 ;; them test motive strings this model no longer produces. See docs/WIP_ISSUES.md
 ;; before trusting one.
 ;; @see need_definition.nls
-;; @see country_specific_features/cultural_model.nls
 ;; @see docs/WIP_ISSUES.md
 
 __includes ["need_definition.nls"]

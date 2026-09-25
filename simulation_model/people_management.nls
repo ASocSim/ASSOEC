@@ -9,7 +9,6 @@
 ;; weighted sum of expected satisfaction gains.
 ;;
 ;; @see need_management.nls
-;; @see country_specific_features/cultural_model.nls
 ;; @see docs/WIP_ISSUES.md
 
 __includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" "people/classes.nls" ]
@@ -98,7 +97,7 @@ people-own [
   social-safety-satisfaction-level ;;< satisfaction of the social-safety need, in [0, 1]
   
   
-  
+
 ;; @group Social contact
   social-distance-profile     ;;< willingness to keep distance, in [0, 1]; only ever set by `set-social-distance-profile`, which is commented out
   is-I-apply-social-distancing? ;;< whether this person is distancing on this tick

@@ -83,43 +83,6 @@ while [current-day <= end-day] [ go ]]]></button>
     <button x="10" actionKey="I" y="361" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="inspect person">inspect one-of people</button>
     <button x="10" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Day run">if slice-of-the-day = "morning" [go]
 while [slice-of-the-day != "morning"] [go]</button>
-    <note x="4065" y="22" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
-    <switch x="4065" y="56" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
-    <switch x="4070" y="227" height="40" on="false" variable="log?" width="103" display="log?"></switch>
-    <switch x="4186" y="56" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
-    <chooser x="4066" y="105" height="60" variable="preset-scenario" current="0" width="242" display="preset-scenario">
-      <choice type="string" value="default-scenario"></choice>
-      <choice type="string" value="scenario-1-zero-action-scandinavia"></choice>
-      <choice type="string" value="scenario-1-closing-schools-and-uni"></choice>
-      <choice type="string" value="scenario-1-work-at-home-only"></choice>
-      <choice type="string" value="scenario-1-closing-all"></choice>
-      <choice type="string" value="scenario-3-random-test-20"></choice>
-      <choice type="string" value="scenario-3-app-test-60"></choice>
-      <choice type="string" value="scenario-3-app-test-80"></choice>
-      <choice type="string" value="scenario-3-app-test-100"></choice>
-      <choice type="string" value="economic-scenario-1-baseline"></choice>
-      <choice type="string" value="economic-scenario-2-infections"></choice>
-      <choice type="string" value="economic-scenario-3-lockdown"></choice>
-      <choice type="string" value="economic-scenario-4-wages"></choice>
-      <choice type="string" value="app-test-scenario-5-1K"></choice>
-      <choice type="string" value="scenario-6-default"></choice>
-      <choice type="string" value="no-action-scandinavia-2.5K"></choice>
-      <choice type="string" value="one-family"></choice>
-      <choice type="string" value="scenario-9-smart-testing"></choice>
-      <choice type="string" value="scenario-7-cultural-model"></choice>
-    </chooser>
-    <button x="4066" y="172" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="66" display="import">ask-user-for-import-file
-load-scenario-from-file</button>
-    <button x="4137" y="172" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="69" display="export">ask-user-for-export-file
-save-world-state</button>
-    <input x="4319" multiline="false" y="36" height="60" variable="#random-seed" type="number" width="113">25.0</input>
-    <switch x="4180" y="228" height="40" on="false" variable="log-contamination?" width="172" display="log-contamination?"></switch>
-    <switch x="4067" y="278" height="40" on="false" variable="log-preferred-activity-decision?" width="255" display="log-preferred-activity-decision?"></switch>
-    <switch x="4068" y="323" height="40" on="true" variable="log-setup?" width="113" display="log-setup?"></switch>
-    <switch x="4360" y="261" height="40" on="true" variable="clear-log-on-setup?" width="163" display="clear-log-on-setup?"></switch>
-    <switch x="4357" y="203" height="40" on="false" variable="log-violating-quarantine?" width="171" display="log-violating-quarantine?"></switch>
-    <switch x="4186" y="323" height="40" on="true" variable="log-transactions?" width="150" display="log-transactions?"></switch>
-    <switch x="4356" y="306" height="40" on="false" variable="inspect-to-file?" width="152" display="inspect-to-file?"></switch>
     <button x="10" y="134" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="95" display="go">go
 if not any? people with [is-contagious?]
 [stop]</button>
@@ -598,7 +561,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <monitor x="2178" precision="17" y="1200" height="60" fontSize="11" width="177">#church-workers</monitor>
     <monitor x="2178" precision="17" y="1131" height="60" fontSize="11" width="177">#store-workers</monitor>
     <note x="2180" y="678" backgroundDark="0" fontSize="16" width="170" markdown="false" height="65" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
-    <switch x="2373" y="682" height="40" on="true" variable="bunia_proxemics" display="bunia_proxemics" width="142" sizeVersion="0"></switch>
     <note x="2536" y="648" backgroundDark="0" fontSize="10" width="234" markdown="false" height="124" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
 As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
     <note x="2370" y="743" backgroundDark="0" fontSize="10" width="144" markdown="false" height="75" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Density factors:
@@ -709,6 +671,23 @@ Relative proximity between individuals within an activity type (impacts contamin
     </plot>
     <monitor x="3015" precision="17" y="563" height="60" fontSize="11" width="117">#dead-females</monitor>
     <monitor x="3012" precision="17" y="496" height="60" fontSize="11" width="117">#dead-people</monitor>
+    <note x="2853" y="38" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
+    <switch x="2856" y="339" height="40" on="true" variable="log-setup?" width="113" display="log-setup?"></switch>
+    <switch x="2855" y="294" height="40" on="false" variable="log-preferred-activity-decision?" width="255" display="log-preferred-activity-decision?"></switch>
+    <switch x="2968" y="244" height="40" on="false" variable="log-contamination?" width="172" display="log-contamination?"></switch>
+    <input x="3107" multiline="false" y="52" height="60" variable="#random-seed" type="number" width="113">25.0</input>
+    <button x="2925" y="188" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="69" display="export">ask-user-for-export-file
+save-world-state</button>
+    <button x="2854" y="188" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="66" display="import">ask-user-for-import-file
+load-scenario-from-file</button>
+    <chooser x="2854" y="121" height="60" variable="preset-scenario" current="0" width="242" display="preset-scenario">
+      <choice type="string" value="default-scenario"></choice>
+    </chooser>
+    <switch x="2974" y="72" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
+    <switch x="2858" y="243" height="40" on="false" variable="log?" width="103" display="log?"></switch>
+    <switch x="2853" y="72" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
+    <switch x="2979" y="340" height="40" on="true" variable="clear-log-on-setup?" width="163" display="clear-log-on-setup?"></switch>
+    <switch x="2857" y="385" height="40" on="false" variable="inspect-to-file?" width="152" display="inspect-to-file?"></switch>
   </widgets>
   <info>## WHAT IS IT?
 
