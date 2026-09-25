@@ -2,16 +2,6 @@
 ;; @brief Turning a country's culture into the value system and need weights of
 ;; each person.
 ;;
-;; The chain is: Hofstede's six cultural dimensions for the country, which give
-;; the population-level means of Schwartz's nine value priorities, from which each
-;; person draws their own values, from which the importance weight of each need is
-;; computed. Those weights are what `global-prevalence-of` multiplies the expected
-;; satisfactions by, so this file decides what the population cares about.
-;;
-;; Much of the chain is currently short-circuited for the Ebola adaptation: the
-;; Hofstede scores are hardcoded rather than loaded, and the value calibration
-;; steps are commented out of the setup path.
-;;
 ;; @author Bart de Bruin (TU Delft), Kurt Kreulen (TU Delft), coordinated by
 ;; Amineh Ghorbani (TU Delft)
 ;; @see people_management.nls
@@ -23,14 +13,9 @@
 ;Short description of procedures included in this nls file:
 ;setup-person-values-and-needs-based-on-cultural-model: is called in setup.nls, calls procedures that calibrate agent values and needs according to the cultural model
 ;set-initial-need-satisfaction-levels; initiates need satisfaction levels (i.e. water tank levels)
-;calibrate-importance-weights-of-needs; each agent ascribes a particular importance to each of its weights based on the configuration of its value system
-;set-values-based-on-culture; agent value systems are calibrated on the basis of the settings of the Hofstede cultural dimensions (see ASSOCC model interface)
-;increase-logical-consistency-of-agent-value-systems; agent value systems are structured according to the Schwartz circumplex value model ...
-; ... (i.e. values placed closer to one another in the circumplex correlate positively, while values placed further apart in the circumplex correlate negatively)
+
 ;load-nations-hofstede-dimension-scores: calibrate Hofstede dimensions based on a nation's Hofstede dimension scorecard
 
-
-;;2026 update for ebola adaptation: set-initial-need-satisfaction-levels now shows
 
 
 ;; Give every person their cultural values, need weights and starting need levels.
@@ -45,44 +30,7 @@
 ;; @see calibrate-importance-weights-of-needs
 ;; @see set-initial-need-satisfaction-levels-ebo
 to setup-person-values-and-needs
-  drc-hofstede-partial
-
-  calibrate-importance-weights-of-needs
-
   set-initial-need-satisfaction-levels-ebo
-end
-
-;scores taken from https://www.hofstede-insights.com/product/compare-countries/
-;;;;;;;;;;;;;;;;;;;;;;EBOLA ;;;;;;;;;;;;;;;;;;;;,
-;;;;;;;;;HARDCODING THIS AS UGANDA and Africa EAST PARTIAL METRICS FOR NOW, PLEASE ADD DRC if values are available or discuss
-
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @side-effects work in progress
-;; @todo Hardcoded to Ugandan and East African scores, and stops before the
-;; "Custom" branch. Real DRC values still needed. See
-;; docs/WIP_ISSUES.md#drc-hofstede-partial.
-to drc-hofstede-partial
-    set power-distance 64
-    set individualism-vs-collectivism 24 ;uganda, use 32 for east africa
-    set masculinity-vs-femininity 41
-    set uncertainty-avoidance 52
-    set long-vs-short-termism 32
-    set indulgence-vs-restraint 40
-    stop
-  
-  if load-country-specific-settings = "Custom" [
-    set power-distance power-distance
-    set individualism-vs-collectivism individualism-vs-collectivism
-    set masculinity-vs-femininity masculinity-vs-femininity
-    set uncertainty-avoidance uncertainty-avoidance
-    set long-vs-short-termism long-vs-short-termism
-    set indulgence-vs-restraint indulgence-vs-restraint
-    stop
-  ]
 end
 
 
@@ -127,79 +75,4 @@ to set-initial-need-satisfaction-levels-ebo
   ]
 end
 
-
-
-;; @context work in progress
-;; @side-effects work in progress
-;; @todo Autonomy is assigned twice and counted twice in the normalising sum,
-;; which omits social safety and providing. The weights do not sum to 1. See
-;; docs/WIP_ISSUES.md#calibrate-importance-weights-of-needs.
- to calibrate-importance-weights-of-needs
-
-   ;For each agent: set the importance ascribed to its needs
-   ;Importance weights ascribed to needs vary between 0 and 1
-
-   ;IMPORTANT VARIABLES:
-   ;maslow-multiplier = modulates the hierarchical aspect of maslow needs ...
-   ; ... i.e. the higher the maslow-multiplier, the higher the importance ascribed to lower level needs vis-a-vis those situated at higher levels in the Maslow pyramid.
-   ;survival-multiplier = increases the importance ascribed to biological (survival) needs vis-a-vis psychological needs (safety, belonging, esteem).
-
-   ask people [
-     ;initiate maslow-based importance weights for the maslow need categories
-     let weight-esteem-needs-category 1
-     let weight-belonging-needs-category weight-esteem-needs-category * (1 + maslow-multiplier)
-     let weight-safety-needs-category weight-belonging-needs-category * (1 + maslow-multiplier)
-     let weight-survival-needs-category weight-safety-needs-category * ((1 + maslow-multiplier) * survival-multiplier)
-    
-     ;Set importance weights of subneeds of SURVIVAL
-     set importance-weight-food (weight-survival-needs * weight-survival-needs-category)
-     set importance-weight-financial-survival (weight-survival-needs * weight-survival-needs-category)
-     set importance-weight-health (weight-survival-needs * weight-survival-needs-category)
-     set importance-weight-sleep (weight-survival-needs * weight-survival-needs-category)
-    
-
-     ;Set importance weights of subneeds of SAFETY
-     ;calculate wrong
-     set importance-weight-physical-safety (importance-given-to-power-value / 100) * weight-safety-needs-category
-     set importance-weight-social-safety (importance-given-to-security-value / 100) * weight-safety-needs-category
-     
-     ;not calculate correctly, review
-     set importance-weight-autonomy ((importance-given-to-conformity-tradition-value + importance-given-to-security-value) / (2 * 100)) * weight-safety-needs-category
-     ;not calculate correctly, review
-     set importance-weight-social-status (importance-given-to-conformity-tradition-value / 100) * weight-safety-needs-category
-    
-     ;Set importance weights of subneeds of BELONGING
-     ;group and family are calculate the same and have the same value
-     set importance-weight-family-belonging ((importance-given-to-benevolence-value + importance-given-to-conformity-tradition-value) / (2 * 100)) * weight-belonging-needs-category
-     set importance-weight-group-belonging ((importance-given-to-benevolence-value + importance-given-to-conformity-tradition-value) / (2 * 100)) * weight-belonging-needs-category
-
-     ;Set importance weights of subneeds of ESTEEM
-     set importance-weight-autonomy ((importance-given-to-self-direction-value + importance-given-to-achievement-value) / (2 * 100)) * weight-esteem-needs-category
-     set importance-weight-providing (importance-given-to-security-value / 100) * weight-safety-needs-category
-
-     let total-sum-of-weights sum (list
-       importance-weight-food
-       importance-weight-financial-survival
-       importance-weight-health
-       importance-weight-sleep
-       importance-weight-social-status
-       importance-weight-physical-safety
-       importance-weight-autonomy
-       importance-weight-family-belonging
-       importance-weight-group-belonging
-       importance-weight-autonomy)
-
-     ;Normalize all the importance weights so that they sum up to 1
-     set importance-weight-food (importance-weight-food / total-sum-of-weights)
-     set importance-weight-financial-survival (importance-weight-financial-survival / total-sum-of-weights)
-     set importance-weight-health (importance-weight-health / total-sum-of-weights)
-     set importance-weight-sleep (importance-weight-sleep / total-sum-of-weights)
-     set importance-weight-social-status (importance-weight-social-status / total-sum-of-weights)
-     set importance-weight-physical-safety (importance-weight-physical-safety / total-sum-of-weights)
-     set importance-weight-social-safety (importance-weight-social-safety / total-sum-of-weights)
-     set importance-weight-family-belonging (importance-weight-family-belonging / total-sum-of-weights)
-     set importance-weight-group-belonging (importance-weight-group-belonging / total-sum-of-weights)
-     set importance-weight-autonomy (importance-weight-autonomy / total-sum-of-weights)
-   ]
- end
 

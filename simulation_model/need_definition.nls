@@ -22,9 +22,6 @@ to-report SDE-survival [ad]
     SDE-sleep ad  
     SDE-financial-survival ad
   )
-;  if age != "young" [ ; The young te taken care of by their parents, so do not worry about finances
-;    set physiological-needs fput (SDE-financial-survival ad) physiological-needs
-;  ]
   report max physiological-needs
 end
 
@@ -32,7 +29,13 @@ end
 
     ;;;;;;;;;;;;;;;;;;EBOLA BELONGING NEEDS;;;;;;;;;;;;;;;;;;
 ;;; belonging is split in family and group
-
+to-report SDE-social [ad]
+  let social-needs (list 
+    SDE-group-belonging ad 
+    SDE-family-belonging ad
+  )
+  report max social-needs
+end
 
 
 
@@ -44,17 +47,12 @@ end
 ;;;; COMPLIANCE AND RISK AVOIDANCE are not in the ebola model
 
 to-report SDE-safety [ad]
-  ; Using min here the value is always zero (food can only go up when they go to the store, but that lowers compliance/risk avoidance).
-  ; The actual solution is to fully recalculate what safety would be after doing the action based on the satisfaction-gains calculated,
-  ;  pick the lowest one, and take the difference between that and current satisfaction
   
   let psychological-needs (list
     (SDE-social-safety ad)
     (SDE-physical-safety ad)
   )
-  let importances-psychological-needs (list importance-weight-social-safety importance-weight-physical-safety)
-
-  report weighted-mean psychological-needs importances-psychological-needs
+  report max psychological-needs 
   
 end
 
@@ -73,34 +71,6 @@ to-report SDE-self-esteem [ad]
   SDE-providing ad
   SDE-social-status ad
   SDE-autonomy ad)
-  let importances (list importance-weight-providing importance-weight-autonomy importance-weight-social-status)
   
-  report weighted-mean needs importances
+  report max needs
 end
-
-
-;###################
-
-
-to-report quality-of-life-indicator
-  
-  let quality-of-life (list 
-      ;Survival needs
-    (food-satisfaction-level * importance-weight-food) 
-    (financial-survival-satisfaction-level * importance-weight-financial-survival)
-    (sleep-satisfaction-level * importance-weight-sleep) 
-    (health-satisfaction-level * importance-weight-health) 
-    ;Self-Esteem needs
-    (social-status-satisfaction-level * importance-weight-social-status)
-    (providing-satisfaction-level * importance-weight-providing)
-    (autonomy-satisfaction-level * importance-weight-autonomy)
-    ;Safety needs
-    (physical-safety-satisfaction-level * importance-weight-physical-safety) 
-    (social-safety-satisfaction-level * importance-weight-social-safety) 
-    ;Belonging needs
-    (group-belonging-satisfaction-level * importance-weight-group-belonging)
-    (family-belonging-satisfaction-level * importance-weight-family-belonging))
- 
-  report sum quality-of-life
-end
-

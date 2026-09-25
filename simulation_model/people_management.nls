@@ -2,12 +2,6 @@
 ;; @brief The `people` breed: everything a person is made of, plus the per-tick
 ;; update of their mind.
 ;;
-;; The `people-own` block below is the centre of the model. It carries the
-;; demographic and disease state, the decision-making state, the Schwartz value
-;; system and the Maslow-style need satisfaction levels that drive activity
-;; choice, and a residue of COVID-era variables that the Ebola adaptation has not
-;; yet removed.
-;;
 ;; The needs machinery is explained at length in the comments inside the block and
 ;; in need_management.nls; the short version is that each need holds a
 ;; satisfaction level in [0, 1] which decays every tick and is topped up by the
@@ -107,44 +101,6 @@ people-own [
   ;Notably, new plans for satisfying should be learnable by agents (e.g. satisfying physical-activity needs might need some adaptation when locked in)
   ;and traumatic events or long-term deprivation should affect the need structure (e.g. food deprivation should dramatically bump up the prevalence of food safety, thus causing rush to supermarkets for instance)
   
-  ;;;;;;;; CULTURAL MODEL VARIABLES (by Amineh, Bart, Kurt) ;;;;;;;;
-
-;; @group Schwartz values
-;;
-;; Nine value priorities, each in [0, 100], drawn per person from distributions
-;; derived from the country's Hofstede scores by `set-values-based-on-culture`.
-;; They feed `calibrate-importance-weights-of-needs`, which turns them into the
-;; importance weights below.
-  importance-given-to-hedonism-value ;;< importance of hedonism, in [0, 100]
-  importance-given-to-stimulation-value ;;< importance of stimulation, in [0, 100]
-  importance-given-to-self-direction-value ;;< importance of self-direction, in [0, 100]
-  importance-given-to-universalism-value ;;< importance of universalism, in [0, 100]
-  importance-given-to-benevolence-value ;;< importance of benevolence, in [0, 100]
-  importance-given-to-conformity-tradition-value ;;< importance of conformity and tradition, in [0, 100]
-  importance-given-to-security-value ;;< importance of security, in [0, 100]
-  importance-given-to-power-value ;;< importance of power, in [0, 100]
-  importance-given-to-achievement-value ;;< importance of achievement, in [0, 100]
-  
-  
-;; @group Need importance weights
-;;
-;; How much each need counts when comparing candidate activities. Set once at
-;; setup by `calibrate-importance-weights-of-needs` and normalised to sum to 1.
-  importance-weight-group-belonging ;;< weight of the group-belonging need
-  importance-weight-family-belonging ;;< weight of the family-belonging need
-
-  importance-weight-food      ;;< weight of the food need
-  importance-weight-financial-survival ;;< weight of the financial-survival need
-  importance-weight-health    ;;< weight of the health need
-  importance-weight-sleep     ;;< weight of the sleep need
-
-  importance-weight-physical-safety ;;< weight of the physical-safety need
-  importance-weight-social-safety ;;< weight of the social-safety need
-
-  importance-weight-social-status ;;< weight of the social-status need
-  importance-weight-providing ;;< weight of the providing need
-  importance-weight-autonomy  ;;< weight of the autonomy need
- 
 
 
   ;Need satisfaction levels (i.e. level of watertanks)
