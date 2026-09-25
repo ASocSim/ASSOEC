@@ -11,26 +11,19 @@ globals [
   current-day
 
   #dead-people
-  #dead-retired
-  #dead-workers
-  #dead-students
-  #dead-young
+  #dead-females
+  #dead-males
   away-gathering-point
   #who-became-sick-while-travelling-locally
   import-scenario-name
-  someone-died?
   funeral-cemetery
 ]
 
 
 to go
-  set someone-died? false
   ;set funeral-cemetery one-of cemeteries
-  
   reset-timer
   reset-metrics
-;  reset-economy-measurements
-  ;rumor-mill ;define later how mis/information spreads  
   spread-contagion
   
   update-within-agent-disease-status
@@ -39,18 +32,21 @@ to go
   
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)
   perform-people-activities
-  ask people [set am-I-mourning? false]
 
 
   update-display
   ;inspect-agents
   increment-time
+
  ; apply-active-measures
   update-metrics
-  set someone-died? false
-  ; Tick goes at the end of the go procedure for better plot updating
+
+;make mourning process more verosimile, now all mourners stop mourning the day of the funeral
+ ask people with [am-I-mourning?] [set am-I-mourning? false]
+; Tick goes at the end of the go procedure for better plot updating
   tick
 end
+
 
 to go-profile
   profiler:reset
@@ -63,7 +59,6 @@ end
 
 to startup
   setup-ebola
-
 end
 
 
@@ -489,6 +484,10 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <setup></setup>
         <update>plot count people with [infection-status = "safe-burial"]</update>
       </pen>
+      <pen interval="0.1" mode="0" display="Mourners" color="-7500403" legend="true">
+        <setup></setup>
+        <update>plot count people with [am-I-mourning?]</update>
+      </pen>
     </plot>
     <plot x="18" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="573" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction">
       <setup></setup>
@@ -658,42 +657,76 @@ Relative proximity between individuals within an activity type (impacts contamin
     <monitor x="3016" precision="17" y="923" height="60" fontSize="11" width="291">#who-became-sick-while-travelling-locally</monitor>
     <monitor x="3016" precision="17" y="854" height="60" fontSize="11" width="291">#people-dying-due-to-lack-of-hospitalization</monitor>
     <monitor x="3016" precision="17" y="777" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
-    <monitor x="3016" precision="17" y="630" height="60" fontSize="11" width="117">#dead-people</monitor>
+    <monitor x="3016" precision="17" y="630" height="60" fontSize="11" width="117">#dead-males</monitor>
     <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
     <slider x="2499" step="0.01" y="1469" max="1" width="271" display="density-factor-traditional-healer" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-traditional-healer"></slider>
     <input x="2370" multiline="false" y="1470" height="60" variable="#traditional-healer-gp" type="number" width="122">3.0</input>
     <input x="2372" multiline="false" y="1536" height="60" variable="#civil-society-gp" type="number" width="122">3.0</input>
     <slider x="2501" step="0.01" y="1535" max="1" width="271" display="density-factor-civil-society" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-civil-society"></slider>
-    <slider x="995" step="0.01" y="76" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.9" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
-    <slider x="996" step="0.1" y="130" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.9" variable="trust-in-institutions"></slider>
+    <slider x="995" step="0.01" y="76" max="1" display="trust_in_hospital" height="50" min="0" direction="Horizontal" default="0.26" variable="trust_in_hospital" width="250" sizeVersion="0"></slider>
+    <slider x="996" step="0.1" y="130" max="1" width="250" display="trust-in-institutions" height="50" min="0" direction="Horizontal" default="0.3" variable="trust-in-institutions"></slider>
     <switch x="517" y="492" height="40" on="true" variable="enforce-SDB?" width="109" display="enforce-SDB?"></switch>
-    <plot x="1504" autoPlotX="true" yMax="1.0" autoPlotY="true" y="228" xMin="0.0" height="322" legend="true" xMax="10.0" yMin="0.0" width="437" xAxis="time" display="population status">
+    <plot x="1504" autoPlotX="true" yMax="5.0" autoPlotY="false" y="228" xMin="0.0" height="322" legend="true" xMax="10.0" yMin="0.0" width="437" display="population status">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="Uninfected" color="-11085214" legend="true">
+      <pen interval="0.1" mode="1" display="Uninfected / 100" color="-11085214" legend="true">
         <setup></setup>
-        <update>plot count people with [infection-status = "healthy"]</update>
+        <update>plot count people with [infection-status = "healthy"] / 50
+</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Dead" color="-10873583" legend="true">
+      <pen interval="0.1" mode="1" display="just exposed" color="-12087248" legend="true">
         <setup></setup>
-        <update>plot #dead-people
-;plot count people with [infection-status = "removed"]</update>
+        <update>plot count people with [infection-status = just-exposed-infection-status]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Infected" color="-2674135" legend="true">
+      <pen interval="0.1" mode="1" display="exposed to stage 1" color="-11881837" legend="true">
         <setup></setup>
-        <update>plot count people with [is-infected?]</update>
+        <update>plot count people with [infection-status = exposed-to-stage-one-infection-status]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="EInfected" color="-1604481" legend="true">
+      <pen interval="0.1" mode="1" display="s1 to s2" color="-4079321" legend="true">
         <setup></setup>
-        <update>plot count people with [epistemic-infection-status = "infected"]</update>
+        <update>plot count people with [infection-status = stage-one-to-stage-two-infection-status]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="EImmune" color="-5516827" legend="true">
+      <pen interval="0.1" mode="1" display="stage 2" color="-2674135" legend="true">
         <setup></setup>
-        <update>plot count people with [is-believing-to-be-immune?]</update>
+        <update>plot count people with [infection-status = stage-two-infection-status]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="Immune" color="-1184463" legend="true">
+      <pen interval="0.1" mode="1" display="s2 to hospital" color="-5298144" legend="true">
         <setup></setup>
-        <update>plot count people with [infection-status = "immune"]</update>
+        <update>plot count people with [infection-status = stage-two-to-hospitalised-infection-status ]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="s2 to no hospital" color="-3844592" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = stage-two-to-non-hospitalised-infection-status ]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="in hospital" color="-2754856" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = in-hospital-infection-status]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="h to immune" color="-11221820" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = hospitalised-to-immune-infection-status ]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="immune" color="-6759204" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = immune-infection-status ]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="nh to dead" color="-12440034" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = non-hospitalised-to-dead-infectious-infection-status]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="h to dead" color="-8053223" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = hospitalised-to-dead-infectious-infection-status]</update>
+      </pen>
+      <pen interval="0.1" mode="1" display="all deceased" color="-16777216" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = hospitalised-to-dead-infectious-infection-status
+  or infection-status = dead-to-unsafe-burial-infection-status 
+  or infection-status = dead-to-safe-burial-infection-status
+    or infection-status = dead-to-safe-burial-infection-status
+    or infection-status =   unsafe-burial-to-removed-infection-status
+    or infection-status =   unsafe-burial-to-removed-infection-status
+  or infection-status = removed-infection-status ]</update>
       </pen>
     </plot>
     <plot x="998" autoPlotX="true" yMax="10.0" autoPlotY="true" y="308" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="230" display="Family households money">
@@ -712,6 +745,8 @@ Relative proximity between individuals within an activity type (impacts contamin
         <update>plot mean [my-current-income] of people with [member? my-home male-only-homes]</update>
       </pen>
     </plot>
+    <monitor x="3015" precision="17" y="563" height="60" fontSize="11" width="117">#dead-females</monitor>
+    <monitor x="3012" precision="17" y="496" height="60" fontSize="11" width="117">#dead-people</monitor>
   </widgets>
   <info>## WHAT IS IT?
 

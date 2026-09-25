@@ -172,8 +172,7 @@ to-report is-infected?
   report is-infected-infection-status? infection-status
 end
 
-;simplification, with a more advanced model, these symptoms might be visible after a few days of incubation
-;might depend on age (e.g. more visible for the elderly, might be undetected for kids)
+
 to-report has-internally-visible-symptoms?  
   ifelse infection-status = "hospitalised"
   or infection-status = "infected-stage-2"
@@ -201,18 +200,19 @@ end
 
 
 to kill-person 
-  set #infected #infected - 1
-  set #hospitalised #hospitalised - 1
-  set #non-hospitalised #non-hospitalised - 1
+  ;set #infected #infected - 1
+  ;set #hospitalised #hospitalised - 1
+  ;set #non-hospitalised #non-hospitalised - 1
   set #dead-people #dead-people + 1
   ;set list-of-dead-and-safely-buried-people fput who list-of-dead-and-safely-buried-people
   
-;   if age = retired-age [ set #dead-retired #dead-retired + 1]
-;   if age = young-age [set #dead-young #dead-young + 1]
-;   if age = worker-age [set #dead-workers #dead-workers + 1]
-;   if age = student-age [set #dead-students #dead-students + 1]
+   if sex = "female" [ set #dead-females #dead-females + 1]
+   if sex = "male" [ set #dead-males #dead-males + 1]
   
   if is-currently-allocated-a-bed-in-hospital? [ release-bed-in-hospital ]
+  
+  print "a patient died of ebola"
   die
+  
   end
 

@@ -133,7 +133,7 @@ to decay-satisfaction-level-ebo
   set health-satisfaction-level health-satisfaction-level * health-decay
   if health-satisfaction-level < 0 [set health-satisfaction-level 0]
   
-  set sleep-satisfaction-level sleep-satisfaction-level * 0.8 
+  set sleep-satisfaction-level sleep-satisfaction-level * 0.9 
   if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
   
 
@@ -221,7 +221,7 @@ to-report SUE-leisure [ad]
     report 0.6
   ]
   if gp = my-home and motive = rest-motive [
-    report 0.1
+    report 0.01
   ]
   report 0
 end
@@ -242,16 +242,16 @@ to-report SUE-sleep [ad]
   let motive motive-of ad 
   
   if motive = rest-motive [
-    if slice-of-the-day = "night" [
+  ;  if slice-of-the-day = "night" [
+
   ;sleep quality decreases when sick
-      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
-    ]
-    report ifelse-value has-internally-visible-symptoms? [ 0.025 ] [ 0.05 ]
-  ]
-  if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad [
+;      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
+;    ]
+;    report ifelse-value has-internally-visible-symptoms? [ 0.025 ] [ 0.05 ]
+ ; ]
+ ; if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad [
 
     if slice-of-the-day = "night" [report 0.7]
-    report 0.15
   ]
   report 0
 end
@@ -319,7 +319,7 @@ end
 ;; @return work in progress
 ;; @todo Tests the motive "get treatmet". See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-health [ad]
-  let base 1
+  let base 0.4
   let belief-modifier 1
   let motive motive-of ad
   let gp location-of ad
@@ -334,23 +334,23 @@ to-report SUE-health [ad]
     report base * belief-modifier
   ]
   
-  if is-believing-to-be-infected? or has-internally-visible-symptoms?
-  [
-    ifelse is-observing-critical-symptoms? [
-      ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
-      [set base .8]
-      [set base 0]
-    ] [
-      ;if not observing critical symptoms
-      ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
-      [set base .3]
-      [ ifelse is-rest-at-home-descriptor? ad
-        [ set base 0.3 ]
-        [ set base -0.1 ]
-      ]
-    ]
-  ]
-  ;;can be updated if agents start to be deprived from sleep, not needed at the moment
+;   if is-believing-to-be-infected? or has-internally-visible-symptoms?
+;   [
+;     ifelse is-observing-critical-symptoms? [
+;       ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
+;       [set base .8]
+;       [set base 0]
+;     ] [
+;       ;if not observing critical symptoms
+;       ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
+;       [set base .3]
+;       [ ifelse is-rest-at-home-descriptor? ad
+;         [ set base 0.3 ]
+;         [ set base -0.1 ]
+;       ]
+;     ]
+;  ]
+
   report base
 end
 
@@ -418,7 +418,7 @@ to-report SUE-providing [ad]
       report 0.2]
   ]
   
-   ;religious gathering attending provides
+   ;religious gathering attending is providing too
     if [gathering-type] of gp = "church" and motive = spiritual-motive [
     ifelse is-female? [report 0.8] [report 0.4]]
   

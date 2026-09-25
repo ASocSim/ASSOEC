@@ -26,12 +26,6 @@ __includes ["need_management.nls" "country_specific_features/cultural_model.nls"
 ;; @see my-available-activity-descriptors
 to-report my-preferred-available-activity-descriptor 
 
-if (am-I-mourning?)
-  [
-    let preferred-activity-descriptor  activity-descriptor funeral-cemetery funeral-motive
-    report preferred-activity-descriptor
-  ]
-
   let preferred-activity-descriptor item 0 reduce [[x y] -> ifelse-value item 1 x > item 1 y [x] [y]] shuffle (map [x -> (list x (global-prevalence-of x))] my-available-activity-descriptors)
   
   let activity-place location-of preferred-activity-descriptor
@@ -107,34 +101,6 @@ to-report is-currently-in-situation-of-active-dependence?
   report is-child? and closed-schools?
 end
 
-;; Whether this person is under any instruction to stay at home right now.
-;;
-;; @context person
-;; @return true under hard lockdown, under an official quarantine order, or during
-;; curfew hours
-;; @note Two of the three routes are COVID-era: the Ebola model activates neither
-;; lockdown nor curfew, so in practice only the quarantine order can fire.
-to-report should-I-stay-home?
-  if is-hard-lockdown-active? [report true]
-  if is-officially-asked-to-quarantine? [report true]
-  if is-curfew-active? and (is-evening? or is-night?) [report true]
-  report false
-end
-
-
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @return work in progress
-;; @todo Tests for gathering types the Ebola build does not create. See
-;; docs/WIP_ISSUES.md#is-technically-feasible-to-work-from-home-.
-to-report is-technically-feasible-to-work-from-home?
-  if not is-worker? [error "not a worker"]
-  report member? [gathering-type] of my-work ["workplace" "university"]
-  ;link-neighbors with [gathering-type = "workplace"]
-end
 
 ;; True when a child is present wherever this person currently is.
 ;;

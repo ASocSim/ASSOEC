@@ -237,6 +237,7 @@ to update-people-mind
   
  ; print (sentence "updating people mind for" count people "people")
   update-alive-status
+  update-alive-status-ebola
   
 end
 
@@ -251,24 +252,46 @@ end
 ;; independently of infection, age or anything else. See
 ;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status
-  ;print "death enabled"
   ;make people die by probability (needed for later death and funeral procedures)
   if random 100 > 80
   [ 
-    print "I have died"
-    
-    set someone-died? true
-
+   ; print "I have died of some other disease"    
     set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
 
-    let deceased one-of people 
-    ask [my-kin-link-neighbors] of deceased [set am-I-mourning? true]
+    let deceased one-of people
 
     ask deceased
-    [ die ]    
+    [ 
+      ask my-kin-link-neighbors [
+        set am-I-mourning? true
+      ]
+      ;die
+      ]    
   ]
   
 end
+
+
+
+to update-alive-status-ebola
+
+let deceased people with [infection-status = dead-to-unsafe-burial-infection-status or infection-status = dead-to-safe-burial-infection-status]
+
+if any? deceased [
+   print "I have died of ebola disease"  
+  set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+  
+  ask deceased
+    [ ask my-kin-link-neighbors 
+    [
+        set am-I-mourning? true
+      ]
+      ;die
+      ]    
+]
+    
+end
+
 
 
 

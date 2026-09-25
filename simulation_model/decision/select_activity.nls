@@ -24,17 +24,23 @@
 ;; docs/WIP_ISSUES.md#my-available-activity-descriptors.
 to-report my-available-activity-descriptors
 
-  ;add resting at home for SLEEP need
+
+      ;add resting at home for SLEEP need
   let activities (list (list my-home rest-motive))
 
-;;hacky funeral test
+
+;;first we check the infection status of the agent
+;;if they are very sick, their choices for activities are limited and the motive get-treatment shows strongest
+if ( not is-observing-critical-symptoms?)
+  [
+
 ;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
 ;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
   if am-I-mourning? and not enforce-SDB?
   [
     set activities []
     set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
-    print (sentence "someone died, so I go to traditional funeral" funeral-cemetery)
+    ;print (sentence "someone died, so I go to traditional funeral" funeral-cemetery)
 
     let ret []
     foreach activities [ activity ->
@@ -48,30 +54,15 @@ to-report my-available-activity-descriptors
     set activities []
     ;assuming 100% compliance with SDB
     set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
-    print (sentence "someone died, so I go to SDB" funeral-cemetery)
+    ;print (sentence "someone died, so I go to SDB" funeral-cemetery)
 
     let ret []
     foreach activities [ activity ->
       set ret fput (lput false activity) ret
   ]
+
   report ret
   ]
-
-
- ;enable one treatment motive at hospital
- ;TODO add other gps where treatment can be had
- if infection-status = stage-two-infection-status [
-  set activities lput (list my-hospital "get treatment") activities
-  set activities lput (list my-traditional-healer "get treatment") activities
-    print "very sick"
-  ] 
-
-;if infection-status = in-hospital-infection-status [
-;  set activities []
-;      print "very sick, I stay in the hospital"
-;  set activities lput (list my-hospital "get treatment") activities
-;  ] 
-
 
   ;get food
   ;from store any day except sundays
@@ -103,27 +94,6 @@ to-report my-available-activity-descriptors
   [
     set activities (lput (activity-descriptor my-church spiritual-motive) activities)
   ]
-  
-  ;get treatment
-;; THIS NEEDS TO BE EXPANDED FOR THE PIVOTAL CHOICE OF GOING TO HOSPITAL OR NOT
-  if has-internally-visible-symptoms? or is-believing-to-be-infected?
-  ;epistemic logic conditional here
-  [
-    ;print "I am sick, I want to go to the hospital"
-    set activities lput activity-descriptor my-hospital treatment-motive activities
-    set activities lput activity-descriptor my-home treatment-motive activities
-  ]
-  
-  
-  ;care for the sick
-  ;if i have a sick relative, and I am female, I care for them (at home)
-  ;note that networks homes now coincides with relatives, this is a placeholder for when we have social networks
-  if (any? my-sick-relatives) and is-female?
-  [
-    set activities lput (activity-descriptor one-of my-networks-homes "care for the sick") activities
-   ;print "I stay home to care for you"
-  ]
-  ;logic here for hospital caring
 
 
 ;leisure
@@ -143,13 +113,52 @@ to-report my-available-activity-descriptors
     ;print "add visits to list of possible actv"
    ]
 
+  
+  ;care for the sick
+  ;if i have a sick relative, and I am female, I care for them (at home)
+  ;note that networks homes now coincides with relatives, this is a placeholder for when we have social networks
+  if (any? my-sick-relatives) and is-female?
+  [
+    set activities lput (activity-descriptor one-of my-networks-homes care-motive) activities
+   ;print "I stay home to care for you"
+  ]
+  ;logic here for hospital caring
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;end of activities for non severely sick people
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ]
+
+
+if infection-status = in-hospital-infection-status [
+    ;print "forced to stay in hospital"
+    set activities [] 
+    set activities lput (list my-hospital treatment-motive) activities ]
+
+
+ ;enable one treatment motive at hospital and healher and church
+   if has-internally-visible-symptoms? or is-observing-critical-symptoms?
+   [
+    ;empty list
+    set activities [] 
+    ;print "forced to seek treatment"
+  set activities lput (list my-hospital treatment-motive) activities
+  set activities lput (list my-traditional-healer treatment-motive) activities
+  set activities lput (list my-church treatment-motive) activities
+  ] 
+
 
   let ret []
   foreach activities [ activity ->
     set ret fput (lput false activity) ret
   ]
   report ret
+
+
 end
+
+
+
 
 ;; Commit this person to their preferred activity for this tick.
 ;;
@@ -171,14 +180,8 @@ to select-activity
   let schedule-entry (list loc motive slice-of-the-day day-of-the-week)
   set schedule lput schedule-entry schedule
 
-if (motive = social-motive) 
-[
- if ([gathering-type] of loc = "home")
- [
-  print "i am visiting kin even if they are not sick"
- ]
-]
-  ;print (sentence "my preferred activity is" c-a)
+
+  print (sentence "my preferred activity is" c-a)
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [
 ;     set c-a (list away-gathering-point travelling-motive false)

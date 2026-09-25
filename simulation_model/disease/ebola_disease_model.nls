@@ -60,7 +60,7 @@ to-report transition-ebo [s]
   if state-of-timed-state s = dead-to-unsafe-burial-infection-status
   [report stochastic-fsm-transition (list (list unsafe-burial-to-removed-infection-status 1))]
   
-    ;burials to removed
+  ;burials to removed
   if state-of-timed-state s = unsafe-burial-to-removed-infection-status
   [report stochastic-fsm-transition (list (list removed-infection-status 1))]
 

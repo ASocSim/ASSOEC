@@ -389,7 +389,7 @@ to-report is-at-church?
 end
 
 to-report is-at-leisure-point?
-  report current-activity = my-leisure-point
+  report current-activity = my-leisure-point and current-motivation = leisure-motive
 end
 
 to-report is-visiting?
