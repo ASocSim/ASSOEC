@@ -2,12 +2,6 @@
 ;; @brief The `people` breed: everything a person is made of, plus the per-tick
 ;; update of their mind.
 ;;
-;; The `people-own` block below is the centre of the model. It carries the
-;; demographic and disease state, the decision-making state, the Schwartz value
-;; system and the Maslow-style need satisfaction levels that drive activity
-;; choice, and a residue of COVID-era variables that the Ebola adaptation has not
-;; yet removed.
-;;
 ;; The needs machinery is explained at length in the comments inside the block and
 ;; in need_management.nls; the short version is that each need holds a
 ;; satisfaction level in [0, 1] which decays every tick and is topped up by the
@@ -15,7 +9,6 @@
 ;; weighted sum of expected satisfaction gains.
 ;;
 ;; @see need_management.nls
-;; @see country_specific_features/cultural_model.nls
 ;; @see docs/WIP_ISSUES.md
 
 __includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" "people/classes.nls" ]
@@ -77,79 +70,7 @@ people-own [
 
   ; Memory of the network's actions
 
-
-  
-  ;"needs" are a central driver in decision-making (e.g. eating, belonging to groups, physical security).
-  ;"needs" are a relevant concept for accounting for the reasons that can push an agent for violating guidelines, in spite of generally complying to them
-  ;"needs" can be seen as criteria that agents tend to satisfy.
-  ;As a criteria, each need can be related to a level of satisfaction
-  ;Each need is related to a prevalence, i.e. how much this need is "active" or is "bothering agent decision".
-  ;The less a need is currently satisfied, the more prevalent it becomes (comparatively to other times when the same need has been satisfied); i.e. prevalence is monotonous wrt need satisfaction
-  ;Each need is related to a specific prevalence measure: certain needs can become suddently very critical while the criticality of others is more smooth
-  ;Likewise, a relative ordering exists within needs/prevalence (e.g. a person both hungry and lonely is likely to eat alone whereas a mildly-fed lonely person is more likely to share).
-
-  ;Agents tend to act towards satisfying the most pressing needs first;
-  ;satisfying needs tends to require active engagement and satisfied needs tend to be less cognitively important for the agent
-
-  ;Various needs have a relative *prevalence* for the agent (e.g. eating is less relatively important than breathing), which then affect how much the agent will aim to satisfy this need when acting
-  ;Agents assign different priorities for their needs, this priority order is culturally-sensitive and can thus shape collective responses
-
-  ;For follow-up coders:
-  ;More needs can and should be added as one sees fit
-  ;Here, I rely on very simplified [0,1] variables for memorizing when was the need satisfied for the last time and making the maths easy.
-  ;Though, in principle, needs are shaped by the history of the agent rather than "regularly growing" and thus more advanced representations are advised --if needed.
-  ;For instance, a "food-security" need should be much more prevalent if the agent experienced forced hunger due to a shortage
-
-  ;Currently, the need level and the prevalence are weighted and scaled within [0,1], where 1 means "the most prevalent ever" and "the least satisfied ever".
-  ;Keeping the scale is very important for conceptual coherence.
-
-  ;Regarding assumptions/scale, my gut feeling (to be checked against theory) is that available plans and need prevalence should evolve over time when the agent faces new situations
-  ;Notably, new plans for satisfying should be learnable by agents (e.g. satisfying physical-activity needs might need some adaptation when locked in)
-  ;and traumatic events or long-term deprivation should affect the need structure (e.g. food deprivation should dramatically bump up the prevalence of food safety, thus causing rush to supermarkets for instance)
-  
-  ;;;;;;;; CULTURAL MODEL VARIABLES (by Amineh, Bart, Kurt) ;;;;;;;;
-
-;; @group Schwartz values
-;;
-;; Nine value priorities, each in [0, 100], drawn per person from distributions
-;; derived from the country's Hofstede scores by `set-values-based-on-culture`.
-;; They feed `calibrate-importance-weights-of-needs`, which turns them into the
-;; importance weights below.
-  importance-given-to-hedonism-value ;;< importance of hedonism, in [0, 100]
-  importance-given-to-stimulation-value ;;< importance of stimulation, in [0, 100]
-  importance-given-to-self-direction-value ;;< importance of self-direction, in [0, 100]
-  importance-given-to-universalism-value ;;< importance of universalism, in [0, 100]
-  importance-given-to-benevolence-value ;;< importance of benevolence, in [0, 100]
-  importance-given-to-conformity-tradition-value ;;< importance of conformity and tradition, in [0, 100]
-  importance-given-to-security-value ;;< importance of security, in [0, 100]
-  importance-given-to-power-value ;;< importance of power, in [0, 100]
-  importance-given-to-achievement-value ;;< importance of achievement, in [0, 100]
-  
-  
-;; @group Need importance weights
-;;
-;; How much each need counts when comparing candidate activities. Set once at
-;; setup by `calibrate-importance-weights-of-needs` and normalised to sum to 1.
-  importance-weight-group-belonging ;;< weight of the group-belonging need
-  importance-weight-family-belonging ;;< weight of the family-belonging need
-
-  importance-weight-food      ;;< weight of the food need
-  importance-weight-financial-survival ;;< weight of the financial-survival need
-  importance-weight-health    ;;< weight of the health need
-  importance-weight-sleep     ;;< weight of the sleep need
-
-  importance-weight-physical-safety ;;< weight of the physical-safety need
-  importance-weight-social-safety ;;< weight of the social-safety need
-
-  importance-weight-social-status ;;< weight of the social-status need
-  importance-weight-providing ;;< weight of the providing need
-  importance-weight-autonomy  ;;< weight of the autonomy need
- 
-
-
   ;Need satisfaction levels (i.e. level of watertanks)
-
-
 ;; @group Need satisfaction levels
 ;;
 ;; The "water tanks": how satisfied each need currently is, in [0, 1]. Every tick
@@ -176,6 +97,7 @@ people-own [
   social-safety-satisfaction-level ;;< satisfaction of the social-safety need, in [0, 1]
   
   
+
 ;; @group Social contact
   social-distance-profile     ;;< willingness to keep distance, in [0, 1]; only ever set by `set-social-distance-profile`, which is commented out
   is-I-apply-social-distancing? ;;< whether this person is distancing on this tick

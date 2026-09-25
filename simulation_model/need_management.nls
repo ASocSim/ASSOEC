@@ -26,7 +26,6 @@
 ;; them test motive strings this model no longer produces. See docs/WIP_ISSUES.md
 ;; before trusting one.
 ;; @see need_definition.nls
-;; @see country_specific_features/cultural_model.nls
 ;; @see docs/WIP_ISSUES.md
 
 __includes ["need_definition.nls"]
@@ -882,27 +881,25 @@ to-report global-prevalence-of [ad]
  ; calculate the total-satisfaction an agent expects to gain from performing an activity as the weighted sum of all its needs
   set total-satisfaction sum (list
     ;Survival needs
-    (SDE-food ad * importance-weight-food) 
-    (SDE-financial-survival ad * importance-weight-financial-survival)
-    (SDE-sleep ad * importance-weight-sleep) 
-    (SDE-health ad * importance-weight-health) 
+    (SDE-food ad ) 
+    (SDE-financial-survival ad )
+    (SDE-sleep ad ) 
+    (SDE-health ad) 
 
     ;Belonging needs
-    (SDE-group-belonging ad * importance-weight-group-belonging)
-    (SDE-family-belonging ad * importance-weight-family-belonging)
+    (SDE-group-belonging ad )
+    (SDE-family-belonging ad )
     
     ;Esteem needs
-    (SDE-autonomy ad * importance-weight-autonomy) 
-    (SDE-social-status ad * importance-weight-social-status) 
-    (SDE-providing ad * importance-weight-providing)
+    (SDE-autonomy ad ) 
+    (SDE-social-status ad ) 
+    (SDE-providing ad )
     
     ;Safety needs
-    (SDE-physical-safety ad * importance-weight-physical-safety) 
-    (SDE-social-safety ad * importance-weight-social-safety)
+    (SDE-physical-safety ad ) 
+    (SDE-social-safety ad )
     )
   
-  ;print (word "total satisfaction:" total-satisfaction)
-
   if log-preferred-activity-decision? [log-file-print (sentence "Global prevalence of:" [gathering-type] of location-of ad " " motive-of ad " " social-distancing-of ad " " total-satisfaction)]
   report total-satisfaction
 
@@ -922,20 +919,20 @@ to debug-global-prevalence-of [ad]
  if log? [
     debug-print (sentence [gathering-type] of (location-of ad) " " motive-of ad " ") 
       ;Survival needs
-    debug-print (word "  Food:" (SDE-food ad * importance-weight-food))
-    debug-print (word "  Financial-survival:" (SDE-financial-survival ad * importance-weight-financial-survival))
-    debug-print (word "  Sleep:" (SDE-sleep ad * importance-weight-sleep))
-    debug-print (word "  Health:" (SDE-health ad * importance-weight-health))
+    debug-print (word "  Food:" (SDE-food ad ))
+    debug-print (word "  Financial-survival:" (SDE-financial-survival ad ))
+    debug-print (word "  Sleep:" (SDE-sleep ad ))
+    debug-print (word "  Health:" (SDE-health ad))
       ;Safety needs
-    debug-print (word "  Physical Safety:" (SDE-physical-safety ad * importance-weight-physical-safety))
-    debug-print (word "  Social Safety:" (SDE-social-safety ad * importance-weight-social-safety))
+    debug-print (word "  Physical Safety:" (SDE-physical-safety ad ))
+    debug-print (word "  Social Safety:" (SDE-social-safety ad ))
       ;Belonging needs
-    debug-print (word "  Belonging group:" (SDE-group-belonging ad * importance-weight-group-belonging))
-    debug-print (word "  Belonging family:" (SDE-family-belonging ad * importance-weight-family-belonging))
+    debug-print (word "  Belonging group:" (SDE-group-belonging ad ))
+    debug-print (word "  Belonging family:" (SDE-family-belonging ad ))
       ;Esteem needs
-    debug-print (word "  Autonomy:" (SDE-autonomy ad * importance-weight-autonomy))
-    debug-print (word "  Social status:" (SDE-social-status ad * importance-weight-social-status))
-    debug-print (word "  Providing:" (SDE-providing ad * importance-weight-providing))
+    debug-print (word "  Autonomy:" (SDE-autonomy ad ))
+    debug-print (word "  Social status:" (SDE-social-status ad ))
+    debug-print (word "  Providing:" (SDE-providing ad ))
     
     debug-print (word " Global:" global-prevalence-of ad)
   ]

@@ -1,0 +1,47 @@
+
+
+;; @context observer
+;; variables of every person
+to setup-person-values-and-needs
+  set-initial-need-satisfaction-levels-ebo
+end
+
+
+
+;; Fill every person's need tanks at the start of the run.
+;;
+;; Survival needs start high (0.8 to 1.0), esteem needs a little lower, belonging
+;; and physical safety lower still (0.5 to 1.0)
+;; The spread is what makes people choose differently from one another on the
+;; first ticks.
+;;
+;; @context observer
+;; @side-effects sets all eleven satisfaction levels on every person
+
+to set-initial-need-satisfaction-levels-ebo
+  ask people [
+    ;Initiate need satisfaction levels (i.e. fill up watertanks)
+
+    ;SURVIVAL:
+    set sleep-satisfaction-level random-float 0.2 + 0.8
+    set food-satisfaction-level random-float 0.2 + 0.8
+    set financial-survival-satisfaction-level random-float 0.2 + 0.8
+    set health-satisfaction-level random-float 0.2 + 0.8
+    
+    ;SELF-ESTEEM:
+    set social-status-satisfaction-level random-float 0.3 + 0.7
+    set providing-satisfaction-level random-float 0.3 + 0.7
+    set autonomy-satisfaction-level random-float 0.3 + 0.6
+
+    ;BELONGING:
+    set group-belonging-satisfaction-level random-float 0.5 + 0.5
+    set family-belonging-satisfaction-level random-float 0.5 + 0.5
+    
+    ;SAFETY:
+    set physical-safety-satisfaction-level random-float 0.5 + 0.5
+    set social-safety-satisfaction-level random-float 0.2 + 0.8
+
+  ]
+end
+
+

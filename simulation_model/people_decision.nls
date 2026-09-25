@@ -11,7 +11,7 @@
 ;; @see need_management.nls
 ;; @see docs/WIP_ISSUES.md
 
-__includes ["need_management.nls" "country_specific_features/cultural_model.nls" "decision/quarantining.nls" "decision/select_activity.nls"]
+__includes ["need_management.nls" "country_specific_features/needs_assignment.nls" "decision/quarantining.nls" "decision/select_activity.nls"]
 
 ;; The activity this person most wants to do, of those open to them now.
 ;;

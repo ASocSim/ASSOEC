@@ -13,7 +13,6 @@
 ;;
 ;; @see gathering_points.nls
 ;; @see people_management.nls
-;; @see country_specific_features/cultural_model.nls
 ;; @see docs/WIP_ISSUES.md
 
 __includes ["scenarios.nls" "setup/household-configuration.nls"]
