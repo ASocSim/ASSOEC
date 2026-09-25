@@ -80,39 +80,21 @@ to-report epistemic-error-of-ignored-immunity-ratio report count people with [no
 let end-day starting-day + 28
 while [current-day <= end-day] [ go ]]]></button>
     <slider x="2825" step="1" y="161" max="100" width="174" display="uncertainty-avoidance" height="50" min="0" direction="Horizontal" default="52.0" variable="uncertainty-avoidance"></slider>
-    <slider x="3009" step="1" y="150" max="100" width="189" display="individualism-vs-collectivism" height="50" min="0" direction="Horizontal" default="24.0" variable="individualism-vs-collectivism"></slider>
     <slider x="2829" step="1" y="216" max="100" width="172" display="power-distance" height="50" min="0" direction="Horizontal" default="64.0" variable="power-distance"></slider>
     <slider x="3009" step="1" y="206" max="100" width="189" display="indulgence-vs-restraint" height="50" min="0" direction="Horizontal" default="40.0" variable="indulgence-vs-restraint"></slider>
     <slider x="2824" step="1" y="271" max="100" width="174" display="masculinity-vs-femininity" height="50" min="0" direction="Horizontal" default="41.0" variable="masculinity-vs-femininity"></slider>
     <slider x="3010" step="1" y="261" max="100" width="186" display="long-vs-short-termism" height="50" min="0" direction="Horizontal" default="32.0" variable="long-vs-short-termism"></slider>
-    <slider x="3469" step="1" y="90" max="10" width="150" display="value-std-dev" height="50" min="0" direction="Horizontal" default="5.0" variable="value-std-dev"></slider>
-    <slider x="3233" step="1" y="90" max="40" width="223" display="value-system-calibration-factor" height="50" min="0" direction="Horizontal" default="25.0" variable="value-system-calibration-factor"></slider>
     <slider x="2829" step="0.1" y="351" max="3" width="172" display="survival-multiplier" height="50" min="0" direction="Horizontal" default="2.4" variable="survival-multiplier"></slider>
     <note x="2819" y="23" backgroundDark="0" fontSize="16" width="508" markdown="false" height="21" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Country-Specific Features Model: Culture, Values, Needs</note>
     <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="go once">go</button>
     <button x="10" actionKey="I" y="361" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="inspect person">inspect one-of people</button>
     <note x="2825" y="129" backgroundDark="0" fontSize="11" width="334" markdown="false" height="27" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Hofstede dimension settings</note>
-    <note x="3233" y="70" backgroundDark="0" fontSize="11" width="197" markdown="false" height="30" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent value system settings</note>
     <note x="2833" y="331" backgroundDark="0" fontSize="11" width="190" markdown="false" height="18" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent need system settings</note>
     <button x="10" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Day run">if slice-of-the-day = "morning" [go]
 while [slice-of-the-day != "morning"] [go]</button>
-    <slider x="3233" step="1" y="147" max="25" width="233" display="influence-of-age-on-value-system" height="50" min="0" direction="Horizontal" default="5.0" variable="influence-of-age-on-value-system"></slider>
     <chooser x="2820" y="60" height="60" variable="load-country-specific-settings" current="0" width="217" display="load-country-specific-settings">
       <choice type="string" value="DRC"></choice>
       <choice type="string" value="Custom"></choice>
-      <choice type="string" value="Belgium"></choice>
-      <choice type="string" value="Canada"></choice>
-      <choice type="string" value="Germany"></choice>
-      <choice type="string" value="Great Britain"></choice>
-      <choice type="string" value="France"></choice>
-      <choice type="string" value="Italy"></choice>
-      <choice type="string" value="Korea South"></choice>
-      <choice type="string" value="Netherlands"></choice>
-      <choice type="string" value="Norway"></choice>
-      <choice type="string" value="Spain"></choice>
-      <choice type="string" value="Singapore"></choice>
-      <choice type="string" value="Sweden"></choice>
-      <choice type="string" value="U.S.A."></choice>
     </chooser>
     <note x="4065" y="22" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
     <switch x="4065" y="56" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
@@ -201,13 +183,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <monitor x="1742" precision="17" y="90" height="60" fontSize="11" width="182">#sick-hospital-personel</monitor>
     <input x="1743" multiline="false" y="160" height="60" variable="#beds-in-hospital" type="number" width="195">11.0</input>
     <monitor x="1295" precision="17" y="158" height="60" fontSize="11" width="100">r0</monitor>
-    <slider x="2832" step="0.01" y="409" max="1" width="173" display="weight-survival-needs" height="50" min="0" direction="Horizontal" default="0.5" variable="weight-survival-needs"></slider>
-    <slider x="3013" step="0.01" y="355" max="1" width="173" display="maslow-multiplier" height="50" min="0" direction="Horizontal" default="0.0" variable="maslow-multiplier"></slider>
-    <slider x="3013" step="0.01" y="414" max="1" width="252" display="financial-stability-learning-rate" height="50" min="0" direction="Horizontal" default="0.05" variable="financial-stability-learning-rate"></slider>
-    <switch x="3218" y="290" height="40" on="false" variable="make-social-distance-profile-value-based?" width="324" display="make-social-distance-profile-value-based?"></switch>
-    <slider x="3449" step="0.01" y="338" max="1" width="258" display="std-dev-social-distance-profile" height="50" min="0" direction="Horizontal" default="0.1" variable="std-dev-social-distance-profile"></slider>
-    <slider x="3215" step="0.01" y="338" max="1" width="225" display="mean-social-distance-profile" height="50" min="0" direction="Horizontal" default="0.5" variable="mean-social-distance-profile"></slider>
-    <note x="3222" y="257" backgroundDark="0" fontSize="11" width="272" markdown="false" height="30" textColorDark="-1" textColorLight="-13403783" backgroundLight="0">Agent social distancing settings</note>
     <note x="3625" y="524" backgroundDark="0" fontSize="16" width="188" markdown="false" height="23" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Transport Model</note>
     <slider x="3488" step="0.01" y="730" max="1" width="253" display="ratio-retired-public-transport" height="50" min="0" direction="Horizontal" default="0.2" variable="ratio-retired-public-transport"></slider>
     <slider x="3492" step="0.01" y="617" max="1" width="254" display="ratio-student-public-transport" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-student-public-transport"></slider>
@@ -747,6 +722,9 @@ Relative proximity between individuals within an activity type (impacts contamin
     </plot>
     <monitor x="3015" precision="17" y="563" height="60" fontSize="11" width="117">#dead-females</monitor>
     <monitor x="3012" precision="17" y="496" height="60" fontSize="11" width="117">#dead-people</monitor>
+    <slider x="3009" step="1" y="150" max="100" width="189" display="individualism-vs-collectivism" height="50" min="0" direction="Horizontal" default="24.0" variable="individualism-vs-collectivism"></slider>
+    <slider x="3013" step="0.01" y="355" max="1" width="173" display="maslow-multiplier" height="50" min="0" direction="Horizontal" default="0.0" variable="maslow-multiplier"></slider>
+    <slider x="2832" step="0.01" y="409" max="1" width="173" display="weight-survival-needs" height="50" min="0" direction="Horizontal" default="0.5" variable="weight-survival-needs"></slider>
   </widgets>
   <info>## WHAT IS IT?
 

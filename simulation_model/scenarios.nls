@@ -1,8 +1,9 @@
 to load-scenario-specific-parameter-settings
   load-scenario
   load-population-profile-based-on-current-preset-profile
-  load-nations-hofstede-dimension-scores
+  
 end
+
 
 to load-scenario
   if preset-scenario = "none" [stop]
@@ -307,7 +308,7 @@ to load-baseline-parameter-settings
   load-default-contagion-model
   load-default-transport-model
   load-default-economic-parameters
-  load-default-agent-values-and-needs-parameters
+  ;load-default-agent-values-and-needs-parameters
   load-default-social-network-model
   load-default-worker-distribution-settings
   load-default-intervention-measures-settings
@@ -479,18 +480,19 @@ to load-population-profile-based-on-current-preset-profile
 
 end
 
-to load-default-agent-values-and-needs-parameters
-  ; Values
-  set value-system-calibration-factor 25
-  set value-std-dev 5
-  ; Needs
-  set survival-multiplier 2.5
-  set maslow-multiplier 0
-  set weight-survival-needs 0.5
-  set financial-stability-learning-rate 0.05
-  ; Social distancing variables
-  set make-social-distance-profile-value-based? true
-  set mean-social-distance-profile 0.5
-  set std-dev-social-distance-profile 0.1
-end
+
+; to load-default-agent-values-and-needs-parameters
+;   ; Values
+;   set value-system-calibration-factor 25
+;   set value-std-dev 5
+;   ; Needs
+;   set survival-multiplier 2.5
+;   set maslow-multiplier 0
+;   set weight-survival-needs 0.5
+;   set financial-stability-learning-rate 0.05
+;   ; Social distancing variables
+;   set make-social-distance-profile-value-based? true
+;   set mean-social-distance-profile 0.5
+;   set std-dev-social-distance-profile 0.1
+; end
 
