@@ -1,34 +1,7 @@
-;; @file country_specific_features/cultural_model.nls
-;; @brief Turning a country's culture into the value system and need weights of
-;; each person.
-;;
-;; @author Bart de Bruin (TU Delft), Kurt Kreulen (TU Delft), coordinated by
-;; Amineh Ghorbani (TU Delft)
-;; @see people_management.nls
-;; @see need_management.nls
-;; @see docs/WIP_ISSUES.md
-
-;Cultural_model.nls created by Bart de Bruin (TU Delft) and Kurt Kreulen (TU Delft), efforts coordinated by Amineh Ghorbani (TU Delft)
-
-;Short description of procedures included in this nls file:
-;setup-person-values-and-needs-based-on-cultural-model: is called in setup.nls, calls procedures that calibrate agent values and needs according to the cultural model
-;set-initial-need-satisfaction-levels; initiates need satisfaction levels (i.e. water tank levels)
-
-;load-nations-hofstede-dimension-scores: calibrate Hofstede dimensions based on a nation's Hofstede dimension scorecard
 
 
-
-;; Give every person their cultural values, need weights and starting need levels.
-;;
-;; Called once from setup. Three of the original six steps - loading the country
-;; scorecard, calibrating value systems, and setting the social distance profile -
-;; are commented out for the Ebola build.
-;;
 ;; @context observer
-;; @side-effects sets the Hofstede globals, and the value, weight and satisfaction
 ;; variables of every person
-;; @see calibrate-importance-weights-of-needs
-;; @see set-initial-need-satisfaction-levels-ebo
 to setup-person-values-and-needs
   set-initial-need-satisfaction-levels-ebo
 end
@@ -38,18 +11,14 @@ end
 ;; Fill every person's need tanks at the start of the run.
 ;;
 ;; Survival needs start high (0.8 to 1.0), esteem needs a little lower, belonging
-;; and physical safety lower still (0.5 to 1.0), and autonomy is fixed at 0.95.
+;; and physical safety lower still (0.5 to 1.0)
 ;; The spread is what makes people choose differently from one another on the
 ;; first ticks.
 ;;
 ;; @context observer
 ;; @side-effects sets all eleven satisfaction levels on every person
-;; @note The financial-survival, food and health tanks are declared in
-;; need_definition.nls rather than here.
-to set-initial-need-satisfaction-levels-ebo
-  ;NOTE: The water tanks for financial safety (SAFETY), food safety (SURVIVAL), financial survival (SURVIVAL), health (SURVIVAL) are located in the need_defintion.nls file
-  ;The subneeds defined in need_defintion.nls are not formalized as people-own variables but as to-reporter functions
 
+to set-initial-need-satisfaction-levels-ebo
   ask people [
     ;Initiate need satisfaction levels (i.e. fill up watertanks)
 
@@ -62,7 +31,7 @@ to set-initial-need-satisfaction-levels-ebo
     ;SELF-ESTEEM:
     set social-status-satisfaction-level random-float 0.3 + 0.7
     set providing-satisfaction-level random-float 0.3 + 0.7
-    set autonomy-satisfaction-level 0.95
+    set autonomy-satisfaction-level random-float 0.3 + 0.6
 
     ;BELONGING:
     set group-belonging-satisfaction-level random-float 0.5 + 0.5
