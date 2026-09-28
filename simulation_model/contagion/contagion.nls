@@ -60,11 +60,6 @@ end
 
 ;;if any contextual mitigation factors are discovered, multiply infection probabilities with contextual-contagion-modificators in apply-risk-of-contamination functions
 
-to-report social-distancing-risk-mitigation-factor
-;   ifelse is-I-apply-social-distancing? [report social-distancing-density-factor]
-;   [report 0.5]
-  report 0.5
-end
 
 
 ;; this process is a bit shitty as it does some mathematical merging of probability

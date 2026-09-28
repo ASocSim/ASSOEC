@@ -34,6 +34,8 @@ globals
   #people-infected-in-stores
   #people-infected-in-cemeteries
   #people-infected-in-leisure
+  #people-infected-in-civil-society
+  #people-infected-in-traditional-healer
 
   #people-infected-in-away-travel
   
@@ -217,7 +219,9 @@ to increment-contagion-metrics-from [context infected infector]
     if gt = "home" [set #people-infected-in-homes #people-infected-in-homes + 1 stop]
     if gt = "church" [set #people-infected-in-churches #people-infected-in-churches + 1 stop]
     if gt = "cemetery" [set #people-infected-in-cemeteries #people-infected-in-cemeteries + 1 stop]
-     if gt = "leisure" [set #people-infected-in-leisure #people-infected-in-leisure + 1 stop]   
+     if gt = "leisure" [set #people-infected-in-leisure #people-infected-in-leisure + 1 stop]
+    if gt = "traditional healer" [set #people-infected-in-traditional-healer #people-infected-in-traditional-healer + 1 stop]
+    if gt = "civil society" [set #people-infected-in-civil-society #people-infected-in-civil-society + 1 stop]
   ]
   
   if context = "bus" [set #people-infected-in-pubtrans #people-infected-in-pubtrans + 1 stop]

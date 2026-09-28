@@ -86,8 +86,8 @@ if ( not is-observing-critical-symptoms?)
       
       ;print (sentence "working day for me:" is-working-day-for-me? " my work is" [gathering-type] of my-work " my motive is" work-motive)
   ]  
-  
-  
+
+
   ;attend religious gathering,
   ;on sunday we can go to religious gathering 
   if (day-of-the-week = "sunday" and slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
@@ -110,6 +110,9 @@ if ( not is-observing-critical-symptoms?)
    if slice-of-the-day = "evening" 
    [
     set activities lput (activity-descriptor [my-home] of one-of my-relatives social-motive) activities
+    set activities (lput (activity-descriptor my-traditional-healer spiritual-motive) activities)
+    set activities (lput (activity-descriptor my-civil-society social-motive) activities)
+
     ;print "add visits to list of possible actv"
    ]
 
