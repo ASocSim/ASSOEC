@@ -1,7 +1,5 @@
 globals
 [
-  ;price-of-rations
-
   #infected-times-ticks
   #delivered-supply-proposed-this-tick
   when-has-2%-infected-threshold-first-been-met?

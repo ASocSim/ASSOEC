@@ -81,7 +81,7 @@ end
 
 to-report p-hosp
   ;INSTEAD OF AGE, THIS DEPENDS ON TRUST IN HOSPITAL SLIDER VALUE
-  report trust_in_hospital ;expand this later, good for testing now
+  report trust-in-hospital ;expand this later, good for testing now
 end
 
 

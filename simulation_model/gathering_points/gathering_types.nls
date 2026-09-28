@@ -90,8 +90,6 @@ end
 ;; Every traditional healer.
 ;;
 ;; @return agentset of gathering points with `gathering-type` "traditional healer"
-;; @note Healers are staffed, so their district holds their workers during working
-;; hours, but nothing offers *visiting* a healer as an activity yet.
 to-report traditional-healer-gathering-type
   report gathering-points with [gathering-type = "traditional healer"]
 end
@@ -99,7 +97,6 @@ end
 ;; Every civil society organisation.
 ;;
 ;; @return agentset of gathering points with `gathering-type` "civil society"
-;; @note As `traditional-healer-gathering-type`: staffed, but never visited yet.
 to-report civil-society-gathering-type
   report gathering-points with [gathering-type = "civil society"]
 end
