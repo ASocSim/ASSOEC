@@ -1,6 +1,6 @@
 globals
 [
-  price-of-rations
+  ;price-of-rations
 
   #infected-times-ticks
   #delivered-supply-proposed-this-tick

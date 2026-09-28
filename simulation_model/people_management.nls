@@ -174,8 +174,8 @@ end
 ;; independently of infection, age or anything else. See
 ;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status
-  ;make people die by probability (needed for later death and funeral procedures)
-  if random 100 > 80
+  ;make people die by probability
+  if random 100 > 100 ;avoid other deaths for test
   [ 
    ; print "I have died of some other disease"    
     set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]

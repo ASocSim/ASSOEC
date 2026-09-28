@@ -44,7 +44,7 @@ to setup-ebola
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
-  set price-of-rations 1
+  ;set price-of-rations 1
 
   
   set was-social-distancing-enforced? false
