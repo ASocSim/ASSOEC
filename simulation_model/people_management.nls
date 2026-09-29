@@ -65,9 +65,11 @@ people-own [
   is-user-of-tracking-app?    ;;< COVID era: whether this person runs the tracing app
   has-mobile-phone?           ;;< COVID era: whether this person owns a phone at all
     
-  
-  ; Optional measures information
 
+;; @group epistemic model
+  my-trust-in-hospital
+  my-trust-in-institutions
+  
   ; Memory of the network's actions
 
   ;Need satisfaction levels (i.e. level of watertanks)
@@ -174,8 +176,8 @@ end
 ;; independently of infection, age or anything else. See
 ;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status
-  ;make people die by probability (needed for later death and funeral procedures)
-  if random 100 > 80
+  ;make people die by probability
+  if random 100 > 100 ;avoid other deaths for test
   [ 
    ; print "I have died of some other disease"    
     set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
@@ -349,8 +351,6 @@ end
 ;;
 ;; @context person
 ;; @return a gathering point, or `nobody` if none is linked
-;; @note Nothing offers *visiting* a healer as an activity yet - people are only
-;; ever there to work. The link exists so the place has a population attached to it.
 to-report my-traditional-healer
   report my-gathering-point-of-type "traditional healer"
 end
@@ -359,7 +359,6 @@ end
 ;;
 ;; @context person
 ;; @return a gathering point, or `nobody` if none is linked
-;; @note As `my-traditional-healer`: staffed, but never visited.
 to-report my-civil-society
   report my-gathering-point-of-type "civil society"
 end

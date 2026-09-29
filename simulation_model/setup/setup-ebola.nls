@@ -44,7 +44,7 @@ to setup-ebola
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
-  set price-of-rations 1
+  ;set price-of-rations 1
 
   
   set was-social-distancing-enforced? false
@@ -411,6 +411,8 @@ to setup-person [current-home l-sex]
     set has-been-tested-infected? false
 
     set am-I-mourning? false
+    set my-trust-in-hospital random-float 1
+    set my-trust-in-institutions random-float 1
     
     ;;money handling
     set my-current-income 0
