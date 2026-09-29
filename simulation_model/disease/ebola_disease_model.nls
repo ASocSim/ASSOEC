@@ -42,16 +42,19 @@ to-report transition-ebo [s]
   ;to immunity
      if s = in-hospital-infection-status or state-of-timed-state s = hospitalised-to-immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
   
+
   ;death to burials
-  ;;This procedure needs to trigger a social network response to let agents connected to the deceased attend the burial
-  if state-of-timed-state s = non-hospitalised-to-dead-infectious-infection-status 
+
+  ;;This procedure needs to trigger a social network response to let agents connected to the deceased attend the burial after choosing the burial type
+
+  if ( state-of-timed-state s = non-hospitalised-to-dead-infectious-infection-status 
   or s = non-hospitalised-to-dead-infectious-infection-status
-  or state-of-timed-state s = hospitalised-to-dead-infectious-infection-status
-  [report stochastic-fsm-transition (list
+  or state-of-timed-state s = hospitalised-to-dead-infectious-infection-status )
+  [ report stochastic-fsm-transition (list
     (list timed-state dead-to-safe-burial-infection-status tau-bur p-safe-burial)
     (list timed-state dead-to-unsafe-burial-infection-status tau-bur)
-  )
-  ]
+  ) ]
+
   
   ;burials (Emil added)
   if state-of-timed-state s = dead-to-safe-burial-infection-status
@@ -72,6 +75,7 @@ to-report transition-ebo [s]
 end
 
 
+
 to-report next-state-ebo [s]
   report stochastic-transition-apply transition-ebo s
 end
@@ -80,9 +84,11 @@ end
 ;;;;;;;TRANSITION PROBABILITIES;;;;;;;;;;;;
 
 to-report p-hosp
-  ;INSTEAD OF AGE, THIS DEPENDS ON TRUST IN HOSPITAL SLIDER VALUE
-  report trust-in-hospital ;expand this later, good for testing now
+  ;THIS DEPENDS ON TRUST IN HOSPITAL agent value
+  ;is the agent likely to accept treatment at the hospital based on their experiences and knowledge of biomedicine?
+  report my-trust-in-hospital
 end
+
 
 
 ;probability of survival, using the inverse of latest case fatality rate, adjust as more accurate data comes in
@@ -90,9 +96,15 @@ to-report p-mortality-in-hospital
   report CFR
 end
 
-;for sanity check
 to-report p-safe-burial
-  report trust-in-institutions
+;THIS DEPENDS ON TRUST IN institutions of the deceased's network
+  report my-networks-trust-in-institutions
+end
+
+to-report my-networks-trust-in-institutions
+;;simplified procedure for considering networks opinion on SDB
+;;does not consider that close relatives have more impact on choice, as do people with higher social status (could connect to need!)
+   report mean [my-trust-in-institutions] of my-kin-link-neighbors
 end
 
 

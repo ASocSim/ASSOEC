@@ -65,9 +65,11 @@ people-own [
   is-user-of-tracking-app?    ;;< COVID era: whether this person runs the tracing app
   has-mobile-phone?           ;;< COVID era: whether this person owns a phone at all
     
-  
-  ; Optional measures information
 
+;; @group epistemic model
+  my-trust-in-hospital
+  my-trust-in-institutions
+  
   ; Memory of the network's actions
 
   ;Need satisfaction levels (i.e. level of watertanks)

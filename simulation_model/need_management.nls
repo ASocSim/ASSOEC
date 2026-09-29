@@ -322,26 +322,29 @@ to-report SUE-health [ad]
   report 0.5
   ]
 
+  ;;;;;; this can be done better by considering when one person is too sick to decide for themselves
+  ;;;;;;consider using my-networks-trust-in-hospital  !
+
 
   ;if agent getting treatment at home, decrease health
   if motive = treatment-motive and gp = my-home [
   ;this should depend on the agent belief
     set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
     ;;;;;;;;;;;EPISTEMIC MODEL INFLUENCES HERE
-    report base * (1 - trust-in-hospital)
+    report base * (1 - my-trust-in-hospital)
   ]
 
  if motive = treatment-motive and gp = my-traditional-healer [
     set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
         ;;;;;;;;;;;EPISTEMIC MODEL INFLUENCES HERE
 
-    report base * (1 - trust-in-hospital)
+    report base * (1 - my-trust-in-hospital)
   ]
  if motive = treatment-motive and gp = my-hospital [
     set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
         ;;;;;;;;;;;EPISTEMIC MODEL INFLUENCES HERE
 
-    report base *  trust-in-hospital
+    report base *  my-trust-in-hospital
   ]
   
 ;   if is-believing-to-be-infected? or has-internally-visible-symptoms?
