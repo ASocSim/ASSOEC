@@ -47,10 +47,13 @@ people-own [
   what-my-network-did-week-day ;;< the most common (place type, motive) among this person's network, one entry per weekday tick, oldest first
   what-my-network-did-weekend ;;< the same for weekend ticks
   am-I-mourning?
+  attending_sdb?
+  funeral-cemetery            ;;< the next cemetary this person will go to if they attend a funeral
 
 ;; @group Attachments
   my-home                     ;;< the gathering point this person lives at
   my-work                     ;;< the gathering point this person is employed at; equal to `my-home` for unemployed women at setup
+  my-cemetery                 ;;< the gathering point this person will be buried at if they die
   current-person-I-depend-on  ;;< the person this one is currently following, or `nobody`
 
 ;; @group Transport model (dormant)
@@ -177,21 +180,21 @@ end
 ;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status
   ;make people die by probability
-  if random 100 > 100 ;avoid other deaths for test
-  [ 
+;;  if random 100 > 100 ;avoid other deaths for test
+;;  [ 
    ; print "I have died of some other disease"    
-    set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+    ;;set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
 
-    let deceased one-of people
+;;    let deceased one-of people
 
-    ask deceased
-    [ 
-      ask my-kin-link-neighbors [
-        set am-I-mourning? true
-      ]
-      ;die
-      ]    
-  ]
+;;    ask deceased
+;;    [ 
+;;      ask my-kin-link-neighbors [
+;;        set am-I-mourning? true
+;;      ]
+;;      ;die
+;;      ]    
+;;  ]
   
 end
 
@@ -199,18 +202,34 @@ end
 
 to update-alive-status-ebola
 
-let deceased people with [infection-status = dead-to-unsafe-burial-infection-status or infection-status = dead-to-safe-burial-infection-status]
+let deceased_sdb people with [ infection-status = dead-to-safe-burial-infection-status]
+let deceased_not_sdb people with [infection-status = dead-to-unsafe-burial-infection-status]
 
-if any? deceased [
-   print "I have died of ebola disease"  
-  set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
-  
-  ask deceased
-    [ ask my-kin-link-neighbors 
+if any? deceased_sdb [
+  ;set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+  let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
+  ask deceased_sdb[
+    set my-cemetery current_cemetery
+    ask my-kin-link-neighbors 
     [
         set am-I-mourning? true
+        set attending_sdb? true
+        set funeral-cemetery current_cemetery
       ]
-      ;die
+     
+  ]
+]
+
+if any? deceased_not_sdb [
+  let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
+  ask deceased_not_sdb[
+    set my-cemetery current_cemetery
+    ask my-kin-link-neighbors 
+    [
+        set am-I-mourning? true
+        set attending_sdb? false
+        set funeral-cemetery current_cemetery
+      ]
       ]    
 ]
     

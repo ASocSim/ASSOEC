@@ -36,10 +36,18 @@ if ( not is-observing-critical-symptoms?)
 
 ;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
 ;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
-  if am-I-mourning? and not enforce-SDB?
+  if am-I-mourning? ;;and not enforce-SDB?
   [
-    set activities []
-    set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+    ifelse not attending_sdb?[
+      ;; if I'm ok with unsafe burial, I add it to activities
+      if not not-going-to-unsafe-burials [
+        ;set activities []
+        set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+      ]
+    ][
+    ;set activities []
+    set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
+    ]
     ;print (sentence "someone died, so I go to traditional funeral" funeral-cemetery)
 
     let ret []
@@ -49,20 +57,20 @@ if ( not is-observing-critical-symptoms?)
   report ret
   ]
 
-  if am-I-mourning? and enforce-SDB?
-  [
-    set activities []
+  ;;if am-I-mourning? and enforce-SDB?
+  ;;[
+  ;;  set activities []
     ;assuming 100% compliance with SDB
-    set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
+
     ;print (sentence "someone died, so I go to SDB" funeral-cemetery)
 
-    let ret []
-    foreach activities [ activity ->
-      set ret fput (lput false activity) ret
-  ]
+  ;;  let ret []
+  ;;  foreach activities [ activity ->
+  ;;    set ret fput (lput false activity) ret
+  ;;]
 
-  report ret
-  ]
+  ;;report ret
+  ;;]
 
   ;get food
   ;from store any day except sundays
@@ -188,7 +196,10 @@ to select-activity
   set schedule lput schedule-entry schedule
 
 
-  print (sentence "my preferred activity is" c-a)
+  
+  if loc = funeral-cemetery [
+    print (sentence "my preferred activity is" c-a)
+  ]
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [
 ;     set c-a (list away-gathering-point travelling-motive false)
