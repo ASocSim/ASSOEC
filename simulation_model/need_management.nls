@@ -132,10 +132,12 @@ to decay-satisfaction-level-ebo
   let group-belonging-decay 0.9
   set group-belonging-satisfaction-level group-belonging-satisfaction-level * group-belonging-decay
   if group-belonging-satisfaction-level < 0 [set group-belonging-satisfaction-level 0]
+  if am-I-mourning? [set group-belonging-satisfaction-level 0.5 * group-belonging-satisfaction-level]
   
   let family-belonging-decay 0.8
   set family-belonging-satisfaction-level family-belonging-satisfaction-level * family-belonging-decay
   if family-belonging-satisfaction-level < 0 [set family-belonging-satisfaction-level 0]
+  if am-I-mourning? [set family-belonging-satisfaction-level 0.5 * family-belonging-satisfaction-level]
   
   ;;SAFETY
   let social-safety-decay 0.7
@@ -513,7 +515,9 @@ to-report SUE-group-belonging [ad]
   if ( motive = work-motive ) [report 0.5]
   
   if (motive = funeral-motive) [
-    report 0.5]
+    report 0.6]
+  if (motive = SDB-motive) [
+    report 0.6]
   
   if is-female? and motive = care-motive [
     ;this splits caring at home or at an hospital, eg bringing food to sick relatives
@@ -547,10 +551,10 @@ to-report SUE-family-belonging [ad]
   ;work and religion positively effects group belonging
   if ( motive = spiritual-motive) [report 0.8]
   if (motive = funeral-motive) [
-    report 0.4]
+    report 0.8]
   if (motive = SDB-motive)
   [
-    report -0.4
+    report 0.8
     ]
   
   if is-female? [
@@ -598,6 +602,14 @@ to-report SUE-physical-safety [ad]
   [report 0.2]
     ;  print "default phys safety"
   report 0
+  ; Traditional funerals are considered less safe
+  if gp = funeral-cemetery[
+    ifelse attending_sdb?[
+      report -0.2
+    ][
+      report -0.6
+    ]
+  ]
 end
 
 

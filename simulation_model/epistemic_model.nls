@@ -94,3 +94,10 @@ to perform-immunity-test
 ;     set has-been-tested-immune? true 
 ;  ]
 end
+
+to-report not-going-to-unsafe-burials
+  if my-trust-in-institutions >= 0.95[
+    report true
+  ]
+    report false
+end

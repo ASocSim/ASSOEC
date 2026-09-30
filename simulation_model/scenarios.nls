@@ -47,7 +47,6 @@ end
 to load-population-profile-based-on-current-preset-profile
   
   if household-profiles = "custom" [
-    set ratio-adults-homes ratio-adults-homes
     set ratio-family-homes ratio-family-homes
     set ratio-displaced-homes ratio-displaced-homes
     stop
