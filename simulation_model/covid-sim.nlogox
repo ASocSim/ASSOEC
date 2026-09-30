@@ -75,7 +75,6 @@ to-report epistemic-error-of-ignored-immunity-ratio report count people with [no
   ]]></code>
   <widgets>
     <view x="138" wrappingAllowedX="false" y="60" frameRate="15.0" minPycor="0" height="417" showTickCounter="true" patchSize="5.314285714285714" fontSize="10" wrappingAllowedY="false" width="417" tickCounterLabel="ticks" maxPycor="69" updateMode="0" maxPxcor="69" minPxcor="0"></view>
-    <switch x="138" y="490" height="40" on="false" variable="show-social-links?" width="196" display="show-social-links?"></switch>
     <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
 while [current-day <= end-day] [ go ]]]></button>
@@ -88,23 +87,66 @@ if not any? people with [is-contagious?]
 [stop]</button>
     <button x="10" y="224" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Week Run">go
 while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</button>
-    <note x="578" y="24" backgroundDark="0" fontSize="16" width="208" markdown="false" height="38" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Demographics Model</note>
-    <slider x="699" step="0.01" y="222" max="1" width="247" display="ratio-adults-homes" height="50" min="0" direction="Horizontal" default="0.32" variable="ratio-adults-homes"></slider>
-    <slider x="697" step="0.01" y="276" max="1" width="248" display="ratio-family-homes" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-family-homes"></slider>
-    <chooser x="578" y="74" height="60" variable="household-profiles" current="0" width="187" display="household-profiles">
-      <choice type="string" value="custom"></choice>
-      <choice type="string" value="no displaced"></choice>
-    </chooser>
-    <monitor x="578" precision="17" y="148" height="60" fontSize="11" width="100" display="#people">count people</monitor>
-    <input x="578" multiline="false" y="220" height="63" variable="#households" type="number" width="100">100.0</input>
-    <slider x="700" step="0.01" y="334" max="1" width="248" display="ratio-displaced-homes" height="50" min="0" direction="Horizontal" default="0.07" variable="ratio-displaced-homes"></slider>
-    <monitor x="844" precision="17" y="153" height="60" fontSize="11" width="100" display="#males">count male-agentset</monitor>
-    <monitor x="843" precision="17" y="84" height="60" fontSize="11" width="100" display="#females">count female-agentset</monitor>
-    <button x="699" y="153" height="60" disableUntilTicks="false" forever="false" kind="Observer" width="135" display="set households demographics">load-population-profile-based-on-current-preset-profile</button>
-    <note x="997" y="28" backgroundDark="0" fontSize="16" width="167" markdown="false" height="27" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Disease Model</note>
-    <monitor x="618" precision="17" y="420" height="60" fontSize="11" width="118">day-of-the-week</monitor>
-    <monitor x="765" precision="17" y="420" height="60" fontSize="11" width="116">slice-of-the-day</monitor>
-    <plot x="1985" autoPlotX="true" yMax="10.0" autoPlotY="true" y="25" xMin="0.0" height="332" legend="true" xMax="10.0" yMin="0.0" width="419" display="#people infected in">
+    <note x="22" y="13" backgroundDark="0" fontSize="32" width="271" markdown="false" height="42" textColorDark="-1" textColorLight="-5298144" backgroundLight="0">ASSOEC</note>
+    <slider x="3874" step="0.01" y="94" max="1" width="254" display="ratio-children-public-transport" height="50" min="0" direction="Horizontal" default="0.75" variable="ratio-children-public-transport"></slider>
+    <input x="3943" multiline="false" y="531" height="60" variable="#max-people-per-bus" type="number" width="156">20.0</input>
+    <input x="3940" multiline="false" y="461" height="60" variable="#bus-per-timeslot" type="number" width="156">27.0</input>
+    <monitor x="3939" precision="17" y="390" height="60" fontSize="11" width="195" display="#people-staying-out-queuing">count people with [stayed-out-queuing-for-bus?]</monitor>
+    <monitor x="3939" precision="17" y="322" height="60" fontSize="11" width="189">#people-denied-bus</monitor>
+    <slider x="4150" step="0.01" y="516" max="1" width="247" display="density-factor-shared-cars" height="50" min="0" direction="Horizontal" default="0.8" variable="density-factor-shared-cars"></slider>
+    <slider x="4150" step="0.01" y="459" max="1" width="244" display="density-factor-public-transports" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-public-transports"></slider>
+    <slider x="4150" step="0.01" y="399" max="1" width="247" display="density-factor-queuing" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-queuing"></slider>
+    <slider x="4150" step="0.01" y="339" max="1" width="244" display="density-walking-outside" height="50" min="0" direction="Horizontal" default="0.05" variable="density-walking-outside"></slider>
+    <slider x="3874" step="0.01" y="205" max="1" width="254" display="ratio-worker-public-transport" height="50" min="0" direction="Horizontal" default="0.4" variable="ratio-worker-public-transport"></slider>
+    <slider x="4150" step="0.01" y="206" max="1" width="218" display="ratio-worker-shared-car" height="50" min="0" direction="Horizontal" default="0.15" variable="ratio-worker-shared-car"></slider>
+    <slider x="4148" step="0.01" y="92" max="1" width="218" display="ratio-children-shared-car" height="50" min="0" direction="Horizontal" default="0.0" variable="ratio-children-shared-car"></slider>
+    <slider x="4148" step="0.01" y="147" max="1" width="218" display="ratio-student-shared-car" height="50" min="0" direction="Horizontal" default="0.1" variable="ratio-student-shared-car"></slider>
+    <slider x="4150" step="0.01" y="262" max="1" width="218" display="ratio-retired-shared-car" height="50" min="0" direction="Horizontal" default="0.5" variable="ratio-retired-shared-car"></slider>
+    <slider x="3874" step="0.01" y="149" max="1" width="254" display="ratio-student-public-transport" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-student-public-transport"></slider>
+    <slider x="3874" step="0.01" y="262" max="1" width="253" display="ratio-retired-public-transport" height="50" min="0" direction="Horizontal" default="0.2" variable="ratio-retired-public-transport"></slider>
+    <note x="3936" y="639" backgroundDark="0" fontSize="16" width="308" markdown="false" height="40" textColorDark="-1" textColorLight="-6459832" backgroundLight="0">Migration model</note>
+    <slider x="3936" step="0.01" y="744" max="1" width="308" display="probability-going-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-going-abroad"></slider>
+    <slider x="3936" step="0.01" y="684" max="1" width="308" display="probability-infection-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-infection-when-abroad"></slider>
+    <slider x="3936" step="0.01" y="799" max="1" width="308" display="owning-solo-transportation-probability" height="50" min="0" direction="Horizontal" default="1.0" variable="owning-solo-transportation-probability"></slider>
+    <slider x="3936" step="0.01" y="855" max="1" width="308" display="probability-getting-back-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-getting-back-when-abroad"></slider>
+    <plot x="3934" autoPlotX="true" yMax="10.0" autoPlotY="true" y="926" xMin="0.0" height="359" legend="true" xMax="10.0" yMin="0.0" width="512" display="contacts">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="hospitals" color="-16777216" legend="true">
+        <setup></setup>
+        <update>plot  #contacts-in-hospitals</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="workplaces" color="-7500403" legend="true">
+        <setup></setup>
+        <update>plot  #contacts-in-workplaces</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="homes" color="-2674135" legend="true">
+        <setup></setup>
+        <update>plot  #contacts-in-homes</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="schools" color="-1184463" legend="true">
+        <setup></setup>
+        <update>plot  #contacts-in-schools</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="pub-trans" color="-11221820" legend="true">
+        <setup></setup>
+        <update>plot  #contacts-in-pubtrans</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="priv-trans" color="-2064490" legend="true">
+        <setup></setup>
+        <update> plot #contacts-in-shared-cars</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="queuing" color="-13345367" legend="true">
+        <setup></setup>
+        <update>plot  #contacts-in-queuing</update>
+      </pen>
+    </plot>
+    <switch x="4116" y="592" height="40" on="false" variable="migration?" width="127" display="migration?"></switch>
+    <note x="3873" y="28" backgroundDark="0" fontSize="16" width="188" markdown="false" height="23" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Transport Model</note>
+    <note x="4142" y="23" backgroundDark="0" fontSize="11" width="255" markdown="false" height="55" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Density settings influence risk of becoming sick when travelling locally (is related with contagion model)</note>
+    <monitor x="580" precision="17" y="74" height="60" fontSize="11" width="160">day-of-the-week</monitor>
+    <monitor x="758" precision="17" y="74" height="60" fontSize="11" width="172">slice-of-the-day</monitor>
+    <plot x="1973" autoPlotX="true" yMax="10.0" autoPlotY="true" y="237" xMin="0.0" height="320" legend="true" xMax="10.0" yMin="0.0" width="454" display="#people infected in">
       <setup></setup>
       <update></update>
       <pen interval="1.0" mode="0" display="hospitals" color="-16777216" legend="true">
@@ -148,7 +190,74 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <update>plot #people-infected-in-civil-society</update>
       </pen>
     </plot>
-    <plot x="2419" autoPlotX="true" yMax="10.0" autoPlotY="true" y="29" xMin="0.0" height="224" legend="true" xMax="10.0" yMin="0.0" width="332" display="infection per sex">
+    <plot x="1974" autoPlotX="true" yMax="0.01" autoPlotY="true" y="4" xMin="0.0" height="226" legend="false" xMax="1.0" yMin="0.0" width="451" display="avg-infectiousity per person">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="pen-1" color="-5298144" legend="true">
+        <setup></setup>
+        <update>ifelse not any? people with [is-infected?] [plot 0]
+[plot mean [ebola-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
+      </pen>
+    </plot>
+    <plot x="2454" autoPlotX="true" yMax="10.0" autoPlotY="true" y="242" xMin="0.0" height="311" legend="true" xMax="10.0" yMin="0.0" width="390" xAxis="time" display="Types of burial rites performed over time">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="Unsafe burial" color="-13297659" legend="true">
+        <setup>plot count people with [infection-status = "unsafe-burial"]</setup>
+        <update>plot count people with [infection-status = "unsafe-burial"]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="SDB" color="-11881837" legend="true">
+        <setup></setup>
+        <update>plot count people with [infection-status = "safe-burial"]</update>
+      </pen>
+      <pen interval="0.1" mode="0" display="Illegal burials" color="-7500403" legend="true">
+        <setup></setup>
+        <update>;plot count people with [am-I-mourning?]</update>
+      </pen>
+    </plot>
+    <monitor x="2777" precision="17" y="24" height="60" fontSize="11" width="195">#healthy-hospital-personel</monitor>
+    <monitor x="2777" precision="17" y="91" height="60" fontSize="11" width="195">#sick-hospital-personel</monitor>
+    <input x="2777" multiline="false" y="161" height="60" variable="#beds-in-hospital" type="number" width="195">11.0</input>
+    <switch x="3343" y="179" height="40" on="true" variable="enforce-SDB?" width="109" display="enforce-SDB?"></switch>
+    <monitor x="2868" precision="17" y="303" height="60" fontSize="11" width="121">#dead-people</monitor>
+    <monitor x="2868" precision="17" y="370" height="60" fontSize="11" width="121">#dead-females</monitor>
+    <monitor x="2868" precision="17" y="437" height="60" fontSize="11" width="121">#dead-males</monitor>
+    <monitor x="3003" precision="17" y="25" height="60" fontSize="11" width="291">#people-saved-by-hospitalization</monitor>
+    <monitor x="3003" precision="17" y="247" height="60" fontSize="11" width="291">#who-became-sick-while-travelling-locally</monitor>
+    <monitor x="3003" precision="17" y="178" height="60" fontSize="11" width="291">#people-dying-due-to-lack-of-hospitalization</monitor>
+    <monitor x="3003" precision="17" y="101" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
+    <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
+    <switch x="578" y="143" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
+    <switch x="705" y="438" height="40" on="true" variable="clear-log-on-setup?" width="163" display="clear-log-on-setup?"></switch>
+    <switch x="694" y="342" height="40" on="false" variable="log-contamination?" width="172" display="log-contamination?"></switch>
+    <switch x="575" y="392" height="40" on="false" variable="log-preferred-activity-decision?" width="255" display="log-preferred-activity-decision?"></switch>
+    <switch x="575" y="437" height="40" on="true" variable="log-setup?" width="113" display="log-setup?"></switch>
+    <switch x="575" y="341" height="40" on="false" variable="log?" width="103" display="log?"></switch>
+    <chooser x="575" y="248" height="69" variable="preset-scenario" current="0" width="241" display="preset-scenario">
+      <choice type="string" value="default-scenario"></choice>
+    </chooser>
+    <input x="823" multiline="false" y="195" height="70" variable="#random-seed" type="number" width="139">25.0</input>
+    <button x="893" y="274" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="69" display="export">ask-user-for-export-file
+save-world-state</button>
+    <button x="822" y="274" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="66" display="import">ask-user-for-import-file
+load-scenario-from-file</button>
+    <switch x="700" y="194" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
+    <switch x="846" y="390" height="40" on="false" variable="inspect-to-file?" width="117" display="inspect-to-file?"></switch>
+    <switch x="575" y="194" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
+    <switch x="742" y="143" height="40" on="false" variable="show-social-links?" width="196" display="show-social-links?"></switch>
+    <note x="1026" y="19" backgroundDark="0" fontSize="16" width="208" markdown="false" height="38" textColorDark="-1" textColorLight="-13210332" backgroundLight="0">Demographics Model</note>
+    <monitor x="1012" precision="17" y="75" height="60" fontSize="11" width="100" display="#people">count people</monitor>
+    <monitor x="1012" precision="17" y="148" height="60" fontSize="11" width="100" display="#females">count female-agentset</monitor>
+    <monitor x="1013" precision="17" y="217" height="60" fontSize="11" width="100" display="#males">count male-agentset</monitor>
+    <chooser x="1121" y="74" height="60" variable="household-profiles" current="0" width="124" display="household-profiles">
+      <choice type="string" value="custom"></choice>
+      <choice type="string" value="no displaced"></choice>
+    </chooser>
+    <input x="1256" multiline="false" y="74" height="63" variable="#households" type="number" width="100">100.0</input>
+    <button x="1142" y="145" height="42" disableUntilTicks="false" forever="false" kind="Observer" width="190" display="set households demographics">load-population-profile-based-on-current-preset-profile</button>
+    <slider x="1128" step="0.01" y="197" max="1" width="248" display="ratio-family-homes" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-family-homes"></slider>
+    <slider x="1128" step="0.01" y="255" max="1" width="251" display="ratio-displaced-homes" height="50" min="0" direction="Horizontal" default="0.4" variable="ratio-displaced-homes"></slider>
+    <plot x="1015" autoPlotX="true" yMax="10.0" autoPlotY="true" y="316" xMin="0.0" height="228" legend="true" xMax="10.0" yMin="0.0" width="364" display="infection per sex">
       <setup></setup>
       <update></update>
       <pen interval="1.0" mode="0" display="females-infected" color="-8053223" legend="true">
@@ -168,427 +277,10 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <update>plot #cumulative-males-infector</update>
       </pen>
     </plot>
-    <plot x="2418" autoPlotX="true" yMax="0.01" autoPlotY="true" y="265" xMin="0.0" height="190" legend="false" xMax="1.0" yMin="0.0" width="335" display="avg-infectiousity per person">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="pen-1" color="-5298144" legend="true">
-        <setup></setup>
-        <update>ifelse not any? people with [is-infected?] [plot 0]
-[plot mean [ebola-contagion-factor-between self (one-of people) (one-of gathering-points)] of people with [is-infected?]]</update>
-      </pen>
-    </plot>
-    <plot x="1048" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="574" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction FEMALES">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
-        <setup></setup>
-        <update>plot mean [group-belonging-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
-        <setup></setup>
-        <update>plot mean [family-belonging-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="autonomy" color="-11221820" legend="true">
-        <setup></setup>
-        <update>plot mean [autonomy-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
-        <setup></setup>
-        <update>plot mean [providing-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
-        <setup></setup>
-        <update>plot mean [health-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
-        <setup></setup>
-        <update>plot mean [sleep-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot mean [financial-survival-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
-        <setup></setup>
-        <update>plot mean [social-status-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
-        <setup></setup>
-        <update>plot mean [food-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
-        <setup></setup>
-        <update>plot mean [physical-safety-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
-        <setup></setup>
-        <update>plot mean [social-safety-satisfaction-level] of people with [is-female?]</update>
-      </pen>
-    </plot>
-    <plot x="1567" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="573" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction MALES">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
-        <setup></setup>
-        <update>plot mean [group-belonging-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
-        <setup></setup>
-        <update>plot mean [family-belonging-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="autonomy" color="-2139308" legend="true">
-        <setup></setup>
-        <update>plot mean [autonomy-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
-        <setup></setup>
-        <update>plot mean [providing-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
-        <setup></setup>
-        <update>plot mean [health-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
-        <setup></setup>
-        <update>plot mean [sleep-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot mean [financial-survival-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
-        <setup></setup>
-        <update>plot mean [social-status-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
-        <setup></setup>
-        <update>plot mean [food-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
-        <setup></setup>
-        <update>plot mean [physical-safety-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
-        <setup></setup>
-        <update>plot mean [social-safety-satisfaction-level] of people with [is-male?]</update>
-      </pen>
-    </plot>
-    <plot x="929" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1034" xMin="0.0" height="361" legend="true" xMax="10.0" yMin="0.0" width="510" display="Activities">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="1" display="@Work" color="-14070903" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-at-work?]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="@Home" color="-14439633" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-at-home?]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="Treated at hospital" color="-6459832" legend="true">
-        <setup></setup>
-        <update>plot count people with [current-motivation = treatment-motive]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="getting food" color="-7500403" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-getting-food?]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="attend religious gathering" color="-13403783" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-at-church?]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="care for sick at hospital" color="-2674135" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-caring-for-the-sick-at-hospital?]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="funeral rite" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot count people with [current-motivation = funeral-motive]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="social" color="-7858858" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-visiting?]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="leisure" color="-4757638" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-at-leisure-point?]</update>
-      </pen>
-      <pen interval="1.0" mode="1" display="care at home" color="-955883" legend="true">
-        <setup></setup>
-        <update>plot count people with [is-caring-for-the-sick-at-home?]</update>
-      </pen>
-    </plot>
-    <plot x="1462" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1033" xMin="0.0" height="359" legend="true" xMax="10.0" yMin="0.0" width="512" display="contacts">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="hospitals" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-hospitals</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="workplaces" color="-7500403" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-workplaces</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="homes" color="-2674135" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-homes</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="schools" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-schools</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="pub-trans" color="-11221820" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-pubtrans</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="priv-trans" color="-2064490" legend="true">
-        <setup></setup>
-        <update> plot #contacts-in-shared-cars</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="queuing" color="-13345367" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-queuing</update>
-      </pen>
-    </plot>
-    <plot x="18" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="573" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
-        <setup></setup>
-        <update>plot mean [group-belonging-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
-        <setup></setup>
-        <update>plot mean [family-belonging-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="autonomy" color="-11221820" legend="true">
-        <setup></setup>
-        <update>plot mean [autonomy-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
-        <setup></setup>
-        <update>plot mean [providing-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
-        <setup></setup>
-        <update>plot mean [health-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
-        <setup></setup>
-        <update>plot mean [sleep-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot mean [financial-survival-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
-        <setup></setup>
-        <update>plot mean [social-status-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
-        <setup></setup>
-        <update>plot mean [food-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
-        <setup></setup>
-        <update>plot mean [physical-safety-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
-        <setup></setup>
-        <update>plot mean [social-safety-satisfaction-level] of people</update>
-      </pen>
-    </plot>
-    <plot x="535" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="573" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="standard deviation need satisfaction">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [group-belonging-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [family-belonging-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="autonomy" color="-11221820" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [autonomy-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [providing-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [health-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [sleep-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [financial-survival-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [social-status-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [food-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [physical-safety-satisfaction-level] of people</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
-        <setup></setup>
-        <update>plot standard-deviation [social-safety-satisfaction-level] of people</update>
-      </pen>
-    </plot>
-    <plot x="22" autoPlotX="true" yMax="-0.5" autoPlotY="true" yAxis="need satisfaction" y="991" xMin="0.0" height="390" legend="true" xMax="1.0" yMin="-0.5" width="506" xAxis="time" display="average need satisfaction difference">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="sleep" color="-14070903" legend="true">
-        <setup></setup>
-        <update>plot ( mean [sleep-satisfaction-level]
-  of people with [is-female?]) -
-(mean [sleep-satisfaction-level] 
-  of people with [is-male?])</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="just 0" color="-7500403" legend="true">
-        <setup></setup>
-        <update>plot 0</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="family-belonging" color="-14439633" legend="true">
-        <setup></setup>
-        <update>plot ( mean [family-belonging-satisfaction-level]
-    of people with [is-female?]) -
-(mean [family-belonging-satisfaction-level] 
-  of people with [is-male?])</update>
-      </pen>
-    </plot>
-    <note x="22" y="13" backgroundDark="0" fontSize="32" width="271" markdown="false" height="42" textColorDark="-1" textColorLight="-5298144" backgroundLight="0">ASSOEC</note>
-    <switch x="352" y="493" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
-    <input x="2369" multiline="false" y="847" height="60" variable="#hospital-gp" type="number" width="122">2.0</input>
-    <input x="2369" multiline="false" y="916" height="60" variable="#schools-gp" type="number" width="122">2.0</input>
-    <input x="2369" multiline="false" y="988" height="60" variable="#mines-gp" type="number" width="122">10.0</input>
-    <input x="2369" multiline="false" y="1056" height="60" variable="#agriculture-gp" type="number" width="122">10.0</input>
-    <input x="2369" multiline="false" y="1127" height="60" variable="#stores-gp" type="number" width="122">5.0</input>
-    <input x="2369" multiline="false" y="1193" height="60" variable="#churches-gp" type="number" width="122">3.0</input>
-    <input x="2369" multiline="false" y="1261" height="60" variable="#markets-gp" type="number" width="122">3.0</input>
-    <input x="2369" multiline="false" y="1401" height="60" variable="#leisure-gp" type="number" width="122">3.0</input>
-    <input x="2369" multiline="false" y="1332" height="60" variable="#cemeteries-gp" type="number" width="122">3.0</input>
-    <slider x="2502" step="0.01" y="785" max="1" width="271" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
-    <slider x="2502" step="0.01" y="1335" max="1" width="271" display="density-factor-cemeteries" height="50" min="0" direction="Horizontal" default="0.88" variable="density-factor-cemeteries"></slider>
-    <slider x="2502" step="0.01" y="1407" max="1" width="271" display="density-factor-leisure" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-leisure"></slider>
-    <slider x="2502" step="0.1" y="1260" max="1" width="271" display="density-factor-markets" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-markets"></slider>
-    <slider x="2502" step="0.01" y="1193" max="1" width="271" display="density-factor-churches" height="50" min="0" direction="Horizontal" default="0.25" variable="density-factor-churches"></slider>
-    <slider x="2502" step="0.01" y="1123" max="1" width="271" display="density-factor-store" height="50" min="0" direction="Horizontal" default="0.49" variable="density-factor-store"></slider>
-    <slider x="2502" step="0.01" y="1055" max="1" width="271" display="density-factor-agriculture" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-agriculture"></slider>
-    <slider x="2502" step="0.01" y="988" max="1" width="271" display="density-factor-mines" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-mines"></slider>
-    <slider x="2502" step="0.01" y="917" max="1" width="271" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-schools"></slider>
-    <slider x="2502" step="0.01" y="850" max="1" width="271" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-hospitals"></slider>
-    <monitor x="2178" precision="17" y="844" height="60" fontSize="11" width="177">#hospital-workers</monitor>
-    <monitor x="2178" precision="17" y="1060" height="60" fontSize="11" width="177">#agriculture-workers</monitor>
-    <monitor x="2178" precision="17" y="919" height="60" fontSize="11" width="177">#school-workers</monitor>
-    <monitor x="2178" precision="17" y="993" height="60" fontSize="11" width="177">#mine-workers</monitor>
-    <monitor x="2178" precision="17" y="1269" height="60" fontSize="11" width="177">#market-workers</monitor>
-    <monitor x="2178" precision="17" y="1200" height="60" fontSize="11" width="177">#church-workers</monitor>
-    <monitor x="2178" precision="17" y="1131" height="60" fontSize="11" width="177">#store-workers</monitor>
-    <note x="2180" y="678" backgroundDark="0" fontSize="16" width="170" markdown="false" height="65" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
-    <note x="2536" y="648" backgroundDark="0" fontSize="10" width="234" markdown="false" height="124" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
-As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
-    <note x="2370" y="743" backgroundDark="0" fontSize="10" width="144" markdown="false" height="75" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Density factors:
-Relative proximity between individuals within an activity type (impacts contamination risks).</note>
-    <monitor x="2801" precision="17" y="917" height="60" fontSize="11" width="126" display="#@school">count people with [[gathering-type] of current-activity = "school"]</monitor>
-    <monitor x="2801" precision="17" y="1022" height="60" fontSize="11" width="126" display="#@workplace">count people with [member? ([gathering-type] of current-activity) ["workplace-mine" "workplace-agriculture"]]</monitor>
-    <monitor x="2801" precision="17" y="783" height="60" fontSize="11" width="126" display="#@home">count people with [[gathering-type] of current-activity = "home"]</monitor>
-    <monitor x="2801" precision="17" y="850" height="60" fontSize="11" width="126" display="#@hospital">count people with [[gathering-type] of current-activity = "hospital"]</monitor>
-    <monitor x="2801" precision="17" y="1397" height="60" fontSize="11" width="126" display="#@leisure">count people with [[gathering-type] of current-activity = "leisure"]</monitor>
-    <monitor x="2801" precision="17" y="683" height="60" fontSize="11" width="126" display="#away">count people with [is-away?]</monitor>
-    <monitor x="2801" precision="17" y="1090" height="60" fontSize="11" width="126" display="#@store">count people with [[gathering-type] of current-activity = "store"]</monitor>
-    <monitor x="2801" precision="17" y="1160" height="60" fontSize="11" width="126" display="#@market">count people with [[gathering-type] of current-activity = "market"]</monitor>
-    <monitor x="2801" precision="17" y="1230" height="60" fontSize="11" width="126" display="#@church">count people with [[gathering-type] of current-activity = "church"]</monitor>
-    <monitor x="2801" precision="17" y="1300" height="60" fontSize="11" width="126" display="#@cemetery">count people with [[gathering-type] of current-activity = "cemetery"]</monitor>
-    <monitor x="2801" precision="17" y="1467" height="60" fontSize="11" width="126" display="#@healer">count people with [[gathering-type] of current-activity = "traditional healer"]</monitor>
-    <monitor x="2801" precision="17" y="1537" height="60" fontSize="11" width="126" display="#@civil-soc">count people with [[gathering-type] of current-activity = "civil society"]</monitor>
-    <monitor x="3016" precision="17" y="701" height="60" fontSize="11" width="291">#people-saved-by-hospitalization</monitor>
-    <monitor x="3016" precision="17" y="923" height="60" fontSize="11" width="291">#who-became-sick-while-travelling-locally</monitor>
-    <monitor x="3016" precision="17" y="854" height="60" fontSize="11" width="291">#people-dying-due-to-lack-of-hospitalization</monitor>
-    <monitor x="3016" precision="17" y="777" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
-    <monitor x="3016" precision="17" y="630" height="60" fontSize="11" width="117">#dead-males</monitor>
-    <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
-    <slider x="2499" step="0.01" y="1469" max="1" width="271" display="density-factor-traditional-healer" height="50" min="0" direction="Horizontal" default="0.35" variable="density-factor-traditional-healer"></slider>
-    <input x="2370" multiline="false" y="1470" height="60" variable="#traditional-healer-gp" type="number" width="122">3.0</input>
-    <input x="2372" multiline="false" y="1536" height="60" variable="#civil-society-gp" type="number" width="122">3.0</input>
-    <slider x="2501" step="0.01" y="1535" max="1" width="271" display="density-factor-civil-society" height="50" min="0" direction="Horizontal" default="0.36" variable="density-factor-civil-society"></slider>
-    <switch x="517" y="492" height="40" on="true" variable="enforce-SDB?" width="109" display="enforce-SDB?"></switch>
-    <monitor x="3015" precision="17" y="563" height="60" fontSize="11" width="117">#dead-females</monitor>
-    <monitor x="3012" precision="17" y="496" height="60" fontSize="11" width="117">#dead-people</monitor>
-    <note x="2853" y="38" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
-    <switch x="2856" y="339" height="40" on="true" variable="log-setup?" width="113" display="log-setup?"></switch>
-    <switch x="2855" y="294" height="40" on="false" variable="log-preferred-activity-decision?" width="255" display="log-preferred-activity-decision?"></switch>
-    <switch x="2968" y="244" height="40" on="false" variable="log-contamination?" width="172" display="log-contamination?"></switch>
-    <input x="3107" multiline="false" y="52" height="60" variable="#random-seed" type="number" width="113">25.0</input>
-    <button x="2925" y="188" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="69" display="export">ask-user-for-export-file
-save-world-state</button>
-    <button x="2854" y="188" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="66" display="import">ask-user-for-import-file
-load-scenario-from-file</button>
-    <chooser x="2854" y="121" height="60" variable="preset-scenario" current="0" width="242" display="preset-scenario">
-      <choice type="string" value="default-scenario"></choice>
-    </chooser>
-    <switch x="2974" y="72" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
-    <switch x="2858" y="243" height="40" on="false" variable="log?" width="103" display="log?"></switch>
-    <switch x="2853" y="72" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
-    <switch x="2979" y="340" height="40" on="true" variable="clear-log-on-setup?" width="163" display="clear-log-on-setup?"></switch>
-    <switch x="2857" y="385" height="40" on="false" variable="inspect-to-file?" width="152" display="inspect-to-file?"></switch>
-    <slider x="3878" step="0.01" y="94" max="1" width="254" display="ratio-children-public-transport" height="50" min="0" direction="Horizontal" default="0.75" variable="ratio-children-public-transport"></slider>
-    <input x="3943" multiline="false" y="531" height="60" variable="#max-people-per-bus" type="number" width="156">20.0</input>
-    <input x="3940" multiline="false" y="461" height="60" variable="#bus-per-timeslot" type="number" width="156">27.0</input>
-    <monitor x="3939" precision="17" y="390" height="60" fontSize="11" width="195" display="#people-staying-out-queuing">count people with [stayed-out-queuing-for-bus?]</monitor>
-    <monitor x="3939" precision="17" y="322" height="60" fontSize="11" width="189">#people-denied-bus</monitor>
-    <slider x="4156" step="0.01" y="516" max="1" width="247" display="density-factor-shared-cars" height="50" min="0" direction="Horizontal" default="0.8" variable="density-factor-shared-cars"></slider>
-    <slider x="4154" step="0.01" y="459" max="1" width="244" display="density-factor-public-transports" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-public-transports"></slider>
-    <slider x="4150" step="0.01" y="399" max="1" width="247" display="density-factor-queuing" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-queuing"></slider>
-    <slider x="4150" step="0.01" y="339" max="1" width="244" display="density-walking-outside" height="50" min="0" direction="Horizontal" default="0.05" variable="density-walking-outside"></slider>
-    <slider x="3880" step="0.01" y="205" max="1" width="254" display="ratio-worker-public-transport" height="50" min="0" direction="Horizontal" default="0.4" variable="ratio-worker-public-transport"></slider>
-    <slider x="4150" step="0.01" y="206" max="1" width="218" display="ratio-worker-shared-car" height="50" min="0" direction="Horizontal" default="0.15" variable="ratio-worker-shared-car"></slider>
-    <slider x="4148" step="0.01" y="92" max="1" width="218" display="ratio-children-shared-car" height="50" min="0" direction="Horizontal" default="0.0" variable="ratio-children-shared-car"></slider>
-    <slider x="4148" step="0.01" y="147" max="1" width="218" display="ratio-student-shared-car" height="50" min="0" direction="Horizontal" default="0.1" variable="ratio-student-shared-car"></slider>
-    <slider x="4150" step="0.01" y="262" max="1" width="218" display="ratio-retired-shared-car" height="50" min="0" direction="Horizontal" default="0.5" variable="ratio-retired-shared-car"></slider>
-    <slider x="3878" step="0.01" y="149" max="1" width="254" display="ratio-student-public-transport" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-student-public-transport"></slider>
-    <slider x="3874" step="0.01" y="262" max="1" width="253" display="ratio-retired-public-transport" height="50" min="0" direction="Horizontal" default="0.2" variable="ratio-retired-public-transport"></slider>
-    <note x="4011" y="56" backgroundDark="0" fontSize="16" width="188" markdown="false" height="23" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Transport Model</note>
-    <note x="3936" y="639" backgroundDark="0" fontSize="16" width="308" markdown="false" height="40" textColorDark="-1" textColorLight="-6459832" backgroundLight="0">Migration model</note>
-    <slider x="3936" step="0.01" y="744" max="1" width="308" display="probability-going-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-going-abroad"></slider>
-    <slider x="3936" step="0.01" y="684" max="1" width="308" display="probability-infection-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-infection-when-abroad"></slider>
-    <slider x="3936" step="0.01" y="799" max="1" width="308" display="owning-solo-transportation-probability" height="50" min="0" direction="Horizontal" default="1.0" variable="owning-solo-transportation-probability"></slider>
-    <slider x="3936" step="0.01" y="855" max="1" width="308" display="probability-getting-back-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-getting-back-when-abroad"></slider>
-    <switch x="4117" y="633" height="40" on="false" variable="migration?" width="127" display="migration?"></switch>
-    <note x="3023" y="1031" backgroundDark="0" fontSize="16" width="216" markdown="false" height="26" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Economic Model</note>
-    <slider x="3023" step="0.1" y="1130" max="5" width="216" display="price-of-rations" height="50" min="0.5" direction="Horizontal" default="1.0" variable="price-of-rations"></slider>
-    <slider x="3023" step="1" y="1184" max="28" width="216" display="days-of-rations-bought" height="50" min="1" direction="Horizontal" default="1.0" variable="days-of-rations-bought"></slider>
-    <slider x="3023" step="0.5" y="1074" max="30" width="216" display="workers-wages" height="50" min="0" direction="Horizontal" default="8.0" variable="workers-wages"></slider>
-    <plot x="3494" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1055" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="230" display="Males only money">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="default" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot mean [my-current-income] of people with [member? my-home male-only-homes]</update>
-      </pen>
-    </plot>
-    <plot x="3247" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1054" xMin="0.0" height="175" legend="false" xMax="10.0" yMin="0.0" width="230" display="Family households money">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="household income" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot mean [amount-of-household-capital] of family-homes</update>
-      </pen>
-    </plot>
-    <note x="4229" y="25" backgroundDark="0" fontSize="11" width="255" markdown="false" height="55" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Density settings influence risk of becoming sick when travelling locally (is related with contagion model)</note>
-    <slider x="996" step="0.01" y="69" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.67" variable="CFR" width="249" sizeVersion="0"></slider>
-    <monitor x="1263" precision="17" y="67" height="60" fontSize="11" width="100">r0</monitor>
-    <plot x="978" autoPlotX="true" yMax="5.0" autoPlotY="false" y="144" xMin="0.0" height="322" legend="true" xMax="10.0" yMin="0.0" width="437" display="population status">
+    <note x="1481" y="20" backgroundDark="0" fontSize="16" width="182" markdown="false" height="36" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Disease Model</note>
+    <slider x="1485" step="0.01" y="70" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.67" variable="CFR" width="249" sizeVersion="0"></slider>
+    <monitor x="1753" precision="17" y="53" height="60" fontSize="11" width="100">r0</monitor>
+    <plot x="1485" autoPlotX="true" yMax="5.0" autoPlotY="false" y="143" xMin="0.0" height="415" legend="true" xMax="10.0" yMin="0.0" width="477" display="population status">
       <setup></setup>
       <update></update>
       <pen interval="0.1" mode="1" display="Uninfected / 100" color="-11085214" legend="true">
@@ -640,18 +332,8 @@ load-scenario-from-file</button>
         <setup></setup>
         <update>plot count people with [infection-status = hospitalised-to-dead-infectious-infection-status]</update>
       </pen>
-      <pen interval="0.1" mode="1" display="all deceased" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot count people with [infection-status = hospitalised-to-dead-infectious-infection-status
-  or infection-status = dead-to-unsafe-burial-infection-status 
-  or infection-status = dead-to-safe-burial-infection-status
-    or infection-status = dead-to-safe-burial-infection-status
-    or infection-status =   unsafe-burial-to-removed-infection-status
-    or infection-status =   unsafe-burial-to-removed-infection-status
-  or infection-status = removed-infection-status ]</update>
-      </pen>
     </plot>
-    <plot x="1444" autoPlotX="true" yMax="10.0" autoPlotY="true" y="45" xMin="0.0" height="192" legend="true" xMax="10.0" yMin="0.0" width="302" display="hospitals">
+    <plot x="2452" autoPlotX="true" yMax="10.0" autoPlotY="true" y="5" xMin="0.0" height="212" legend="true" xMax="10.0" yMin="0.0" width="307" display="hospitals">
       <setup></setup>
       <update></update>
       <pen interval="1.0" mode="0" display="#taken-beds" color="-2674135" legend="true">
@@ -663,23 +345,328 @@ load-scenario-from-file</button>
         <update>plot #beds-available-for-admission</update>
       </pen>
     </plot>
-    <input x="1762" multiline="false" y="186" height="60" variable="#beds-in-hospital" type="number" width="195">11.0</input>
-    <monitor x="1761" precision="17" y="116" height="60" fontSize="11" width="182">#sick-hospital-personel</monitor>
-    <monitor x="1761" precision="17" y="49" height="60" fontSize="11" width="184">#healthy-hospital-personel</monitor>
-    <plot x="1451" autoPlotX="true" yMax="10.0" autoPlotY="true" y="266" xMin="0.0" height="249" legend="true" xMax="10.0" yMin="0.0" width="507" xAxis="time" display="safe dignified burials vs traditional burials">
+    <note x="580" y="21" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
+    <slider x="1416" step="0.01" y="1525" max="1" width="271" display="density-factor-civil-society" height="50" min="0" direction="Horizontal" default="0.36" variable="density-factor-civil-society"></slider>
+    <input x="1287" multiline="false" y="1526" height="60" variable="#civil-society-gp" type="number" width="122">3.0</input>
+    <input x="1285" multiline="false" y="1460" height="60" variable="#traditional-healer-gp" type="number" width="122">3.0</input>
+    <slider x="1414" step="0.01" y="1459" max="1" width="271" display="density-factor-traditional-healer" height="50" min="0" direction="Horizontal" default="0.35" variable="density-factor-traditional-healer"></slider>
+    <monitor x="1716" precision="17" y="1527" height="60" fontSize="11" width="126" display="#@civil-soc">count people with [[gathering-type] of current-activity = "civil society"]</monitor>
+    <monitor x="1716" precision="17" y="1457" height="60" fontSize="11" width="126" display="#@healer">count people with [[gathering-type] of current-activity = "traditional healer"]</monitor>
+    <monitor x="1716" precision="17" y="1290" height="60" fontSize="11" width="126" display="#@cemetery">count people with [[gathering-type] of current-activity = "cemetery"]</monitor>
+    <monitor x="1716" precision="17" y="1220" height="60" fontSize="11" width="126" display="#@church">count people with [[gathering-type] of current-activity = "church"]</monitor>
+    <monitor x="1716" precision="17" y="1150" height="60" fontSize="11" width="126" display="#@market">count people with [[gathering-type] of current-activity = "market"]</monitor>
+    <monitor x="1716" precision="17" y="1080" height="60" fontSize="11" width="126" display="#@store">count people with [[gathering-type] of current-activity = "store"]</monitor>
+    <monitor x="1716" precision="17" y="673" height="60" fontSize="11" width="126" display="#away">count people with [is-away?]</monitor>
+    <monitor x="1716" precision="17" y="1387" height="60" fontSize="11" width="126" display="#@leisure">count people with [[gathering-type] of current-activity = "leisure"]</monitor>
+    <monitor x="1716" precision="17" y="840" height="60" fontSize="11" width="126" display="#@hospital">count people with [[gathering-type] of current-activity = "hospital"]</monitor>
+    <monitor x="1716" precision="17" y="773" height="60" fontSize="11" width="126" display="#@home">count people with [[gathering-type] of current-activity = "home"]</monitor>
+    <monitor x="1716" precision="17" y="1012" height="60" fontSize="11" width="126" display="#@workplace">count people with [member? ([gathering-type] of current-activity) ["workplace-mine" "workplace-agriculture"]]</monitor>
+    <monitor x="1716" precision="17" y="907" height="60" fontSize="11" width="126" display="#@school">count people with [[gathering-type] of current-activity = "school"]</monitor>
+    <monitor x="1093" precision="17" y="1121" height="60" fontSize="11" width="177">#store-workers</monitor>
+    <monitor x="1093" precision="17" y="1190" height="60" fontSize="11" width="177">#church-workers</monitor>
+    <monitor x="1093" precision="17" y="1259" height="60" fontSize="11" width="177">#market-workers</monitor>
+    <monitor x="1093" precision="17" y="983" height="60" fontSize="11" width="177">#mine-workers</monitor>
+    <monitor x="1093" precision="17" y="909" height="60" fontSize="11" width="177">#school-workers</monitor>
+    <monitor x="1093" precision="17" y="1050" height="60" fontSize="11" width="177">#agriculture-workers</monitor>
+    <monitor x="1093" precision="17" y="834" height="60" fontSize="11" width="177">#hospital-workers</monitor>
+    <slider x="1417" step="0.01" y="840" max="1" width="271" display="density-factor-hospitals" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-hospitals"></slider>
+    <slider x="1417" step="0.01" y="907" max="1" width="271" display="density-factor-schools" height="50" min="0" direction="Horizontal" default="0.3" variable="density-factor-schools"></slider>
+    <slider x="1417" step="0.01" y="978" max="1" width="271" display="density-factor-mines" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-mines"></slider>
+    <slider x="1417" step="0.01" y="1045" max="1" width="271" display="density-factor-agriculture" height="50" min="0" direction="Horizontal" default="0.1" variable="density-factor-agriculture"></slider>
+    <slider x="1417" step="0.01" y="1113" max="1" width="271" display="density-factor-store" height="50" min="0" direction="Horizontal" default="0.49" variable="density-factor-store"></slider>
+    <slider x="1417" step="0.01" y="1183" max="1" width="271" display="density-factor-churches" height="50" min="0" direction="Horizontal" default="0.25" variable="density-factor-churches"></slider>
+    <slider x="1417" step="0.1" y="1250" max="1" width="271" display="density-factor-markets" height="50" min="0" direction="Horizontal" default="0.4" variable="density-factor-markets"></slider>
+    <slider x="1417" step="0.01" y="1397" max="1" width="271" display="density-factor-leisure" height="50" min="0" direction="Horizontal" default="0.47" variable="density-factor-leisure"></slider>
+    <slider x="1417" step="0.01" y="1325" max="1" width="271" display="density-factor-cemeteries" height="50" min="0" direction="Horizontal" default="0.88" variable="density-factor-cemeteries"></slider>
+    <slider x="1417" step="0.01" y="775" max="1" width="271" display="density-factor-homes" height="50" min="0" direction="Horizontal" default="1.0" variable="density-factor-homes"></slider>
+    <input x="1284" multiline="false" y="1322" height="60" variable="#cemeteries-gp" type="number" width="122">3.0</input>
+    <input x="1284" multiline="false" y="1391" height="60" variable="#leisure-gp" type="number" width="122">3.0</input>
+    <input x="1284" multiline="false" y="1251" height="60" variable="#markets-gp" type="number" width="122">3.0</input>
+    <input x="1284" multiline="false" y="1183" height="60" variable="#churches-gp" type="number" width="122">3.0</input>
+    <input x="1284" multiline="false" y="1117" height="60" variable="#stores-gp" type="number" width="122">5.0</input>
+    <input x="1284" multiline="false" y="1046" height="60" variable="#agriculture-gp" type="number" width="122">10.0</input>
+    <input x="1284" multiline="false" y="978" height="60" variable="#mines-gp" type="number" width="122">10.0</input>
+    <input x="1284" multiline="false" y="906" height="60" variable="#schools-gp" type="number" width="122">2.0</input>
+    <input x="1284" multiline="false" y="837" height="60" variable="#hospital-gp" type="number" width="122">2.0</input>
+    <note x="1094" y="591" backgroundDark="0" fontSize="16" width="170" markdown="false" height="65" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
+    <note x="1415" y="682" backgroundDark="0" fontSize="10" width="266" markdown="false" height="75" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Density factors:
+Relative proximity between individuals within an activity type (impacts contamination risks).</note>
+    <note x="1091" y="682" backgroundDark="0" fontSize="10" width="303" markdown="false" height="124" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics is represented as "meeting spaces" people can move into and be infected or spread infection.
+As simplifications: each person relates to a fix set of spaces over time (same school, bus, bar) and gets in contact with everyone sharing this space; no contamination due to left germs.</note>
+    <plot x="2144" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1247" xMin="0.0" height="278" legend="true" xMax="10.0" yMin="0.0" width="397" display="Households budget">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="Unsafe burial" color="-13297659" legend="true">
-        <setup>plot count people with [infection-status = "unsafe-burial"]</setup>
-        <update>plot count people with [infection-status = "unsafe-burial"]</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="SDB" color="-11881837" legend="true">
+      <pen interval="1.0" mode="0" display="family homes" color="-16449023" legend="true">
         <setup></setup>
-        <update>plot count people with [infection-status = "safe-burial"]</update>
+        <update>plot mean [amount-of-household-capital] of family-homes</update>
       </pen>
-      <pen interval="0.1" mode="0" display="Illegal burials" color="-7500403" legend="true">
+      <pen interval="1.0" mode="0" display="displaced people" color="-5298144" legend="true">
         <setup></setup>
-        <update>;plot count people with [am-I-mourning?]</update>
+        <update>plot mean [my-current-income] of people with [member? my-home male-only-homes]</update>
+      </pen>
+    </plot>
+    <note x="1897" y="603" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Activities</note>
+    <plot x="1891" autoPlotX="true" yMax="10.0" autoPlotY="true" y="671" xMin="0.0" height="412" legend="true" xMax="10.0" yMin="0.0" width="629" display="Activities">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="1" display="@Work" color="-14070903" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-at-work?]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="@Home" color="-14439633" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-at-home?]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="Treated at hospital" color="-6459832" legend="true">
+        <setup></setup>
+        <update>plot count people with [current-motivation = treatment-motive]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="getting food" color="-7500403" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-getting-food?]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="attend religious gathering" color="-13403783" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-at-church?]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="care for sick at hospital" color="-2674135" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-caring-for-the-sick-at-hospital?]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="funeral rite" color="-1184463" legend="true">
+        <setup></setup>
+        <update>plot count people with [current-motivation = funeral-motive]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="social" color="-7858858" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-visiting?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="leisure" color="-4757638" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-at-leisure-point?]</update>
+      </pen>
+      <pen interval="1.0" mode="1" display="care at home" color="-955883" legend="true">
+        <setup></setup>
+        <update>plot count people with [is-caring-for-the-sick-at-home?]</update>
+      </pen>
+    </plot>
+    <note x="1902" y="1188" backgroundDark="0" fontSize="16" width="216" markdown="false" height="26" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Economic Model</note>
+    <slider x="1904" step="0.5" y="1249" max="30" width="216" display="workers-wages" height="50" min="0" direction="Horizontal" default="4.0" variable="workers-wages"></slider>
+    <slider x="1904" step="1" y="1359" max="5" width="216" display="days-of-rations-bought" height="50" min="0" direction="Horizontal" default="1.0" variable="days-of-rations-bought"></slider>
+    <slider x="1904" step="0.1" y="1305" max="5" width="216" display="price-of-rations" height="50" min="0.5" direction="Horizontal" default="1.0" variable="price-of-rations"></slider>
+    <note x="12" y="497" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Needs</note>
+    <plot x="11" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="553" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
+        <setup></setup>
+        <update>plot mean [group-belonging-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
+        <setup></setup>
+        <update>plot mean [family-belonging-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="autonomy" color="-11221820" legend="true">
+        <setup></setup>
+        <update>plot mean [autonomy-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
+        <setup></setup>
+        <update>plot mean [providing-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
+        <setup></setup>
+        <update>plot mean [health-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
+        <setup></setup>
+        <update>plot mean [sleep-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
+        <setup></setup>
+        <update>plot mean [financial-survival-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
+        <setup></setup>
+        <update>plot mean [social-status-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
+        <setup></setup>
+        <update>plot mean [food-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
+        <setup></setup>
+        <update>plot mean [physical-safety-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+        <setup></setup>
+        <update>plot mean [social-safety-satisfaction-level] of people</update>
+      </pen>
+    </plot>
+    <plot x="528" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="959" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="462" xAxis="time" display="Average need satisfaction MALES">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
+        <setup></setup>
+        <update>plot mean [group-belonging-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
+        <setup></setup>
+        <update>plot mean [family-belonging-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="autonomy" color="-2139308" legend="true">
+        <setup></setup>
+        <update>plot mean [autonomy-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
+        <setup></setup>
+        <update>plot mean [providing-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
+        <setup></setup>
+        <update>plot mean [health-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
+        <setup></setup>
+        <update>plot mean [sleep-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
+        <setup></setup>
+        <update>plot mean [financial-survival-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
+        <setup></setup>
+        <update>plot mean [social-status-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
+        <setup></setup>
+        <update>plot mean [food-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
+        <setup></setup>
+        <update>plot mean [physical-safety-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+        <setup></setup>
+        <update>plot mean [social-safety-satisfaction-level] of people with [is-male?]</update>
+      </pen>
+    </plot>
+    <plot x="9" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="960" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="506" xAxis="time" display="Average need satisfaction FEMALES">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
+        <setup></setup>
+        <update>plot mean [group-belonging-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
+        <setup></setup>
+        <update>plot mean [family-belonging-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="autonomy" color="-11221820" legend="true">
+        <setup></setup>
+        <update>plot mean [autonomy-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
+        <setup></setup>
+        <update>plot mean [providing-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
+        <setup></setup>
+        <update>plot mean [health-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
+        <setup></setup>
+        <update>plot mean [sleep-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
+        <setup></setup>
+        <update>plot mean [financial-survival-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
+        <setup></setup>
+        <update>plot mean [social-status-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
+        <setup></setup>
+        <update>plot mean [food-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
+        <setup></setup>
+        <update>plot mean [physical-safety-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+        <setup></setup>
+        <update>plot mean [social-safety-satisfaction-level] of people with [is-female?]</update>
+      </pen>
+    </plot>
+    <plot x="5" autoPlotX="true" yMax="-0.5" autoPlotY="true" yAxis="need satisfaction" y="1423" xMin="0.0" height="390" legend="true" xMax="1.0" yMin="-0.5" width="506" xAxis="time" display="average need satisfaction difference">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="sleep" color="-14070903" legend="true">
+        <setup></setup>
+        <update>plot ( mean [sleep-satisfaction-level]
+  of people with [is-female?]) -
+(mean [sleep-satisfaction-level] 
+  of people with [is-male?])</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="just 0" color="-7500403" legend="true">
+        <setup></setup>
+        <update>plot 0</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="family-belonging" color="-14439633" legend="true">
+        <setup></setup>
+        <update>plot ( mean [family-belonging-satisfaction-level]
+    of people with [is-female?]) -
+(mean [family-belonging-satisfaction-level] 
+  of people with [is-male?])</update>
+      </pen>
+    </plot>
+    <plot x="528" autoPlotX="true" yMax="1.0" autoPlotY="true" yAxis="need satisfaction" y="553" xMin="0.0" height="390" legend="true" xMax="10.0" yMin="0.0" width="464" xAxis="time" display="standard deviation need satisfaction">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="group-belonging" color="-14070903" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [group-belonging-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="family-belonging" color="-14454117" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [family-belonging-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="autonomy" color="-11221820" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [autonomy-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="providing" color="-3844592" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [providing-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="health" color="-14439633" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [health-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="sleep" color="-6917194" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [sleep-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="financial-survival" color="-1184463" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [financial-survival-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-status" color="-3889007" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [social-status-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="food" color="-1664597" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [food-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="physical-safety" color="-10899396" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [physical-safety-satisfaction-level] of people</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+        <setup></setup>
+        <update>plot standard-deviation [social-safety-satisfaction-level] of people</update>
       </pen>
     </plot>
   </widgets>
