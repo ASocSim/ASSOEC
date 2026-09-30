@@ -201,9 +201,8 @@ to select-activity
 
 
   
-  if loc = funeral-cemetery [
     print (sentence "my preferred activity is" c-a)
-  ]
+  
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [
 ;     set c-a (list away-gathering-point travelling-motive false)

@@ -14,7 +14,7 @@ VAR_TYPES = set(['SLIDER', 'INPUTBOX', 'CHOOSER', 'SWITCH'])
 
 found_variables = []
 
-with open("covid-sim.nlogo", "r") as f:
+with open("ebola-sim.nlogo", "r") as f:
     def skip_to_next():
         line = f.readline().strip()
         while line:
