@@ -120,7 +120,9 @@ if ( not is-observing-critical-symptoms?)
   if (any? my-sick-relatives) and is-female?
   [
     set activities lput (activity-descriptor one-of my-networks-homes care-motive) activities
-    set activities (lput (activity-descriptor my-traditional-healer spiritual-motive) activities)
+    if any? people with [[gathering-type] of my-work = "traditional healer"][
+      set activities (lput (activity-descriptor my-traditional-healer spiritual-motive) activities)
+    ]
 
    ;print "I stay home to care for you"
   ]
@@ -158,7 +160,9 @@ if infection-status = in-hospital-infection-status [
     set activities [] 
     ;print "forced to seek treatment"
   set activities lput (list my-hospital treatment-motive) activities
-  set activities lput (list my-traditional-healer treatment-motive) activities
+  if any? people with [[gathering-type] of my-work = "traditional healer"][
+    set activities lput (list my-traditional-healer treatment-motive) activities
+  ]
   set activities lput (list my-church treatment-motive) activities
   ] 
 
