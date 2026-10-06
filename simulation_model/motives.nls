@@ -23,6 +23,11 @@ to-report SDB-motive
   report "SDB"
 end
 
+;burial motive is for the person who has died
+to-report burial-motive
+  report "my burial"
+end
+
 to-report food-motive
  report "get food"
 end

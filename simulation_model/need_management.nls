@@ -479,7 +479,7 @@ to-report SUE-autonomy [ad]
 
   if (motive = funeral-motive)
     [report 0.5]
-  ;]
+  
   
   ;getting treatment also impacts autonomy
   ;REFACTORING NEEDED, use switch?
@@ -901,6 +901,8 @@ end
 to-report global-prevalence-of [ad]
   ;*** this procedure should be expanded with new needs as they are added ***
   reset-timer
+
+  
   let total-satisfaction 0
 ;  if cultural model is activated then:
  ; calculate the total-satisfaction an agent expects to gain from performing an activity as the weighted sum of all its needs

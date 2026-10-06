@@ -173,6 +173,16 @@ to-report is-infected?
 end
 
 
+to-report is-deceased?
+  ifelse infection-status = "dead-infectious"
+  or infection-status = "unsafe-burial"
+  or infection-status = "safe-burial"
+  or infection-status = "removed"
+  ;... missing any?
+  [report true]
+  [report false]
+end
+
 to-report has-internally-visible-symptoms?  
   ifelse infection-status = "hospitalised"
   or infection-status = "infected-stage-2"
