@@ -42,7 +42,7 @@ undirected-link-breed [my-friends-links my-friends-link]
 ;; docs/WIP_ISSUES.md#setup-social-network-ebola.
 to setup-social-network-ebola
   setup-kin-network
-  ;setup-friend-network
+  setup-friends-networks
   ;setup-civil-society-network
 end
 
@@ -59,18 +59,21 @@ ask people [
     ;print (word "i have kin link " self me)
     ]
   ]
-  let #kin-houses 5
-  repeat #kin-houses [
-   let kin other [gatherers] of one-of other homes
-    ask kin
-    [
-     if not my-kin-link-neighbor? me 
-     [
-      create-my-kin-link-with me
-    ;print (word "i have extended kin link " self me)
-     ]
-   ]
- ]
+  if not displaced?
+  [
+    let #kin-houses 5
+    repeat #kin-houses [
+      let kin other [gatherers] of one-of other homes
+      ask kin
+      [
+        if not my-kin-link-neighbor? me 
+        [
+          create-my-kin-link-with me
+          ;print (word "i have extended kin link " self me)
+        ]
+      ]
+    ]
+  ]
 ]
 end
 
@@ -79,9 +82,10 @@ end
 ;; @context observer
 ;; @side-effects creates `my-friends-links`
 ;; @see setup-social-networks-random
-to setup-social-networks
-  setup-social-networks-random
-end
+;;to setup-social-networks
+;;  setup-friends-networks
+;;  print("I made friends!")
+;;end
 
 ;; Everyone this person could still befriend.
 ;;
@@ -100,7 +104,7 @@ end
 ;; Give every person up to three friends drawn at random from the whole population.
 ;; @context observer
 ;; @side-effects creates `my-friends-links`
-to setup-social-networks-random
+to setup-friends-networks
   
   ;ask children with [any? [gatherers with [is-adult?]] of my-home ][create-dependable-adult-link-to one-of [gatherers with [is-adult?]] of my-home ]
   ;  ask workers [  create-workplace-colleague-links-to other workers with [my-workplace = [my-workplace] of myself]]
@@ -109,6 +113,7 @@ to setup-social-networks-random
     ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
     create-my-friends-links-with up-to-n-of 3 possible-friends
   ]
+  
 end
 
 

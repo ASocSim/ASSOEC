@@ -18,7 +18,8 @@ people-own [
 ;; @group Demographics
   age                         ;;< age class, "young"/"student"/"worker"; never assigned in the Ebola build, so every age predicate is false
   sex                         ;;< "female" or "male", see people/classes.nls
-
+  displaced?          
+              
 ;; @group Debugging
   schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
 ;; @group Disease model

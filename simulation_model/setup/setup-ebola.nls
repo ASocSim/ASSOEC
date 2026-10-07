@@ -279,7 +279,7 @@ end
 to create-all-households
   load-population-profile-based-on-current-preset-profile
 
-  let #family-homes floor (#households * ratio-family-homes)
+  let #family-homes floor (#households * ratio-family-homes-to-displaced-homes)
   let #displaced-homes #households - #family-homes ;+ #retired-couple-homes + #multigenerational-homes
 
 ;  repeat #adults-homes [create-household "adult"]
@@ -336,7 +336,7 @@ to create-household [t]
     let men random 3 + 1
     let women random 3 + 1
 
-    setup-home current-home men women
+    setup-home current-home men women false
     
     stop
   ]
@@ -344,7 +344,7 @@ to create-household [t]
    if t = "displaced"
   [
     let men random 2 + 3
-    setup-home current-home men 0
+    setup-home current-home men 0 true
 
 
     stop
@@ -360,15 +360,15 @@ end
 ;; @param women         how many women to create
 ;; @context observer
 ;; @side-effects creates people
-to setup-home [current-home men women]
+to setup-home [current-home men women displacement-status]
   if men > 0
   [
-    repeat men [setup-person current-home male-sex] 
+    repeat men [setup-person current-home male-sex displacement-status] 
   ]
 
   if women > 0
   [
-    repeat women [setup-person current-home female-sex]
+    repeat women [setup-person current-home female-sex displacement-status]
   ]
 end
 
@@ -402,11 +402,12 @@ end
 ;; @side-effects creates one person and their gathering link to the home
 ;; @note `age` is never set here, or anywhere else, so every age predicate in the
 ;; model is false for everyone.
-to setup-person [current-home l-sex]
+to setup-person [current-home l-sex displacement-status]
   
   create-people 1 
   [
     set sex l-sex
+    set displaced? displacement-status
     set time-when-infected "never"
     set has-been-tested-infected? false
 
