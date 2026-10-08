@@ -18,7 +18,7 @@
 ;; Read the other way round with `people-that-depend-on-me`. Created only by the
 ;; commented-out branch of `setup-social-networks-random`, so no such links exist
 ;; in the current build.
-directed-link-breed [dependable-adult-links dependable-adult-link]
+;directed-link-breed [dependable-adult-links dependable-adult-link]
 
 ;; A friendship, symmetric between the two people it joins.
 ;;
@@ -166,13 +166,22 @@ to-report my-network
   report (turtle-set my-relatives my-colleagues my-friends)
 end
 
+
+
+
+
+
+
+;;LEGACY COVID
+
+
 ;; The people who depend on this person, through `dependable-adult-links`.
 ;;
 ;; @context person
 ;; @return agentset of people
-to-report people-that-depend-on-me
-  report in-dependable-adult-link-neighbors
-end
+;;to-report people-that-depend-on-me
+;;  report in-dependable-adult-link-neighbors
+;;end
 
 ;; Everyone of working age.
 ;;
@@ -207,7 +216,7 @@ end
 ;; @return true if `age` is "student" or "worker"
 ;; @note Never true in the current build: nothing assigns `age`.
 to-report is-adult?
-  report is-student? or is-worker?; or is-retired?
+  report is-student? or is-worker?
 end
 
 ;; True when this person is of the "student" age class.

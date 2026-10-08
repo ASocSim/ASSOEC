@@ -18,7 +18,7 @@ people-own [
 ;; @group Demographics
   age                         ;;< age class, "young"/"student"/"worker"; never assigned in the Ebola build, so every age predicate is false
   sex                         ;;< "female" or "male", see people/classes.nls
-  displaced?          
+  displaced?                  ;;boolean for agent displaced status, not this applies only to men
               
 ;; @group Debugging
   schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
@@ -166,7 +166,7 @@ to update-people-mind
  ; print (sentence "updating people mind for" count people "people")
   update-alive-status
   update-alive-status-ebola
-  
+  update-people-epistemic-status
 end
 
 

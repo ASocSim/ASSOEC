@@ -310,7 +310,6 @@ to create-household [t]
   let current-home nobody
   create-gathering-points 1
   [
-    ;print self
     set current-home self
     set homes (turtle-set homes self)
     set gathering-type "home"

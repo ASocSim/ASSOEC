@@ -9,7 +9,106 @@ globals
 ;daily-risk-believe-experiencing-fake-symptoms
 ]
 
+
+to spread-information
+  
+  
+  ask homes [influence-relatives] ;;converge opinions
+
+  ask people [
+  ;influence-kin
+  influence-colleagues
+]
+
+  print "information is spreading"
+end
+
+
+
+to influence-relatives
+  let home-id self
+  let residents people with [my-home = home-id] 
+  ask residents
+  [
+    ;;calculate the mean
+    let mean-trust-in-hospital mean ([my-trust-in-hospital] of residents)
+    let mean-trust-in-institutions mean ([my-trust-in-institutions] of residents)
+
+    ;;converge within households
+    ifelse my-trust-in-hospital < mean-trust-in-hospital [
+        set my-trust-in-hospital my-trust-in-hospital + 0.01 ;will make dynamic later
+      ][set my-trust-in-hospital my-trust-in-hospital - 0.01]
+
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
+      if my-trust-in-hospital > 1 [set my-trust-in-hospital 1]
+      print my-trust-in-hospital
+
+    ifelse my-trust-in-institutions < mean-trust-in-institutions [
+        set my-trust-in-institutions my-trust-in-institutions + 0.01 ;will make dynamic later
+      ][set my-trust-in-institutions my-trust-in-institutions - 0.01]
+
+      if my-trust-in-institutions < 0 [set my-trust-in-institutions 0]
+      if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
+      print my-trust-in-institutions
+  ]
+
+end
+
+to influence-colleagues
+;;first check how different our opinions are
+;let ebola-business-narrative-value mean (my-trust-in-hospital my-trust-in-institutions) of my-colleagues
+  ask my-colleagues
+  [
+    ;;check if someone's belief are very different from mine
+    let difference-in-beliefs 0.1;
+
+    ;;converge within households
+    if difference-in-beliefs >= 0.6 [
+      ;polarize beliefs
+    ]
+
+  ]
+
+end
+
+
+to-report not-going-to-unsafe-burials
+;threshold level at 95% to not go to unsafe burials
+;;only people with near absolute trust in government institutions will choose not to attend a dear one funeral
+  if my-trust-in-institutions >= 0.95[
+    report true
+  ]
+    report false
+end
+
+
+
+;;BIN
+to influence-relatives-out
+
+ let individual-tih my-trust-in-hospital
+ let individual-tii my-trust-in-institutions
+
+    ask one-of my-housemates
+    [
+      ifelse individual-tih < my-trust-in-hospital [
+        set my-trust-in-hospital my-trust-in-hospital + 0.1 ;will make dynamic later
+      ][set my-trust-in-hospital my-trust-in-hospital - 0.1]
+    
+      ifelse individual-tii < my-trust-in-institutions [
+        set my-trust-in-institutions my-trust-in-institutions + 0.1 ;will make dynamic later
+      ][set my-trust-in-institutions my-trust-in-institutions - 0.1]
+    ]
+
+end
+
+
+
+
+;;;LEGACY COVID
 to update-epistemic-status
+
+
 ;   set daily-risk-believe-experiencing-fake-symptoms 0.5
 ;   set am-I-experiencing-fake-symptoms? random-float 1 < daily-risk-believe-experiencing-fake-symptoms
   
@@ -93,11 +192,4 @@ to perform-immunity-test
 ;     if is-immune? [
 ;     set has-been-tested-immune? true 
 ;  ]
-end
-
-to-report not-going-to-unsafe-burials
-  if my-trust-in-institutions >= 0.95[
-    report true
-  ]
-    report false
 end
