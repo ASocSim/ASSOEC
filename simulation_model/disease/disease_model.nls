@@ -210,9 +210,7 @@ to kill-person
    if sex = "male" [ set #dead-males #dead-males + 1]
   
   if is-currently-allocated-a-bed-in-hospital? [ release-bed-in-hospital ]
-  
-  print "a patient died of ebola"
-  die
+    die
   
   end
 

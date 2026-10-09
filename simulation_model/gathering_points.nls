@@ -31,7 +31,7 @@ globals [
    civil-societies
 
    family-homes
-   male-only-homes
+   displaced-male-homes
 ]
 
 ;; A place people can go to: a home, hospital, school, mine, farm, store, market,
@@ -418,7 +418,7 @@ to-report houses-hosting-males
 end
 
 to-report males-in-all-male-homes
-  report people with [member? my-home male-only-homes]
+  report people with [member? my-home displaced-male-homes]
 end
 
 ;; True when anyone in the population believes themselves to be infected.
@@ -427,7 +427,9 @@ end
 ;; @todo Should be refined once there is a reporting system, or once hospital care
 ;; determines who counts as officially sick.
 to-report is-someone-officially-sick? 
-  report any? people with [is-believing-to-be-infected?]   
+  if any? people with [not believes-ebola-business? and infection-status != "healthy"]
+  [report true]
+   report false
 end
 
 

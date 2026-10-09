@@ -303,7 +303,7 @@ end
 ;; @context person
 ;; @return true if any housemate believes they are infected
 to-report might-I-be-contagious?
-  report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
+  report not believes-ebola-business?
 end
 
 ;; The one place of kind `a-gathering-type` this person is attached to.

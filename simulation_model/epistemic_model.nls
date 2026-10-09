@@ -6,21 +6,17 @@
 globals 
 [
   #tests-performed
-;daily-risk-believe-experiencing-fake-symptoms
 ]
 
 
 to spread-information
-  
-  
   ask homes [influence-relatives] ;;converge opinions
 
   ask people [
   ;influence-kin
   influence-colleagues
 ]
-
-  print "information is spreading"
+  ;print "information is spreading"
 end
 
 
@@ -38,18 +34,16 @@ to influence-relatives
     ifelse my-trust-in-hospital < mean-trust-in-hospital [
         set my-trust-in-hospital my-trust-in-hospital + 0.01 ;will make dynamic later
       ][set my-trust-in-hospital my-trust-in-hospital - 0.01]
-
+;cap
       if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
       if my-trust-in-hospital > 1 [set my-trust-in-hospital 1]
-      print my-trust-in-hospital
 
     ifelse my-trust-in-institutions < mean-trust-in-institutions [
         set my-trust-in-institutions my-trust-in-institutions + 0.01 ;will make dynamic later
       ][set my-trust-in-institutions my-trust-in-institutions - 0.01]
-
+;cap
       if my-trust-in-institutions < 0 [set my-trust-in-institutions 0]
       if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
-      print my-trust-in-institutions
   ]
 
 end
@@ -107,10 +101,6 @@ end
 
 ;;;LEGACY COVID
 to update-epistemic-status
-
-
-;   set daily-risk-believe-experiencing-fake-symptoms 0.5
-;   set am-I-experiencing-fake-symptoms? random-float 1 < daily-risk-believe-experiencing-fake-symptoms
   
 ;   if infection-status = "dead" [
 ;     set epistemic-infection-status "dead"
@@ -152,7 +142,7 @@ to set-believed-to-be-infected
 ;   ]
 end
 
-to-report is-believing-to-be-infected?
+to-report is-believing-to-be-infected-with-ebola?
   report epistemic-infection-status = "infected" 
   
 end
@@ -177,16 +167,13 @@ to perform-test
 end
 
 to-report is-believing-to-be-immune?
-  report  has-been-tested-immune? or has-had-symptoms-long-ago?
+  report believes-ebola-business?
 end
 
-to-report has-had-symptoms-long-ago?
-  report epistemic-infection-status = had-symptoms-long-ago-infection-status
+to-report believes-ebola-business?
+  report epistemic-infection-status = "ebola business"
 end
 
-to-report had-symptoms-long-ago-infection-status
-  report "had-symptoms-long-ago"
-end
 
 to perform-immunity-test
 ;     if is-immune? [

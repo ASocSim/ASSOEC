@@ -46,14 +46,6 @@ to execute-activity-effect
     stop
   ]
 
-  ;might be interesting to hold this variable as an integer, for storing when the next shopping will be needed
-  ;additionally, we might want at some point to hold additional variables within homes (i.e. one person getting the food for the whole community)
-
-  ;the epistemic infection status depends on whether the person has (had) visible symptoms, not on where it now gathers
-  ;though, gathering place might be to be recorded (i.e. a "maybe infected" state if public space has been visited and public space is believed to be contagious)
-  ;if [gathering-type] of current-activity = "hospital"
-  ;[ set epistemic-infection-status  infection-status ]
-
   update-belief-based-on-current-activity
 
 end
@@ -66,13 +58,11 @@ to update-resources-based-on-current-activity [c-a]
   [
       set my-current-income my-current-income + my-expected-income
 
-      if(not member? my-home male-only-homes)
-      [
+    ;  if(not member? my-home male-only-homes)
         earn-household-capital my-expected-income
         set my-current-income 0
-      ]
-
 ]
+
     if (motive = food-motive)
 [
     if ([gathering-type] of loc = [gathering-type] of my-store or [gathering-type] of loc = [gathering-type] of my-market)
@@ -81,40 +71,38 @@ to update-resources-based-on-current-activity [c-a]
 ;;this could be adapted to decreasing food rations to be bought, but for now it will do      
       let expense amount-of-rations-I-buy-when-going-to-stores-or-markets * price-of-rations
       set my-current-income my-current-income - expense
-      
-      if(not member? my-home male-only-homes)
-      [
+
+      ;if(not member? my-home male-only-homes)
         depleat-household-capital expense
-      ]
     ]
 ]
+
 ;;placeholder costs of funeral rites
+;we assume that friends of the deceased displaced will pay for his funeral
   if (motive = funeral-motive) [
-    let cost-of-funeral 100
+    let cost-of-funeral 3
     depleat-household-capital cost-of-funeral
   ]
 
 ;;placeholder costs of going to hospital (e.g. travel, we know ebola care should be free)
   if (motive = treatment-motive) [
     if ([gathering-type] of loc = [gathering-type] of my-hospital)[
-      let hospital-stay-costs 50
+      let hospital-stay-costs 2
       depleat-household-capital hospital-stay-costs
     ] 
   ]
 ;;placeholder costs of going to leisure place
 if (motive = leisure-motive) [
   if ([gathering-type] of loc = [gathering-type] of my-leisure-point) [
-    let cost-of-leisure 20
+    let cost-of-leisure 1
     depleat-household-capital cost-of-leisure
   ] 
 ;;placeholder costs of sending children to school
 ;wait for children
 
 
-
-
-
 ]
+
 
 end
 
@@ -433,10 +421,7 @@ to-report amount-of-rations-I-buy-when-going-to-stores-or-markets
 
 
   if(not member? my-home houses-hosting-males)
-  [
-    report days-of-rations-bought * count [gatherers] of my-home
-  ]
-
+  [report days-of-rations-bought * count [gatherers] of my-home]
   report days-of-rations-bought
 end
 

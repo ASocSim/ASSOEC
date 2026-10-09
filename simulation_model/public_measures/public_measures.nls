@@ -78,7 +78,7 @@ to inform-people-of-measures
 end
 
 to-report should-be-isolators
-  report people with [any? ([gatherers] of my-home) with [is-believing-to-be-infected?]]
+  report false ;people with [any? ([gatherers] of my-home) with [is-believing-to-be-infected?]]
 end
 
 to disable-all-measures

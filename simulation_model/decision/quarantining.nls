@@ -19,7 +19,7 @@
 ;; @see is-in-quarantine?
 ;; @see is-violating-quarantine?
 to-report is-officially-asked-to-quarantine?
-  report #days-I-should-remain-in-self-quarantining > 0 or is-believing-to-be-infected? or [home-in-isolation?] of my-home
+  report false ;#days-I-should-remain-in-self-quarantining > 0 or is-believing-to-be-infected? or [home-in-isolation?] of my-home
 end
 
 ;; Tick down the self-quarantine countdown of everyone still serving one.

@@ -91,8 +91,6 @@ if ( not is-observing-critical-symptoms?)
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
   [
       set activities (lput (activity-descriptor my-work work-motive) activities)
-      
-      ;print (sentence "working day for me:" is-working-day-for-me? " my work is" [gathering-type] of my-work " my motive is" work-motive)
   ]  
 
 

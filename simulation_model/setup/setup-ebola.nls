@@ -44,7 +44,6 @@ to setup-ebola
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
-  ;set price-of-rations 1
 
   
   set was-social-distancing-enforced? false
@@ -141,7 +140,7 @@ end
    set schools (turtle-set)
    set homes (turtle-set)
    set family-homes (turtle-set)
-   set male-only-homes (turtle-set)
+   set displaced-male-homes (turtle-set)
    set markets (turtle-set)
    set churches (turtle-set)
    set cemeteries (turtle-set)
@@ -327,7 +326,7 @@ to create-household [t]
 
     if t = "displaced"
     [
-      set male-only-homes (turtle-set male-only-homes current-home)
+      set displaced-male-homes (turtle-set displaced-male-homes current-home)
     ]
 
   if t = "family"
@@ -411,12 +410,14 @@ to setup-person [current-home l-sex displacement-status]
     set has-been-tested-infected? false
 
     set am-I-mourning? false
+
+    ;currently random distribution, must be changed if we understand this better as the initial condition impacts outcome strongly
     set my-trust-in-hospital random-float 1
     set my-trust-in-institutions random-float 1
     
     ;;money handling
     set my-current-income 0
-    set my-expected-income 45          ;;< income this person expects from working, used by `SUE-financial-survival`
+    set my-expected-income workers-wages          ;;< income this person expects from working, used by `SUE-financial-survival`
 
     set current-activity current-home
     set my-home current-home

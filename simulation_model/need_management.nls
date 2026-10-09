@@ -187,10 +187,12 @@ to-report SUE-food [ad]
   let motive motive-of ad
   
   if motive = food-motive [
+
     let available-food-days [available-food-rations] of my-home
     ;if the household has sufficient food for 2 days, the action has no expected undiscouted satisfaction
     if available-food-days >= 2 [report 0 ]
-report max (list 0.5 (1 - (2 - available-food-days) / 2))
+
+    report max (list 0.5 (1 - (2 - available-food-days) / 2))
   ]
   report 0
 end
@@ -265,34 +267,21 @@ to-report SUE-financial-survival [ad]
   
     if motive = work-motive
   [
-    ;print "me working at"
-    ;print my-work
-    ;print [gathering-type] of gp
-    ;print [gathering-type] of my-work
       ;get money from work, except work in the household
-      ;print min list (my-expected-income / eating-costs) 1
-      ;print "minimum"
        report min list (my-expected-income / eating-costs) 1
-      
-;     print max (list ((- my-expected-income) / eating-costs) 0)
-;     print "maxx"
       ; report max (list ((- my-expected-income) / eating-costs) 0)
      ]
   
   
-  
     if motive = food-motive [
-;       let money-left-over my-amount-of-capital - eating-costs
-;     print my-amount-of-capital
-;     print money-left-over
-;       ; If we spend all our money, financial-survival will drop to 0
-;       if money-left-over < 0 [
+       let money-left-over [amount-of-household-capital] of my-home - eating-costs
 
-;         report (- financial-survival-satisfaction-level)
-;       ]
-;           print (- min (list (money-left-over / eating-costs) 1))
-;       report (- min (list (money-left-over / eating-costs) 1))
-;     ]
+       ; If we spend all our money, financial-survival will drop to 0
+       if money-left-over <= 0 [
+         report (- financial-survival-satisfaction-level)
+       ]
+      report (- min (list (money-left-over / eating-costs) 1))
+     
     report -0.2 ]
 
     if motive = leisure-motive [
@@ -437,7 +426,6 @@ to-report SUE-providing [ad]
     ;in case of sickness, getting treatment at home and at hospital reduces the satisfaction of providing
     ;this should also depend on social networks and beliefs
     if motive = treatment-motive [ 
-    ;print "i am sick"
     report -0.4 ]
   
   if is-male? [
@@ -489,9 +477,7 @@ to-report SUE-autonomy [ad]
   report 0.2]
   if (motive = treatment-motive and gp =  my-hospital) [
   report -0.2]
- 
-    ; print "default autonomy"
-    report 0
+     report 0
 
 end
 
@@ -568,9 +554,7 @@ to-report SUE-family-belonging [ad]
   ]]
   ;visits have a big effect on family belonging, especially if someone is sick(not modeled now)
   if motive = visit-motive [report 0.9]
-  
-    ;  print "default family belonging"
-  report 0
+    report 0
 end
 
 
@@ -600,7 +584,6 @@ to-report SUE-physical-safety [ad]
   ]
   if gp = my-home or member? gp my-networks-homes
   [report 0.2]
-    ;  print "default phys safety"
   report 0
   ; Traditional funerals are considered less safe
   if gp = funeral-cemetery[
@@ -634,7 +617,6 @@ to-report SUE-social-safety [ad]
   if ( motive = spiritual-motive) [ report 0.1]
   
   if motive = visit-motive [report 0.3]
-      ;print "default social safety"
     report 0
 end
 
