@@ -47,7 +47,15 @@ to-report next-infection-state
   report next-state-ebo infection-state
 end
 
-
+to-report is-deceased?
+  ifelse infection-status = "dead-infectious"
+  or infection-status = "unsafe-burial"
+  or infection-status = "safe-burial"
+  or infection-status = "removed"
+  ;... missing any?
+  [report true]
+  [report false]
+end
 
 to set-infection-status [infection]
   if infection = hospitalised-to-immune-infection-status

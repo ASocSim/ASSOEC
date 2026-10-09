@@ -29,7 +29,26 @@ to-report my-available-activity-descriptors
 
   
 
-;;first we check the infection status of the agent
+;; we check the infection status of the agent
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; activities for deceased people
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+if is-deceased? [
+;the only thing a deceased can do (for now) is to attend their burial
+set activities []
+  set activities (lput (activity-descriptor my-own-cemetery burial-motive) activities)
+
+  let ret []
+    foreach activities [ activity ->
+      set ret fput (lput false activity) ret
+  ]
+  report ret
+
+]
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;; activities for healthy people
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -375,6 +375,10 @@ to-report my-traditional-healer
   report my-gathering-point-of-type "traditional healer"
 end
 
+to-report my-own-cemetery
+  report my-gathering-point-of-type "cemetery"
+end
+
 ;; The civil society organisation this person is attached to.
 ;;
 ;; @context person
