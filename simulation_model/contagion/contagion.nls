@@ -158,10 +158,6 @@ to-report density-factor-of [context]
     ;print context
     report [proximity-factor] of context
   ]
-  if context = "walking outside" or context = "travelling outside"[report density-walking-outside]
-  if context = "bus"[report density-factor-public-transports]
-  if context = "shared car" or context = "cars" [report density-factor-shared-cars]
-  if context = "queue-waiting-for-bus" [report density-factor-queuing]
   
   error (sentence "undefined for" context)
 end

@@ -163,7 +163,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <monitor x="2868" precision="17" y="370" height="60" fontSize="11" width="121">#dead-females</monitor>
     <monitor x="2868" precision="17" y="437" height="60" fontSize="11" width="121">#dead-males</monitor>
     <monitor x="3003" precision="17" y="25" height="60" fontSize="11" width="291">#people-saved-by-hospitalization</monitor>
-    <monitor x="3003" precision="17" y="247" height="60" fontSize="11" width="291">#who-became-sick-while-travelling-locally</monitor>
     <monitor x="3003" precision="17" y="178" height="60" fontSize="11" width="291">#people-dying-due-to-lack-of-hospitalization</monitor>
     <monitor x="3003" precision="17" y="101" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
     <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
@@ -276,7 +275,7 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <input x="1284" multiline="false" y="1046" height="60" variable="#agriculture-gp" type="number" width="122">10.0</input>
     <input x="1284" multiline="false" y="978" height="60" variable="#mines-gp" type="number" width="122">10.0</input>
     <input x="1284" multiline="false" y="906" height="60" variable="#schools-gp" type="number" width="122">2.0</input>
-    <input x="1284" multiline="false" y="837" height="60" variable="#hospital-gp" type="number" width="122">2.0</input>
+    <input x="1284" multiline="false" y="837" height="60" variable="#hospital-gp" type="number" width="122">4.0</input>
     <note x="1094" y="591" backgroundDark="0" fontSize="16" width="170" markdown="false" height="65" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Proxemics model</note>
     <note x="1415" y="682" backgroundDark="0" fontSize="10" width="266" markdown="false" height="75" textColorDark="-1" textColorLight="-5825686" backgroundLight="0">Density factors:
 Relative proximity between individuals within an activity type (impacts contamination risks).</note>
@@ -594,24 +593,6 @@ save-world-state</button>
     <switch x="606" y="143" height="40" on="true" variable="with-infected?" width="139" display="with-infected?"></switch>
     <monitor x="786" precision="17" y="74" height="60" fontSize="11" width="172">slice-of-the-day</monitor>
     <monitor x="608" precision="17" y="74" height="60" fontSize="11" width="160">day-of-the-week</monitor>
-    <slider x="3348" step="0.01" y="94" max="1" width="254" display="ratio-children-public-transport" height="50" min="0" direction="Horizontal" default="0.75" variable="ratio-children-public-transport"></slider>
-    <input x="3417" multiline="false" y="531" height="60" variable="#max-people-per-bus" type="number" width="156">20.0</input>
-    <input x="3414" multiline="false" y="461" height="60" variable="#bus-per-timeslot" type="number" width="156">27.0</input>
-    <monitor x="3413" precision="17" y="390" height="60" fontSize="11" width="195" display="#people-staying-out-queuing">count people with [stayed-out-queuing-for-bus?]</monitor>
-    <monitor x="3413" precision="17" y="322" height="60" fontSize="11" width="189">#people-denied-bus</monitor>
-    <slider x="3624" step="0.01" y="516" max="1" width="247" display="density-factor-shared-cars" height="50" min="0" direction="Horizontal" default="0.8" variable="density-factor-shared-cars"></slider>
-    <slider x="3624" step="0.01" y="459" max="1" width="244" display="density-factor-public-transports" height="50" min="0" direction="Horizontal" default="0.5" variable="density-factor-public-transports"></slider>
-    <slider x="3624" step="0.01" y="399" max="1" width="247" display="density-factor-queuing" height="50" min="0" direction="Horizontal" default="0.6" variable="density-factor-queuing"></slider>
-    <slider x="3624" step="0.01" y="339" max="1" width="244" display="density-walking-outside" height="50" min="0" direction="Horizontal" default="0.05" variable="density-walking-outside"></slider>
-    <slider x="3348" step="0.01" y="205" max="1" width="254" display="ratio-worker-public-transport" height="50" min="0" direction="Horizontal" default="0.4" variable="ratio-worker-public-transport"></slider>
-    <slider x="3624" step="0.01" y="206" max="1" width="218" display="ratio-worker-shared-car" height="50" min="0" direction="Horizontal" default="0.15" variable="ratio-worker-shared-car"></slider>
-    <slider x="3622" step="0.01" y="92" max="1" width="218" display="ratio-children-shared-car" height="50" min="0" direction="Horizontal" default="0.0" variable="ratio-children-shared-car"></slider>
-    <slider x="3622" step="0.01" y="147" max="1" width="218" display="ratio-student-shared-car" height="50" min="0" direction="Horizontal" default="0.1" variable="ratio-student-shared-car"></slider>
-    <slider x="3624" step="0.01" y="262" max="1" width="218" display="ratio-retired-shared-car" height="50" min="0" direction="Horizontal" default="0.5" variable="ratio-retired-shared-car"></slider>
-    <slider x="3348" step="0.01" y="149" max="1" width="254" display="ratio-student-public-transport" height="50" min="0" direction="Horizontal" default="0.6" variable="ratio-student-public-transport"></slider>
-    <slider x="3348" step="0.01" y="262" max="1" width="253" display="ratio-retired-public-transport" height="50" min="0" direction="Horizontal" default="0.2" variable="ratio-retired-public-transport"></slider>
-    <note x="3347" y="28" backgroundDark="0" fontSize="16" width="188" markdown="false" height="23" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Transport Model</note>
-    <note x="3616" y="23" backgroundDark="0" fontSize="11" width="255" markdown="false" height="55" textColorDark="-1" textColorLight="-13840069" backgroundLight="0">Density settings influence risk of becoming sick when travelling locally (is related with contagion model)</note>
     <note x="2580" y="1371" backgroundDark="0" fontSize="16" width="216" markdown="false" height="26" textColorDark="-1" textColorLight="-955883" backgroundLight="0">Economic Model</note>
     <plot x="2822" autoPlotX="true" yMax="10.0" autoPlotY="true" y="1430" xMin="0.0" height="278" legend="true" xMax="10.0" yMin="0.0" width="397" display="Households budget">
       <setup></setup>
@@ -628,44 +609,12 @@ save-world-state</button>
     <slider x="2582" step="0.5" y="1432" max="5" width="216" display="workers-wages" height="50" min="0" direction="Horizontal" default="1.0" variable="workers-wages"></slider>
     <slider x="2582" step="1" y="1542" max="5" width="216" display="days-of-rations-bought" height="50" min="0" direction="Horizontal" default="1.0" variable="days-of-rations-bought"></slider>
     <slider x="2582" step="0.1" y="1488" max="5" width="216" display="price-of-rations" height="50" min="0.5" direction="Horizontal" default="1.2" variable="price-of-rations"></slider>
-    <note x="2700" y="609" backgroundDark="0" fontSize="16" width="308" markdown="false" height="40" textColorDark="-1" textColorLight="-6459832" backgroundLight="0">Migration model</note>
-    <plot x="2698" autoPlotX="true" yMax="10.0" autoPlotY="true" y="896" xMin="0.0" height="359" legend="true" xMax="10.0" yMin="0.0" width="512" display="contacts">
-      <setup></setup>
-      <update></update>
-      <pen interval="1.0" mode="0" display="hospitals" color="-16777216" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-hospitals</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="workplaces" color="-7500403" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-workplaces</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="homes" color="-2674135" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-homes</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="schools" color="-1184463" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-schools</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="pub-trans" color="-11221820" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-pubtrans</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="priv-trans" color="-2064490" legend="true">
-        <setup></setup>
-        <update> plot #contacts-in-shared-cars</update>
-      </pen>
-      <pen interval="1.0" mode="0" display="queuing" color="-13345367" legend="true">
-        <setup></setup>
-        <update>plot  #contacts-in-queuing</update>
-      </pen>
-    </plot>
-    <slider x="2700" step="0.01" y="825" max="1" width="308" display="probability-getting-back-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-getting-back-when-abroad"></slider>
-    <slider x="2700" step="0.01" y="769" max="1" width="308" display="owning-solo-transportation-probability" height="50" min="0" direction="Horizontal" default="1.0" variable="owning-solo-transportation-probability"></slider>
-    <slider x="2700" step="0.01" y="654" max="1" width="308" display="probability-infection-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-infection-when-abroad"></slider>
-    <slider x="2700" step="0.01" y="714" max="1" width="308" display="probability-going-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-going-abroad"></slider>
-    <switch x="3024" y="614" height="40" on="false" variable="migration?" width="127" display="migration?"></switch>
+    <slider x="2160" step="0.01" y="1270" max="1" width="308" display="probability-infection-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-infection-when-abroad"></slider>
+    <slider x="2160" step="0.01" y="1330" max="1" width="308" display="probability-going-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-going-abroad"></slider>
+    <switch x="2484" y="1230" height="40" on="false" variable="migration?" width="127" display="migration?"></switch>
+    <slider x="2160" step="0.01" y="1389" max="1" width="308" display="probability-getting-back-when-abroad" height="50" min="0" direction="Horizontal" default="0.0" variable="probability-getting-back-when-abroad"></slider>
+    <note x="2160" y="1225" backgroundDark="0" fontSize="16" width="308" markdown="false" height="40" textColorDark="-1" textColorLight="-6459832" backgroundLight="0">Migration model</note>
+    <monitor x="3003" precision="17" y="247" height="60" fontSize="11" width="291">#who-became-sick-while-travelling-locally</monitor>
   </widgets>
   <info>## WHAT IS IT?
 

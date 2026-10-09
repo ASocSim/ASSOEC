@@ -20,7 +20,7 @@
 ;; @see motives.nls
 ;; @see docs/WIP_ISSUES.md
 
-__includes ["motives.nls" "transport.nls"]
+__includes ["motives.nls"]
 
 ;; Apply the consequences of the activity this person has just performed.
 ;;
