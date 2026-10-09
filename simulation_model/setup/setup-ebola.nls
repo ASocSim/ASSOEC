@@ -46,10 +46,8 @@ to setup-ebola
   set #dead-people 0
 
   
-  set was-social-distancing-enforced? false
-  set when-has-2%-infected-threshold-first-been-met? "never"
-  set when-has-5%-infected-threshold-first-been-met? "never"
-  set start-tick-of-global-quarantine "never"
+ ; set when-has-2%-infected-threshold-first-been-met? "never"
+ ; set when-has-5%-infected-threshold-first-been-met? "never"
 
   
   setup-gathering-points-as-turtle-sets

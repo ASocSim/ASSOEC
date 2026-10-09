@@ -88,19 +88,6 @@ to-report travelling-reason
   report travelling-motive
 end
 
-;; True when this person needs somebody to look after them today.
-;;
-;; A child whose school is shut has to follow an adult around; that is what
-;; `perform-people-activities` uses this for.
-;;
-;; @context person
-;; @return true if this person is a child and schools are closed
-;; @note Never true in the current build: `is-child?` tests `age`, which nothing
-;; assigns.
-to-report is-currently-in-situation-of-active-dependence?
-  report is-child? and closed-schools?
-end
-
 
 ;; True when a child is present wherever this person currently is.
 ;;

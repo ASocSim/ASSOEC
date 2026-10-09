@@ -8,8 +8,8 @@ to spread-contagion
   
   ;Increase transmission probability per contact with deceased; model funeral cluster events; resistance rate parameter ~40-70% in high-tension zones
   ;spread-by-funeral-rites ;(safe burials vs unsafe burials, depends on group affiliation and high-tension zones)
-  
 end
+
 
 
 
@@ -38,8 +38,6 @@ to spread-within-a-set-of-people [ts context]
  
   process-contacts-within-group-event ts context
   
-  ;;quite ugly solution. Contact points should be stored in different structures & processes
-  update-contacts-of-a-set-of-people-in-contact-tracing-app-public-measure ts
   let susceptible-people ts with [is-susceptible?]
   let contagious-people-in-the-set  ts with [is-contagious?] 
   ask contagious-people-in-the-set [

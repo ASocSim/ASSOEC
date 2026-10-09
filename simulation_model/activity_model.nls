@@ -172,6 +172,7 @@ to-report social-distancing-of [an-activity-descriptor]
 end
 
 
+
 to-report is-caring-for-sick?
   if current-motivation = "care for the sick"[report true]
 end
@@ -495,11 +496,6 @@ to perform-people-activities
 
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
 
-    if is-currently-in-situation-of-active-dependence? and current-person-I-depend-on != nobody
-    [
-      set current-activity [current-activity] of current-person-I-depend-on
-      set current-motivation follow-person-in-charge-motive
-    ]
   ]
 
   ;travelling-to-activity-phase
