@@ -20,7 +20,7 @@ to load-scenario-specifics
   if preset-scenario = "default-scenario" [stop]  
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;PLACEHOLDER FOR SCENARIO LOGIC;;;;;;;
+;;;;PLACEHOLDER FOR SCENARIOS IN EBOLA SIM;;;;;;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 

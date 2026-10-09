@@ -265,11 +265,6 @@ to  increment-contacts-due-to-group-gathering-global-metrics [ts context]
   ] 
 end
 
-to-report ratio-quarantiners-currently-complying-to-quarantine
-  if count people with [is-officially-asked-to-quarantine?] = 0 [report 0]
-  report count people with [is-officially-asked-to-quarantine? and is-in-quarantine?] / count people with [is-officially-asked-to-quarantine?]
-end
-
 to increase-people-being-severe-event-global-metrics [p]
   table:put number-of-people-per-sex-having-ever-reached-severe-table [age] of p (table:get number-of-people-per-sex-having-ever-reached-severe-table [age] of p + 1)
 end

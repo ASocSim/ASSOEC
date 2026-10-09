@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <model version="NetLogo 7.0.3" snapToGrid="false">
   <code><![CDATA[extensions [profiler table]
-__includes [ "setup/setup-ebola.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "validation/testing.nls" "utils/all_utils.nls" "inspector.nls" ]
+__includes [ "setup/setup-ebola.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "utils/all_utils.nls" "inspector.nls" ]
 breed [people person]
 
 globals [
