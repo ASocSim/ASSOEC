@@ -162,9 +162,7 @@ to-report is-observing-critical-symptoms?
   or infection-status = "healthy"
   [report false]
   
-  
   error (sentence "not implemented for:" infection-status)
-  error "not implemented"
 end
 
 

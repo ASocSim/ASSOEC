@@ -24,31 +24,30 @@
 ;; docs/WIP_ISSUES.md#my-available-activity-descriptors.
 to-report my-available-activity-descriptors
 
-
       ;add resting at home for SLEEP need
   let activities (list (list my-home rest-motive))
 
+  
 
 ;;first we check the infection status of the agent
-;;if they are very sick, their choices for activities are limited and the motive get-treatment shows strongest
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; activities for healthy people
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if ( not is-observing-critical-symptoms?)
   [
-
-;;if someone dies, all activities are replaced by funeral activity, and the person goes to the funeral
-;;justification: if someone dies, the funeral is the most important activity, people cancel plans to attend
+;;if someone dies,  agents have a strong incentive to go to the funeral
+;;this is driven by needs
   if am-I-mourning? ;;and not enforce-SDB?
   [
     ifelse not attending_sdb?[
       ;; if I'm ok with unsafe burial, I add it to activities
       if not not-going-to-unsafe-burials [
-        ;set activities []
         set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
       ]
     ][
-    ;set activities []
+    ;;this activity is available only if the decease has a SDB
     set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
     ]
-    ;print (sentence "someone died, so I go to traditional funeral" funeral-cemetery)
 
     let ret []
     foreach activities [ activity ->
@@ -57,24 +56,10 @@ if ( not is-observing-critical-symptoms?)
   report ret
   ]
 
-  ;;if am-I-mourning? and enforce-SDB?
-  ;;[
-  ;;  set activities []
-    ;assuming 100% compliance with SDB
-
-    ;print (sentence "someone died, so I go to SDB" funeral-cemetery)
-
-  ;;  let ret []
-  ;;  foreach activities [ activity ->
-  ;;    set ret fput (lput false activity) ret
-  ;;]
-
-  ;;report ret
-  ;;]
-
   ;get food
   ;from store any day except sundays
    if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week != "sunday")
+   and any? people with [[gathering-type] of my-work = "store"]
     [
       set activities (lput (activity-descriptor my-store food-motive ) activities)
     ]
@@ -98,8 +83,9 @@ if ( not is-observing-critical-symptoms?)
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
     if my-leisure-point != nobody [
+     if any? people with [[gathering-type] of my-work = "leisure place"][
     set activities lput (activity-descriptor my-leisure-point leisure-motive) activities
-    ;print "go to leisure point available"
+     ]
     ]
   ]
 
@@ -130,40 +116,56 @@ if ( not is-observing-critical-symptoms?)
 
   ;attend religious gathering,
   ;on sunday we can go to religious gathering 
-  if (day-of-the-week = "sunday")
- ; if [slice-of-the-day = "morning" and slice-of-the-day = "afternoon")[
+  if (day-of-the-week = "sunday") 
   [
-    set activities (lput (activity-descriptor my-church spiritual-motive) activities)
-  ]
+  if any? people with [[gathering-type] of my-work = "church"]
+  [set activities (lput (activity-descriptor my-church spiritual-motive) activities)
+  ]]
 
-
-
-
+]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;end of activities for non severely sick people
+;;activities for  severely sick people
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ]
 
-
+;;if they are very sick, their choices for activities are limited and the motive get-treatment shows strongest
+;;once the infection status changes to recovered or dead the patients can leave the hospital
+;;IN HOSPITAL
 if infection-status = in-hospital-infection-status [
-    ;print "forced to stay in hospital"
-    set activities [] 
-    set activities lput (list my-hospital treatment-motive) activities ]
+    set activities []
+    set activities lput (list my-hospital treatment-motive) activities 
+    
+  let ret []
+  foreach activities [ activity ->
+    set ret fput (lput false activity) ret
+  ]
+  report ret
+    
+    ]
+
 
 
  ;enable one treatment motive at hospital and healher and church
-   if has-internally-visible-symptoms? or is-observing-critical-symptoms?
+   if is-observing-critical-symptoms?
    [
-    ;empty list
+    ;empty list from other activities
     set activities [] 
-    ;print "forced to seek treatment"
-  set activities lput (list my-hospital treatment-motive) activities
+    ;agent with critical symptoms is forced to seek treatment
+    let money [amount-of-household-capital] of my-home
+  if money >= 1
+  [
+  ;;cost expressed in money units, but represents travel distance and general costs to go hospital
+     if not unwilling-to-go-hospital [
+    if any? people with [[gathering-type] of my-work = "hospital"]
+     [set activities lput (list my-hospital treatment-motive) activities]
+     ]
+  ]
   if any? people with [[gathering-type] of my-work = "traditional healer"][
     set activities lput (list my-traditional-healer treatment-motive) activities
   ]
+    if any? people with [[gathering-type] of my-work = "church"][
   set activities lput (list my-church treatment-motive) activities
-  ] 
-
+  ]
+] 
 
   let ret []
   foreach activities [ activity ->

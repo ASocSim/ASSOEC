@@ -165,7 +165,7 @@ end
 ;; @return a number in [0, 1]
 ;; @note Divides by zero where nobody is hired.
 to-report ratio-sick-personnel
-  report count hired-workers with [has-internally-visible-symptoms?] / count hired-workers
+  report count hired-workers with [is-observing-critical-symptoms?] / count hired-workers
 end
 
 ;; How many of this place's staff show no symptoms.
@@ -174,7 +174,7 @@ end
 ;; @return a count of people
 ;; @note The name is missing an `n` - "personel" - in both this and `#sick-personel`.
 to-report #healthy-personel
-  report count hired-workers with [not has-internally-visible-symptoms?]
+  report count hired-workers with [not is-observing-critical-symptoms?]
 end
 
 ;; How many of this place's staff show symptoms.
@@ -182,7 +182,7 @@ end
 ;; @context gathering-point
 ;; @return a count of people
 to-report #sick-personel
-  report count hired-workers with [has-internally-visible-symptoms?]
+  report count hired-workers with [is-observing-critical-symptoms?]
 end
 
 

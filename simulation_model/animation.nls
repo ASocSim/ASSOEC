@@ -488,7 +488,7 @@ to arrange-on-grid [gps x0 x1 y0 y1]
 
   let cell-size min (list column-spacing row-spacing)
   ask gps [
-    set size min (list place-marker-size (0.8 * cell-size))
+    set size min (list place-marker-size (0.7 * cell-size))
     set crowd-radius 0.45 * cell-size
   ]
 

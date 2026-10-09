@@ -126,7 +126,7 @@ to-report my-relatives
 end
 
 to-report my-sick-relatives
-  report my-relatives with [has-internally-visible-symptoms?] 
+  report my-relatives with [is-observing-critical-symptoms?] 
 end
 
 to-report my-networks-homes
