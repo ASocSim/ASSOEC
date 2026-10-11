@@ -8,23 +8,29 @@
 ;higher mistrust = lower compliance with isolation/burial imposed rules
 ;community-led intervention = higher trust coefficient
 
+;;modelling radios as hubs - they spread information relative to institutional directives
+;;however, the effect depends on the listeners previous beliefs:
+;;if someone is low on trust, listening to radio may cause further lowering of trust
+;;if someone is ambivalent, they can be influenced either way (this should depend on who is there)
+;modeling this at civil societies only for now
+
 globals 
 [
+  ;globals prep, not defined
   #ebola-business-believers
-  #willing-to-trust-hospital
-  #willing-to-trust-institutional-advice
-
+  #ratio-willing-to-trust-hospital
+  #ratio-willing-to-trust-institutional-advice
+  ;let ebola-business-narrative-value mean [my-trust-in-institutions] of current-gatherers
+;print ebola-business-narrative-value
 ]
 
 
 to spread-information
-  ask homes [influence-relatives] ;;converge opinions
-
-  ask people [
+;;converge opinions within households
+  ask homes [influence-relatives]
   ;influence-kin
-  influence-colleagues
-]
-  ;print "information is spreading"
+  ask civil-societies [radio-dissemination]
+
 end
 
 
@@ -56,21 +62,18 @@ to influence-relatives
 
 end
 
-to influence-colleagues
+to radio-dissemination
+;this only happens at civil societies
+
 ;;first check how different our opinions are
-;let ebola-business-narrative-value mean (my-trust-in-hospital my-trust-in-institutions) of my-colleagues
-  ask my-colleagues
-  [
-    ;;check if someone's belief are very different from mine
-    let difference-in-beliefs 0.1;
-
-    ;;converge within households
-    if difference-in-beliefs >= 0.6 [
-      ;polarize beliefs
-    ]
-
-  ]
-
+if any? current-gatherers [
+;;here it gets probabilistic
+ask current-gatherers[
+  ifelse my-trust-in-institutions >= 0.5
+  [set my-trust-in-institutions my-trust-in-institutions + 0.01]
+  [set my-trust-in-institutions my-trust-in-institutions - 0.01]
+ ]
+]
 end
 
 
@@ -91,16 +94,13 @@ to-report unwilling-to-go-hospital
     report false
 end
 
-to-report is-believing-to-be-immune?
-  report believes-ebola-business?
-end
 
 to-report believes-ebola-business?
-  report epistemic-infection-status = "ebola business"
+  report epistemic-status = "ebola business"
 end
 
 to-report is-believing-to-be-infected-with-ebola?
-  report epistemic-infection-status = "infected" 
+  report epistemic-status = "infected" 
   
 end
 
@@ -110,7 +110,7 @@ end
 to update-epistemic-status
   
    if infection-status = "dead" [
-     set epistemic-infection-status "dead"
+     set epistemic-status "dead"
      stop
    ]
   

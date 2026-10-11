@@ -24,7 +24,7 @@ people-own [
   schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
-  epistemic-infection-status  ;;< what this person believes about their own infection, as opposed to `infection-state`
+  epistemic-status  ;;< what this person believes about their own infection, as opposed to `infection-state`
   last-day-observed-symptoms  ;;< day symptoms were last noticed; `nobody` until then, so that reading it too early raises an error
   am-I-experiencing-fake-symptoms? ;;< true when the symptoms shown are from something other than the modelled disease
   infection-state             ;;< the true disease state, independent of what the person believes

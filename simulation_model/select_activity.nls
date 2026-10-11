@@ -8,9 +8,7 @@
 ;; The menu is where the day's rhythm lives: resting at home is always on it,
 ;; shopping appears on weekday mornings and afternoons, work on working days,
 ;; religious gatherings around Sunday.
-;;
-;; @todo Caring for children belongs on this menu and is not there yet; at the
-;; moment that need is served by hijacking the decision process elsewhere.
+
 ;; @see people_decision.nls
 ;; @see activity_model.nls
 ;; @see docs/WIP_ISSUES.md
@@ -112,7 +110,7 @@ if ( not is-observing-critical-symptoms?)
 ;go visit your relatives, sometimes the ones who already live with you
    if slice-of-the-day = "evening" 
    [
-    set activities lput (activity-descriptor [my-home] of one-of my-relatives social-motive) activities
+    set activities lput (activity-descriptor [my-home] of one-of my-relatives visit-motive) activities
     set activities (lput (activity-descriptor my-civil-society social-motive) activities)
    ]
 
@@ -126,11 +124,8 @@ if ( not is-observing-critical-symptoms?)
     if any? people with [[gathering-type] of my-work = "traditional healer"][
       set activities (lput (activity-descriptor my-traditional-healer spiritual-motive) activities)
     ]
-
-   ;print "I stay home to care for you"
   ]
   ;logic here for hospital caring
-
 
 
   ;attend religious gathering,
@@ -143,7 +138,7 @@ if ( not is-observing-critical-symptoms?)
 
 ]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;activities for  severely sick people
+;;activities for severely sick people (stage 2 and above)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;if they are very sick, their choices for activities are limited and the motive get-treatment shows strongest
@@ -164,6 +159,8 @@ if infection-status = in-hospital-infection-status [
 
 
  ;enable one treatment motive at hospital and healher and church
+ ;note that non of these are mutually exclusive!
+ 
    if is-observing-critical-symptoms?
    [
     ;empty list from other activities

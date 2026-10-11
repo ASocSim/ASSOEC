@@ -277,7 +277,6 @@ to-report #initial-people-with-sex [a]
   if a = female-sex [report    #females-at-start]
   if a = male-sex [report    #males-at-start]
 ;  if a = worker-age [report    #workers-at-start]
-;  if a = retired-age [report    #retireds-at-start]
 end
 
 to-report sex-group-to-sex-group-#contacts [infector-sex infected-sex]

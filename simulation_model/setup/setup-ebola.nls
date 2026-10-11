@@ -442,13 +442,15 @@ to setup-person [current-home l-sex displacement-status]
     set color default-color
     set size 0.5
     set infection-state susceptible-infection-status
-    set epistemic-infection-status "healthy"
+
+    ;epistemic status is now different: how to model this? start with random distribution?
+    set epistemic-status "healthy"
+
+    
     set last-day-observed-symptoms nobody ;should raise an error if used before being initialized
     set stayed-out-queuing-for-bus? false
     set is-activity-successful? true
 
-   ; set I-know-of-social-distancing? ifelse-value Aware-of-social-distancing-at-start-of-simulation? [true] [false]
-   ; set I-know-of-working-from-home? ifelse-value Aware-of-working-at-home-at-start-of-simulation? [true] [false]
     set what-my-network-did-week-day []
     set what-my-network-did-weekend []
     set did-my-network-socially-distance? false

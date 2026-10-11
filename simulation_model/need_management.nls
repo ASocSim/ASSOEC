@@ -395,6 +395,10 @@ to-report SUE-social-status [ad]
   ;in the case of a male agent getting treatment at hospital, the expected social status decreases
   if is-male? and motive = treatment-motive and member? gp hospitals [report -0.6]
   
+  ;being engaged in community such as civil society bumps social status up
+  if motive = social-motive
+  [report 0.5]
+  report 0
   
   report 0
   
@@ -578,13 +582,21 @@ to-report SUE-physical-safety [ad]
     ifelse [gathering-type] of gp = "workplace-mine" 
     [report -0.1]
     [report 0.1]
+
   ;add logic for hospital and schools (girls are in danger when going to school)
     if member? gp hospitals and motive = work-motive [report -0.2]
    ; if is-girl and motive "school" [report -0.4]
   ]
+  ;if we are visiting relatives
   if gp = my-home or member? gp my-networks-homes
   [report 0.2]
   report 0
+
+  ;if we are going to civil society meeting
+  if gp = my-civil-society and motive = social-motive
+  [report 0.4]
+  report 0
+
   ; Traditional funerals are considered less safe
   if gp = funeral-cemetery[
     ifelse attending_sdb?[
@@ -618,6 +630,10 @@ to-report SUE-social-safety [ad]
   
   if motive = visit-motive [report 0.3]
     report 0
+
+  if motive = social-motive
+  [report 0.4]
+  report 0
 end
 
 
