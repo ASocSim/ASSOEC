@@ -131,13 +131,15 @@ to decay-satisfaction-level-ebo
   ;BELONGING
   let group-belonging-decay 0.9
   set group-belonging-satisfaction-level group-belonging-satisfaction-level * group-belonging-decay
+    if am-I-mourning? [set group-belonging-satisfaction-level 0.5 * group-belonging-satisfaction-level]
+
   if group-belonging-satisfaction-level < 0 [set group-belonging-satisfaction-level 0]
-  if am-I-mourning? [set group-belonging-satisfaction-level 0.5 * group-belonging-satisfaction-level]
   
   let family-belonging-decay 0.8
   set family-belonging-satisfaction-level family-belonging-satisfaction-level * family-belonging-decay
+    if am-I-mourning? [set family-belonging-satisfaction-level 0.5 * family-belonging-satisfaction-level]
+
   if family-belonging-satisfaction-level < 0 [set family-belonging-satisfaction-level 0]
-  if am-I-mourning? [set family-belonging-satisfaction-level 0.5 * family-belonging-satisfaction-level]
   
   ;;SAFETY
   let social-safety-decay 0.7
@@ -236,18 +238,18 @@ to-report SUE-sleep [ad]
   let motive motive-of ad 
   
   if motive = rest-motive and gp = my-home [
-  ;  if slice-of-the-day = "night" [
 
-  ;sleep quality decreases when sick
-;      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
-;    ]
-;    report ifelse-value has-internally-visible-symptoms? [ 0.025 ] [ 0.05 ]
- ; ]
- ; if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad [
-
-    if slice-of-the-day = "night" [report 0.7]
+    ifelse slice-of-the-day = "night"[
+    ;sleep quality decreases when sick
+    
+     ; if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad
+      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
+    ]
+    ;sleep in daytime
+    [report 0.1]
   ]
-  report 0
+report 0
+
 end
 
 

@@ -155,8 +155,8 @@ end
 ;; the per-person event loop, so beliefs are recomputed for the whole population
 ;; once per queued event.
 to update-people-mind
-  print (sentence "updating people mind for" count people "people")
-  update-alive-status
+ ; print (sentence "updating people mind for" count people "people")
+  update-alive-status-other-disease
   update-alive-status-ebola
   update-people-epistemic-status
 end
@@ -171,7 +171,7 @@ end
 ;; @todo Placeholder: kills one random person on roughly one tick in five,
 ;; independently of infection, age or anything else. See
 ;; docs/WIP_ISSUES.md#update-alive-status.
-to update-alive-status
+to update-alive-status-other-disease
   ;make people die by probability
 ;;  if random 100 > 100 ;avoid other deaths for test
 ;;  [ 
@@ -297,6 +297,11 @@ end
 to-report might-I-be-contagious?
   report not believes-ebola-business?
 end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; RELATION TO GATHERING POINTS;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; The one place of kind `a-gathering-type` this person is attached to.
 ;;

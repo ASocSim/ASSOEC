@@ -116,7 +116,7 @@ to update-memory
       set what-my-network-did-week-day lput network-activity what-my-network-did-week-day
       if length what-my-network-did-week-day > 4 [
         set what-my-network-did-week-day but-first what-my-network-did-week-day
-       ; print what-my-network-did-week-day
+        ;print what-my-network-did-week-day
       ]
     ] [
       set what-my-network-did-weekend lput network-activity what-my-network-did-weekend

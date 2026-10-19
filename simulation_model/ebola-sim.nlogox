@@ -611,14 +611,14 @@ save-world-state</button>
         <update>plot #cumulative-males-infector</update>
       </pen>
     </plot>
-    <plot x="1044" autoPlotX="true" yMax="1.0" autoPlotY="true" y="292" xMin="0.0" height="267" legend="true" xMax="10.0" yMin="0.0" width="428" display="trust epistemic">
+    <plot x="1044" autoPlotX="true" yMax="1.0" autoPlotY="true" y="292" xMin="0.0" height="267" legend="true" xMax="10.0" yMin="0.0" width="428" display="mean TRUST levels">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="inst" color="-15040220" legend="true">
+      <pen interval="1.0" mode="0" display="institutions" color="-15040220" legend="true">
         <setup></setup>
         <update>plot mean [my-trust-in-institutions] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="hosp" color="-10141563" legend="true">
+      <pen interval="1.0" mode="0" display="hospitals" color="-10141563" legend="true">
         <setup></setup>
         <update>plot mean [my-trust-in-hospital] of people</update>
       </pen>

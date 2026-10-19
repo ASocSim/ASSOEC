@@ -43,7 +43,6 @@ undirected-link-breed [my-friends-links my-friends-link]
 to setup-social-network-ebola
   setup-kin-network
   setup-friends-networks
-  ;setup-civil-society-network
 end
 
 
