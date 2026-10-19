@@ -106,7 +106,7 @@ end
 ;;this procedure is a simple representation of need decay
 ;important features:
 ;--need decay should decrease over time when not taken care of
-;--special situations can lead to special decay (e.g. breaking an army-enforced lock in should hurt badly the satisfaction of safety needs)
+;--special situations can lead to special decay (e.g. when a person in one's network dies, the satisfaction level of family belonging and group belonging is lowered)
 ;[the previous point might call for the introduction of the person's context later on]
 
 to decay-satisfaction-level-ebo
@@ -396,8 +396,8 @@ to-report SUE-social-status [ad]
   if is-male? and motive = treatment-motive and member? gp hospitals [report -0.6]
   
   ;being engaged in community such as civil society bumps social status up
-  if motive = social-motive
-  [report 0.5]
+  if motive = social-motive and [gathering-type] of gp = "civil society"
+  [report 0.6]
   report 0
   
   report 0
@@ -594,7 +594,7 @@ to-report SUE-physical-safety [ad]
 
   ;if we are going to civil society meeting
   if gp = my-civil-society and motive = social-motive
-  [report 0.4]
+  [report 0.6]
   report 0
 
   ; Traditional funerals are considered less safe
@@ -631,7 +631,7 @@ to-report SUE-social-safety [ad]
   if motive = visit-motive [report 0.3]
     report 0
 
-  if motive = social-motive
+  if motive = social-motive and [gathering-type] of gp = "civil society"
   [report 0.4]
   report 0
 end

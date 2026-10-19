@@ -23,8 +23,12 @@ to-report any-free-bed-in-hospital?
   report #taken-hospital-beds < #beds-available-for-admission
 end
 
+to-report is-currently-being-treated-at-home?
+  report current-motivation = treatment-motive and [gathering-type] of current-activity = "home"
+end
+
 to-report is-currently-being-treated-at-hospital?
-  report  current-motivation = treatment-motive and [is-hospital?] of current-activity and is-currently-allocated-a-bed-in-hospital?
+  report current-motivation = treatment-motive and [is-hospital?] of current-activity and is-currently-allocated-a-bed-in-hospital?
 end
 
 to try-acquire-a-bed-in-hospital

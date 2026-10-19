@@ -406,7 +406,7 @@ to setup-person [current-home l-sex displacement-status]
     set displaced? displacement-status
     set time-when-infected "never"
     set has-been-tested-infected? false
-
+    set priest? false
     set am-I-mourning? false
 
     ;currently random distribution, must be changed if we understand this better as the initial condition impacts outcome strongly
@@ -754,6 +754,8 @@ ask civil-societies
   [
     let hiring-church self
     set hired-workers (turtle-set people with [my-work = hiring-church])
+    ;; assign a priest to each church
+    ask one-of hired-workers [set priest? true]
   ]
 
   ask cemeteries

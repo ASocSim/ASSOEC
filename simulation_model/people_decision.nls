@@ -80,15 +80,56 @@ to-report is-shops-open-today?
   report not (day-of-the-week = "sunday")
 end
 
-;; The motive recorded when a person leaves the country.
-;;
-;; @return `travelling-motive`
-;; @note A thin alias for `travelling-motive`, used by the migration branch of
-;; `my-available-activity-descriptors`, which is currently commented out.
-to-report travelling-reason
-  report travelling-motive
+
+;; @context person
+;;underdeveloped, does not do anything now
+to update-belief-based-on-current-activity
+  let family-here count my-relatives with [current-activity = [current-activity] of myself]
+  if any? my-relatives and family-here / count my-relatives > 0.5 [ set days-since-seen-relatives 0 ]
+  
+  if is-worker? 
+  [
+    let colleagues-here count my-colleagues with [current-activity = [current-activity] of myself]
+    if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]
+    ;if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
+  ]
+
+  let friends-here count my-friends with [current-activity = [current-activity] of myself]
+  if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
+  ;if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
+  
+  update-memory
 end
 
+
+
+
+to update-memory
+  let network-activities new-counter
+  if count my-network > 0 [
+    ask my-network [
+      set network-activities add-to-counter network-activities (list [gathering-type] of current-activity current-motivation)
+    ]
+  
+    let network-activity counter-max-value network-activities
+    ifelse is-working-day-for-me? [
+      set what-my-network-did-week-day lput network-activity what-my-network-did-week-day
+      if length what-my-network-did-week-day > 4 [
+        set what-my-network-did-week-day but-first what-my-network-did-week-day
+       ; print what-my-network-did-week-day
+      ]
+    ] [
+      set what-my-network-did-weekend lput network-activity what-my-network-did-weekend
+      if length what-my-network-did-weekend > 4 [
+        set what-my-network-did-weekend but-first what-my-network-did-weekend
+      ]
+    ]
+
+  ]
+end
+
+
+;;COVID LEGACY
 
 ;; True when a child is present wherever this person currently is.
 ;;
@@ -108,65 +149,4 @@ end
 ;; assigns.
 to-report is-currently-watched-by-an-adult?
   report any? [current-gatherers with [is-adult?]] of current-activity
-end
-
-;; Refresh how long it has been since this person saw each part of their network.
-;;
-;; Seeing your relatives, colleagues or friends means more than half of that group
-;; being in the same place as you; when that happens the corresponding
-;; "days since seen" counter resets to zero. Colleagues also pass on the knowledge
-;; that working from home is possible.
-;;
-;; @context person
-;; @side-effects resets `days-since-seen-relatives`, `days-since-seen-colleagues`
-;; and `days-since-seen-friends`, and may set `I-know-of-working-from-home?`
-;; @note The counters are reset here but nothing increments them, and the call to
-;; `update-memory` at the end is commented out.
-to update-belief-based-on-current-activity
-  let family-here count my-relatives with [current-activity = [current-activity] of myself]
-  if any? my-relatives and family-here / count my-relatives > 0.5 [ set days-since-seen-relatives 0 ]
-  
-  if is-worker? 
-  [
-    let colleagues-here count my-colleagues with [current-activity = [current-activity] of myself]
-    if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]
-    ;if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
-  ]
-
-  let friends-here count my-friends with [current-activity = [current-activity] of myself]
-  if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
-  ;if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
-  
-  ;update-memory
-end
-
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @side-effects work in progress
-;; @todo Fully written but never called: its call site is commented out. See
-;; docs/WIP_ISSUES.md#update-memory.
-to update-memory
-  let network-activities new-counter
-  if count my-network > 0 [
-    ask my-network [
-      set network-activities add-to-counter network-activities (list [gathering-type] of current-activity current-motivation)
-    ]
-  
-    let network-activity counter-max-value network-activities
-    ifelse is-working-day-for-me? [
-      set what-my-network-did-week-day lput network-activity what-my-network-did-week-day
-      if length what-my-network-did-week-day > 4 [
-        set what-my-network-did-week-day but-first what-my-network-did-week-day
-      ]
-    ] [
-      set what-my-network-did-weekend lput network-activity what-my-network-did-weekend
-      if length what-my-network-did-weekend > 4 [
-        set what-my-network-did-weekend but-first what-my-network-did-weekend
-      ]
-    ]
-
-  ]
 end

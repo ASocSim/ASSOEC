@@ -1,6 +1,6 @@
 ;this must be expanded and reworked
 ;stigma is big influence - beliefs on ebola, trust in healthcare
-; affects behaviour on funeral rites and likelihood of going to hospital, acknowledging disease
+;affect behaviour on funeral rites and likelihood of acknowledging disease + going to hospital
 
 ;Fear-driven behavioral change coefficient; dual effect:
 ;reduces treatment-seeking AND increases clustering in home/funeral settings
@@ -14,25 +14,26 @@
 ;;if someone is ambivalent, they can be influenced either way (this should depend on who is there)
 ;modeling this at civil societies only for now
 
-globals 
+globals
 [
-  ;globals prep, not defined
+  ;globals prep, not used
   #ebola-business-believers
   #ratio-willing-to-trust-hospital
   #ratio-willing-to-trust-institutional-advice
   ;let ebola-business-narrative-value mean [my-trust-in-institutions] of current-gatherers
-;print ebola-business-narrative-value
+  ;print ebola-business-narrative-value 
 ]
 
 
 to spread-information
 ;;converge opinions within households
   ask homes [influence-relatives]
-  ;influence-kin
+;;model radio via civil societic
   ask civil-societies [radio-dissemination]
+;;churches
+ ask churches [influence-congregation]
 
 end
-
 
 
 to influence-relatives
@@ -59,13 +60,15 @@ to influence-relatives
       if my-trust-in-institutions < 0 [set my-trust-in-institutions 0]
       if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
   ]
-
 end
+
+
+
 
 to radio-dissemination
 ;this only happens at civil societies
-
 ;;first check how different our opinions are
+;;polarizing
 if any? current-gatherers [
 ;;here it gets probabilistic
 ask current-gatherers[
@@ -75,6 +78,39 @@ ask current-gatherers[
  ]
 ]
 end
+
+
+
+
+to influence-congregation
+;;for the baseline, the priest's individual belief will be propagated to the congregation
+let priests hired-workers with [priest?]
+let congregation current-gatherers
+
+  ask priests
+  [
+    ;;this can be influenced in scenarios
+    ifelse my-trust-in-institutions >= 0.5 
+    [
+    ask congregation 
+     [set my-trust-in-institutions my-trust-in-institutions + 0.01
+     ]]
+     [
+    ask congregation 
+      [set my-trust-in-institutions my-trust-in-institutions - 0.01
+     ]
+
+     ;cap
+      if my-trust-in-institutions < 0 [set my-trust-in-institutions 0]
+      if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
+
+    ]
+  ]
+
+end
+
+
+;;;;REPORTERS;;;;;;
 
 
 to-report not-going-to-unsafe-burials
@@ -87,7 +123,7 @@ to-report not-going-to-unsafe-burials
 end
 
 to-report unwilling-to-go-hospital
-;threshold level at 95% to not go to hospital under any circumstance determined by needs or social influence
+;threshold level at 85% to not go to hospital under any circumstance determined by needs or social influence
   if my-trust-in-hospital <= 0.15[
     report true
   ]
@@ -95,56 +131,52 @@ to-report unwilling-to-go-hospital
 end
 
 
+
+
+
 to-report believes-ebola-business?
   report epistemic-status = "ebola business"
 end
 
 to-report is-believing-to-be-infected-with-ebola?
-  report epistemic-status = "infected" 
-  
+  report epistemic-status = "I am sick with ebola" 
+  ;incorporates the belief that "I can infect others"
+end
+
+to-report sick-with-other-disease
+  report epistemic-status = "I am sick but not with ebola"
+end
+
+to-report sick-with-ebola
+  report epistemic-status = "I am sick with ebola"
+end
+
+to-report ebola-is-survivable
+  report epistemic-status = "I can survive"
 end
 
 
 
 
 to update-epistemic-status
-  
+;let deceased people know they are dead  
    if infection-status = "dead" [
      set epistemic-status "dead"
      stop
    ]
   
-;    if epistemic-infection-status = "infected" and last-day-observed-symptoms < current-day - 3
-;     [
-;       set epistemic-infection-status had-symptoms-long-ago-infection-status
-;     ]
-  
-;   if has-internally-visible-symptoms? or am-I-experiencing-fake-symptoms?
-;   [
-;     ;;newly discovered to be infected
-;       let knew-was-infected epistemic-infection-status = "infected"
-;       set-believed-to-be-infected
-      
-;       if not knew-was-infected and is-user-of-tracking-app? [perform-test]
-      
-;       if not knew-was-infected and test-home-of-confirmed-people?
-;       [
-;         ; show "test"
-;         ask [gatherers] of my-home [perform-test]
-;       ]
-;       if not knew-was-infected and test-workplace-of-confirmed-people? and has-a-work?
-;       [
-;         ask my-colleagues [perform-test]
-;       ]
-    
-;   ]
-end
+;refactor pretty later, this is good for legibility
+    if believes-ebola-business? and is-observing-critical-symptoms?
+     [
+       set epistemic-status sick-with-other-disease
+     ]
 
-to set-believed-to-be-infected 
-;   let knew-was-infected epistemic-infection-status = "infected"
-;   set epistemic-infection-status "infected"
-;   set last-day-observed-symptoms current-day
-;   if not knew-was-infected [
-;     set events-to-process lput just-learned-I-am-infected-event events-to-process 
-;   ]
+    if not believes-ebola-business? and is-observing-critical-symptoms?
+     [
+       set epistemic-status sick-with-ebola
+     ]
+
+    ; if seen-survivor member? what-my-network-did-week-day or what-my-network-did-weekend
+    ; set epistemi-status ebola-is-survivable
+    
 end

@@ -24,7 +24,7 @@ people-own [
   schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
-  epistemic-status  ;;< what this person believes about their own infection, as opposed to `infection-state`
+  epistemic-status            ;;< what this person believes about ebola
   last-day-observed-symptoms  ;;< day symptoms were last noticed; `nobody` until then, so that reading it too early raises an error
   am-I-experiencing-fake-symptoms? ;;< true when the symptoms shown are from something other than the modelled disease
   infection-state             ;;< the true disease state, independent of what the person believes
@@ -54,6 +54,7 @@ people-own [
 ;; @group Attachments
   my-home                     ;;< the gathering point this person lives at
   my-work                     ;;< the gathering point this person is employed at; equal to `my-home` for unemployed women at setup
+  priest?                     ;; true if this person a priest at a church
   my-cemetery                 ;;< the gathering point this person will be buried at if they die
   current-person-I-depend-on  ;;< the person this one is currently following, or `nobody`
 
@@ -134,25 +135,17 @@ people-own [
 ;; Refresh what every person believes about their own infection.
 ;;
 ;; @context observer
-;; @side-effects updates `epistemic-infection-status` on every person
+;; @side-effects updates `epistemic-status` on every person
 ;; @see epistemic_model.nls
 to update-people-epistemic-status
   ask people [update-epistemic-status]
-end
-
-;; The event string queued when a person finds out they are infected.
-;;
-;; @return the string "just-learned-I-am-infected"
-;; @see update-people-mind
-to-report just-learned-I-am-infected-event
-  report "just-learned-I-am-infected"
 end
 
 
 
 ;; Advance everyone's beliefs and decisions by one tick.
 ;;
-;; Deaths first, then beliefs, then quarantine countdowns, and finally the event
+;; Deaths first, then beliefs, and finally the event
 ;; queue each person has accumulated: learning you are infected makes you react,
 ;; and makes everyone in your household react too. The queue is emptied afterwards.
 ;;
@@ -162,8 +155,7 @@ end
 ;; the per-person event loop, so beliefs are recomputed for the whole population
 ;; once per queued event.
 to update-people-mind
-  
- ; print (sentence "updating people mind for" count people "people")
+  print (sentence "updating people mind for" count people "people")
   update-alive-status
   update-alive-status-ebola
   update-people-epistemic-status

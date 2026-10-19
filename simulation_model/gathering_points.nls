@@ -464,6 +464,10 @@ to-report #church-workers
   report count workers with [[gathering-type] of my-work = "church"]
 end
 
+
+
+
+
 ;; How many people are employed at a hospital.
 ;;
 ;; @return a count of people

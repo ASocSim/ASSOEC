@@ -140,7 +140,7 @@ end
 to-report my-colleagues
   ;report other [hired-workers] of my-work
   ;report workplace-colleague-link-neighbors
-  let my-wp  my-workplace
+  let my-wp my-workplace
   if my-wp != nobody [
      report other [gatherers with [my-workplace = my-wp]] of my-wp
    ]
