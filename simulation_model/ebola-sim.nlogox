@@ -163,7 +163,7 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <monitor x="3003" precision="17" y="101" height="60" fontSize="11" width="291">#denied-requests-for-hospital-beds</monitor>
     <button x="10" actionKey="S" y="89" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="setup">setup-ebola</button>
     <note x="1481" y="20" backgroundDark="0" fontSize="16" width="182" markdown="false" height="36" textColorDark="-1" textColorLight="-2674135" backgroundLight="0">Disease Model</note>
-    <slider x="1485" step="0.01" y="70" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.67" variable="CFR" width="249" sizeVersion="0"></slider>
+    <slider x="1485" step="0.01" y="70" max="1" display="CFR" height="50" min="0" direction="Horizontal" default="0.48" variable="CFR" width="249" sizeVersion="0"></slider>
     <monitor x="1753" precision="17" y="53" height="60" fontSize="11" width="100">r0</monitor>
     <plot x="1485" autoPlotX="true" yMax="5.0" autoPlotY="false" y="143" xMin="0.0" height="415" legend="true" xMax="10.0" yMin="0.0" width="477" display="population status">
       <setup></setup>
@@ -614,13 +614,21 @@ save-world-state</button>
     <plot x="1044" autoPlotX="true" yMax="1.0" autoPlotY="true" y="292" xMin="0.0" height="267" legend="true" xMax="10.0" yMin="0.0" width="428" display="mean TRUST levels">
       <setup></setup>
       <update></update>
-      <pen interval="1.0" mode="0" display="institutions" color="-15040220" legend="true">
+      <pen interval="1.0" mode="0" display="institutions (males)" color="-15040220" legend="true">
         <setup></setup>
-        <update>plot mean [my-trust-in-institutions] of people</update>
+        <update>plot mean [my-trust-in-institutions] of people with [is-male?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="hospitals" color="-10141563" legend="true">
+      <pen interval="1.0" mode="0" display="hospitals (males)" color="-10141563" legend="true">
         <setup></setup>
-        <update>plot mean [my-trust-in-hospital] of people</update>
+        <update>plot mean [my-trust-in-hospital] of people with [is-male?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="institutions (female)" color="-13840069" legend="true">
+        <setup></setup>
+        <update>plot mean [my-trust-in-institutions] of people with [is-female?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="hospitals (female)" color="-7858858" legend="true">
+        <setup></setup>
+        <update>plot mean [my-trust-in-hospital] of people with [is-female?]</update>
       </pen>
     </plot>
   </widgets>

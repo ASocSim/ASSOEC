@@ -86,7 +86,9 @@ end
 to-report p-hosp
   ;THIS DEPENDS ON TRUST IN HOSPITAL agent value
   ;is the agent likely to accept treatment at the hospital based on their experiences and knowledge of biomedicine?
-  report my-trust-in-hospital
+  if not unwilling-to-go-hospital
+  [report my-trust-in-hospital]
+  report 0 
 end
 
 
