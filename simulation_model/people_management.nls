@@ -156,7 +156,7 @@ end
 ;; once per queued event.
 to update-people-mind
  ; print (sentence "updating people mind for" count people "people")
-  update-alive-status-other-disease
+  ask people [update-alive-status-other-disease]
   update-alive-status-ebola
   update-people-epistemic-status
 end
@@ -173,22 +173,26 @@ end
 ;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status-other-disease
   ;make people die by probability
-;;  if random 100 > 100 ;avoid other deaths for test
-;;  [ 
-   ; print "I have died of some other disease"    
-    ;;set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+  if random 100 > 98
+  [
+  let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
+    let deceased one-of people
+    set #people-killed-by-other-disease #people-killed-by-other-disease + 1
 
-;;    let deceased one-of people
+    ask deceased
+    [ 
+      set infection-state dead-other
 
-;;    ask deceased
-;;    [ 
-;;      ask my-kin-link-neighbors [
-;;        set am-I-mourning? true
-;;      ]
-;;      ;die
-;;      ]    
-;;  ]
-  
+      ask my-kin-link-neighbors 
+         [set am-I-mourning? true
+          set attending_sdb? true
+        set funeral-cemetery current_cemetery          
+          ]
+      
+      die
+      ]
+  ]
+
 end
 
 
@@ -199,7 +203,7 @@ let deceased_sdb people with [ infection-status = dead-to-safe-burial-infection-
 let deceased_not_sdb people with [infection-status = dead-to-unsafe-burial-infection-status]
 
 if any? deceased_sdb [
-  ;set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
   ask deceased_sdb[
     set my-cemetery current_cemetery

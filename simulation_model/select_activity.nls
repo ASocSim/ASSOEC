@@ -56,22 +56,28 @@ if ( not is-observing-critical-symptoms?)
 ;;this is driven by needs
   if am-I-mourning? ;;and not enforce-SDB?
   [
-    ifelse not attending_sdb?[
-      ;; if I'm ok with unsafe burial, I add it to activities
-      if not not-going-to-unsafe-burials [
-        set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
-      ]
-    ][
+
+    if attending_sdb?[
     ;;this activity is available only if the decease has a SDB
     set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
     ]
+
+      ;; if I'm ok with unsafe burial
+      if not not-going-to-unsafe-burials [
+        set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+      ]
+    ]
+
+
 
     let ret []
     foreach activities [ activity ->
       set ret fput (lput false activity) ret
   ]
   report ret
-  ]
+    
+
+
 
   ;get food
   ;from store any day except sundays
@@ -110,7 +116,9 @@ if ( not is-observing-critical-symptoms?)
 ;go visit your relatives, sometimes the ones who already live with you
    if slice-of-the-day = "evening" 
    [
-    set activities lput (activity-descriptor [my-home] of one-of my-relatives visit-motive) activities
+    if any? my-relatives[
+    set activities lput (activity-descriptor [my-home] of one-of my-relatives visit-motive) activities ]
+
     set activities (lput (activity-descriptor my-civil-society social-motive) activities)
    ]
 

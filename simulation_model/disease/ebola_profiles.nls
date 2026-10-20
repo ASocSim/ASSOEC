@@ -60,7 +60,13 @@ to-report dead-to-safe-burial-infection-status
   report "safe-burial"
 end
 
-;;REMOVED
+
+to-report dead-other
+  report "deceased, other disease"
+end
+
+
+;;REMOVED stati
 
 to-report unsafe-burial-to-removed-infection-status
   report "removed"

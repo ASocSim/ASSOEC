@@ -4,13 +4,11 @@ to spread-contagion
   ;spread-by-travelling
   spread-by-activity-proximity
   ;Delay distribution (days) before seeking care; multiplier on community transmission duration; ~20-40% of symptomatic patients not presenting promptly
-  ;spread-by-care ;split in hospital(ppe, facilities), homestead(density, caretaking habits, gender dynamics), isolation wards
   
+  ;spread-by-care ;split in hospital(ppe, facilities), homestead(density, caretaking habits, gender dynamics), isolation wards
   ;Increase transmission probability per contact with deceased; model funeral cluster events; resistance rate parameter ~40-70% in high-tension zones
-  ;spread-by-funeral-rites ;(safe burials vs unsafe burials, depends on group affiliation and high-tension zones)
+  ;spread-by-funeral-rites ;(safe burials vs unsafe burials, depends on group affiliation and high-tension zones) OBVIATED WITH DENSITY FACTOR
 end
-
-
 
 
 to spread-by-activity-proximity
@@ -50,41 +48,6 @@ to process-contacts-within-group-event [ts context]
   increment-contacts-due-to-group-gathering-global-metrics ts context
 end
 
-;WHAT ARE THE CONTEXTUAL MITIGATION FACTORS FOR EBOLA, IF ANY?
-; to-report contextual-contagion-modificators
-;   report age-infection-risk-mitigation-factor * social-distancing-risk-mitigation-factor
-; end
-
-;;if any contextual mitigation factors are discovered, multiply infection probabilities with contextual-contagion-modificators in apply-risk-of-contamination functions
-
-
-
-;; this process is a bit shitty as it does some mathematical merging of probability
-
-; to apply-risk-of-contamination-when-travelling [travellers contagious]
-;   let #travellers count travellers
-;   let ratio-contagion sum [risks-of-contamination self  myself "walking outside"] of contagious
-;   if not any? contagious [stop]
-;   if density-walking-outside = 0 [stop]
-;   if not is-moving-outside-for-reaching-current-activity? [stop]  
-   
-;   let ratio-contagious ratio-contagion / count people;;this should be related to space
-  
-;   ;;these are "intuitive maths", to be confirmed if relevant
-;   ;;the squared root represents the risk of two people picking the same item when each pick n items on a n*n space (x*x -> n * 1)
-;   ;;it could be cubic if the people we would consider a 3D space (or time)
-;   let number-encounters sqrt #travellers
-  
-;   let probability-avoiding-all-contagious (1 - ratio-contagious) ^ number-encounters
-;   let probability-getting-sick 1 - probability-avoiding-all-contagious
-  
-;  ; show (sentence count travellers with [is-contagious?] "/" ratio-contagious "#contacts" number-encounters "avoid all:" probability-avoiding-all-contagious "sick?" probability-getting-sick)
-  
-;   ;;could be fastened with a bit of math, like 1-(1-p)^k
-;   let was-sick? is-infected?
-;   apply-risk-of-contamination one-of contagious  "travelling outside"
-;   if not was-sick? and is-infected? [set #who-became-sick-while-travelling-locally #who-became-sick-while-travelling-locally + 1]
-; end
 
 
 
@@ -153,7 +116,6 @@ end
 to-report density-factor-of [context]
 
   if is-gathering-point? context [
-    ;print context
     report [proximity-factor] of context
   ]
   
@@ -175,19 +137,10 @@ end
 
 
 
-;;CHANGED FOR EBOLA
-
 to-report is-contagious?
   report not (infection-status = susceptible-infection-status) and not (infection-status = "just-contaminated") and not (infection-status = "removed") and not (infection-status = "safe-burial")
 end
 
-to-report is-alive?
-  report not (infection-status = "removed") and not (infection-status = "safe-burial") and not (infection-status = "unsafe-burial")
-end
-
-to-report abc
-  report r0
-end
 
 to-report r0
   report #infected-by-first-infected-people / #first-infected-people
@@ -197,8 +150,56 @@ to export-contagion-graph-to-graphviz
   export-to-graphviz-util [ [] -> ifelse-value (not table:has-key? contamination-network-table who) [(turtle-set)] [(turtle-set map [x -> turtle first x] table:get contamination-network-table who)]]
 end
 
+
 to-report infection-rate-of [context]
   report density-factor-of context
 end
 
 
+
+;;;;;;;;;;;;
+;not used
+to-report is-alive?
+  report not (infection-status = "removed") and not (infection-status = "safe-burial") and not (infection-status = "unsafe-burial")
+end
+
+to-report abc
+  report r0
+end
+
+
+
+;WHAT ARE THE CONTEXTUAL MITIGATION FACTORS FOR EBOLA, IF ANY?
+; to-report contextual-contagion-modificators
+;   report age-infection-risk-mitigation-factor * social-distancing-risk-mitigation-factor
+; end
+
+;;if any contextual mitigation factors are discovered, multiply infection probabilities with contextual-contagion-modificators in apply-risk-of-contamination functions
+
+
+
+;; this process is a bit shitty as it does some mathematical merging of probability
+; to apply-risk-of-contamination-when-travelling [travellers contagious]
+;   let #travellers count travellers
+;   let ratio-contagion sum [risks-of-contamination self  myself "walking outside"] of contagious
+;   if not any? contagious [stop]
+;   if density-walking-outside = 0 [stop]
+;   if not is-moving-outside-for-reaching-current-activity? [stop]  
+   
+;   let ratio-contagious ratio-contagion / count people;;this should be related to space
+  
+;   ;;these are "intuitive maths", to be confirmed if relevant
+;   ;;the squared root represents the risk of two people picking the same item when each pick n items on a n*n space (x*x -> n * 1)
+;   ;;it could be cubic if the people we would consider a 3D space (or time)
+;   let number-encounters sqrt #travellers
+  
+;   let probability-avoiding-all-contagious (1 - ratio-contagious) ^ number-encounters
+;   let probability-getting-sick 1 - probability-avoiding-all-contagious
+  
+;  ; show (sentence count travellers with [is-contagious?] "/" ratio-contagious "#contacts" number-encounters "avoid all:" probability-avoiding-all-contagious "sick?" probability-getting-sick)
+  
+;   ;;could be fastened with a bit of math, like 1-(1-p)^k
+;   let was-sick? is-infected?
+;   apply-risk-of-contamination one-of contagious  "travelling outside"
+;   if not was-sick? and is-infected? [set #who-became-sick-while-travelling-locally #who-became-sick-while-travelling-locally + 1]
+; end

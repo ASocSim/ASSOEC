@@ -65,10 +65,14 @@ globals
   contamination-network-table
   #infected-people-per-ticks
   #hospitalized-per-tick
+
+  #people-killed-by-other-disease
+
+
 ]
 
 to-report ratio-infected
-  report #infected / count people
+  ifelse any? people [report #infected / count people] [error "no people left"]
 end
 
 to-report ratio-infected-female
