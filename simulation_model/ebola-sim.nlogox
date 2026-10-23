@@ -637,6 +637,7 @@ save-world-state</button>
     <slider x="2551" step="1" y="1611" max="10" width="250" display="cost-of-funeral" height="50" min="0" direction="Horizontal" default="2.0" variable="cost-of-funeral"></slider>
     <slider x="2550" step="1" y="1675" max="10" width="250" display="cost-of-leisure" height="50" min="0" direction="Horizontal" default="1.0" variable="cost-of-leisure"></slider>
     <slider x="2551" step="1" y="1735" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="2.0" variable="hospital-stay-costs"></slider>
+    <monitor x="1418" precision="17" y="586" height="60" fontSize="11" width="100">count people with [is-at-leisure-point?]</monitor>
   </widgets>
   <info>## WHAT IS IT?
 

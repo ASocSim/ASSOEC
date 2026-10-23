@@ -74,7 +74,7 @@ if ( not is-observing-critical-symptoms?)
   ]
   report ret
     
-    
+
     ]
 
 
@@ -109,7 +109,7 @@ if ( not is-observing-critical-symptoms?)
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
     if my-leisure-point != nobody [
-     if any? people with [[gathering-type] of my-work = "leisure place"][
+     if any? people with [[gathering-type] of my-work = "leisure"][
     set activities lput (activity-descriptor my-leisure-point leisure-motive) activities
      ]
     ]
@@ -178,7 +178,7 @@ if infection-status = in-hospital-infection-status [
     set activities [] 
     ;agent with critical symptoms is forced to seek treatment
     let money [amount-of-household-capital] of my-home
-  if money >= 1
+  if money > hospital-stay-costs
   [
   ;;cost expressed in money units, but represents travel distance and general costs to go hospital
      if not unwilling-to-go-hospital [

@@ -390,6 +390,11 @@ to-report SUE-social-status [ad]
 ;       report 0.9]
 ;   ]
   
+;;leisure activity replenishes autonomy
+  if motive = leisure-motive and gp = my-leisure-point [
+    report 0.3
+  ]
+
   ;social status is expected to increase more for women attending religious gatherings
   if [gathering-type] of gp = "church" and motive = spiritual-motive [
     ifelse is-female? [report 0.8] [report 0.4]]
@@ -452,7 +457,13 @@ end
 to-report SUE-autonomy [ad]
   let gp location-of ad
   let motive motive-of ad
-  
+
+;;leisure activity replenishes autonomy
+  if motive = leisure-motive and gp = my-leisure-point [
+    report 0.4
+  ]
+
+
   ;working increases autonomy
     if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
       ifelse motive = work-motive [
@@ -511,6 +522,12 @@ to-report SUE-group-belonging [ad]
   if (motive = SDB-motive) [
     report 0.6]
   
+;;leisure activity replenishes group belonging slightly
+  if motive = leisure-motive and gp = my-leisure-point [
+    report 0.1
+  ]
+
+
   if is-female? and motive = care-motive [
     ;this splits caring at home or at an hospital, eg bringing food to sick relatives
     ;refactor needed
@@ -523,15 +540,7 @@ end
 
 
 ;family belonging
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo Compares the gathering point `gp` against the strings "home" and
-;; "hospital". See docs/WIP_ISSUES.md#the-sue-family.
+
 to-report SUE-family-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
