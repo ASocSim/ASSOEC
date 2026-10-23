@@ -114,7 +114,7 @@ end
 
 
 to-report not-going-to-unsafe-burials
-;threshold level at 95% to not go to unsafe burials
+;threshold level at 98% to not go to unsafe burials
 ;;only people with near absolute trust in government institutions will choose not to attend a dear one funeral
   if my-trust-in-institutions >= 0.98[
     report true
@@ -138,17 +138,14 @@ to-report believes-ebola-business?
   report epistemic-status = "ebola business"
 end
 
-to-report is-believing-to-be-infected-with-ebola?
-  report epistemic-status = "I am sick with ebola" 
-  ;incorporates the belief that "I can infect others"
+
+;incorporates the belief that "I can infect others"
+to-report sick-with-ebola
+  report epistemic-status = "I am sick with ebola"
 end
 
 to-report sick-with-other-disease
   report epistemic-status = "I am sick but not with ebola"
-end
-
-to-report sick-with-ebola
-  report epistemic-status = "I am sick with ebola"
 end
 
 to-report ebola-is-survivable
@@ -159,6 +156,7 @@ end
 
 
 to update-epistemic-status
+
 ;keep track of people who die or survive via hospitals
 ;update their networks beliefs
 
@@ -176,20 +174,29 @@ if infection-status = hospitalised-to-dead-infectious-infection-status
     ;cap
       if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
   ]
+     ; print (sentence "telling my network of" count my-network "people that I died")
+
 ]
 
+;;if relative recovered via hospital, increase trust
 if infection-status = hospitalised-to-immune-infection-status
 [
   ask my-housemates[
     set my-trust-in-hospital my-trust-in-hospital + 0.4
     ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
+      set epistemic-status "ebola-is-survivable"]
+
   ]
 ask my-network[
     set my-trust-in-hospital my-trust-in-hospital - 0.1
     ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
+          set epistemic-status "ebola-is-survivable"]
+
   ]
+       ; print (sentence "telling my network of" count my-network "people that I survived")
+
 ]
 
 
@@ -202,18 +209,17 @@ ask my-network[
 
 
 
-;refactor pretty later, this is good for legibility
+;if agent believes ebola is a business, they interpret their sickness as some other disease
     if believes-ebola-business? and is-observing-critical-symptoms?
      [
-       set epistemic-status sick-with-other-disease
+       set epistemic-status "sick-with-other-disease"
      ]
 
     if not believes-ebola-business? and is-observing-critical-symptoms?
      [
-       set epistemic-status sick-with-ebola
+       set epistemic-status "sick-with-ebola"
      ]
 
-    ; if seen-survivor member? what-my-network-did-week-day or what-my-network-did-weekend
-    ; set epistemi-status ebola-is-survivable
+
     
 end

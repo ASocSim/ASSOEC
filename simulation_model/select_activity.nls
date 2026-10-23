@@ -66,16 +66,19 @@ if ( not is-observing-critical-symptoms?)
       if not not-going-to-unsafe-burials [
         set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
       ]
-    ]
 
-
-
+  
     let ret []
     foreach activities [ activity ->
       set ret fput (lput false activity) ret
   ]
   report ret
     
+    
+    ]
+
+
+
 
 
 

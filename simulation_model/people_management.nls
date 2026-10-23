@@ -155,7 +155,6 @@ end
 ;; the per-person event loop, so beliefs are recomputed for the whole population
 ;; once per queued event.
 to update-people-mind
- ; print (sentence "updating people mind for" count people "people")
   ask people [update-alive-status-other-disease]
   update-alive-status-ebola
   update-people-epistemic-status
@@ -173,7 +172,7 @@ end
 ;; docs/WIP_ISSUES.md#update-alive-status.
 to update-alive-status-other-disease
   ;make people die by probability
-  if random 100 > 98
+  if random 100 > 99
   [
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
     let deceased one-of people

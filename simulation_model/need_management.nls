@@ -131,13 +131,13 @@ to decay-satisfaction-level-ebo
   ;BELONGING
   let group-belonging-decay 0.9
   set group-belonging-satisfaction-level group-belonging-satisfaction-level * group-belonging-decay
-    if am-I-mourning? [set group-belonging-satisfaction-level 0.5 * group-belonging-satisfaction-level]
+    if am-I-mourning? [set group-belonging-satisfaction-level 0.6 * group-belonging-satisfaction-level]
 
   if group-belonging-satisfaction-level < 0 [set group-belonging-satisfaction-level 0]
   
   let family-belonging-decay 0.8
   set family-belonging-satisfaction-level family-belonging-satisfaction-level * family-belonging-decay
-    if am-I-mourning? [set family-belonging-satisfaction-level 0.5 * family-belonging-satisfaction-level]
+    if am-I-mourning? [set family-belonging-satisfaction-level 0.6 * family-belonging-satisfaction-level]
 
   if family-belonging-satisfaction-level < 0 [set family-belonging-satisfaction-level 0]
   
@@ -161,7 +161,7 @@ to decay-satisfaction-level-ebo
 
   let social-status-decay 0.8
   ifelse is-currently-allocated-a-bed-in-hospital? and is-male? [
-    set social-status-satisfaction-level social-status-satisfaction-level * 2 * social-status-decay] ;double the decay, might move to activity selection phase
+    set social-status-satisfaction-level social-status-satisfaction-level * 2 * social-status-decay] ;double the decay, MUST move to activity selection phase
 
     [set social-status-satisfaction-level social-status-satisfaction-level * social-status-decay]
 
@@ -246,7 +246,7 @@ to-report SUE-sleep [ad]
       report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
     ]
     ;sleep in daytime
-    [report 0.1]
+    [report 0.01]
   ]
 report 0
 

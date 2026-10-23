@@ -631,6 +631,12 @@ save-world-state</button>
         <update>plot mean [my-trust-in-hospital] of people with [is-female?]</update>
       </pen>
     </plot>
+    <note x="2714" y="643" backgroundDark="0" fontSize="16" width="150" markdown="false" height="35" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Interventions</note>
+    <switch x="2742" y="705" height="40" on="false" variable="enforce-SDB?" width="110" display="enforce-SDB?"></switch>
+    <switch x="2744" y="761" height="40" on="false" variable="target-priests?" width="115" display="target-priests?"></switch>
+    <slider x="2551" step="1" y="1611" max="10" width="250" display="cost-of-funeral" height="50" min="0" direction="Horizontal" default="2.0" variable="cost-of-funeral"></slider>
+    <slider x="2550" step="1" y="1675" max="10" width="250" display="cost-of-leisure" height="50" min="0" direction="Horizontal" default="1.0" variable="cost-of-leisure"></slider>
+    <slider x="2551" step="1" y="1735" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="2.0" variable="hospital-stay-costs"></slider>
   </widgets>
   <info>## WHAT IS IT?
 
