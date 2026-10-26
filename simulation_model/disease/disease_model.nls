@@ -144,7 +144,6 @@ to-report is-infected-infection-status? [in]
   if in = "just-contaminated"
   or in = "susceptible"
   or in = "safe-burial" ;Emil added
-
   or in = "removed"
   or in = "healthy"
   [report false]
@@ -202,6 +201,15 @@ to update-within-agent-disease-status
     
     if infection-status = removed-infection-status [kill-person]
   ]
+
+  ask people with [other-disease?] [
+    print "update within agent malaria status"
+    ;;here people know they have symptoms of SOMETHING, trigger advice seeking behaviour
+  
+   ; set infection-state other-disease
+  ]
+
+
 end
 
 

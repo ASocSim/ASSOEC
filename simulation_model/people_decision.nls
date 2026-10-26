@@ -85,18 +85,14 @@ end
 ;;underdeveloped, does not do anything now
 to update-belief-based-on-current-activity
   let family-here count my-relatives with [current-activity = [current-activity] of myself]
-  if any? my-relatives and family-here / count my-relatives > 0.5 [ set days-since-seen-relatives 0 ]
+;  if any? my-relatives and family-here / count my-relatives > 0.5 [ set days-since-seen-relatives 0 ]
   
-  if is-worker? 
-  [
-    let colleagues-here count my-colleagues with [current-activity = [current-activity] of myself]
-    if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]
-    ;if any? other my-colleagues with [I-know-of-working-from-home?] [ set I-know-of-working-from-home? true ]
-  ]
+;  if is-worker?   [
+;    let colleagues-here count my-colleagues with [current-activity = [current-activity] of myself]
+;    if (any? other my-colleagues and colleagues-here / count my-colleagues > 0.5) [ set days-since-seen-colleagues 0 ]  ]
 
   let friends-here count my-friends with [current-activity = [current-activity] of myself]
-  if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
-  ;if any? other my-network with [I-know-of-social-distancing?] [ set I-know-of-social-distancing? true ]
+ ; if any? my-friends and friends-here / count my-friends > 0.5 [ set days-since-seen-friends 0 ]
   
   update-memory
 end

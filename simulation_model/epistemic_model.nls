@@ -26,15 +26,186 @@ globals
 
 
 to spread-information
+
+  send-message
+
+end
+
+
+
+to send-message
+;message has content and source
+  ;people share their messages if they have acquired any content by a trusted source
+  ;exceptions are radios, and healthcare workers
+  ask people [
+  let content "test msg"  ;acquire-message
+  let source self
+  let current-message (list content source)
+  ask my-network [
+    set received-messages current-message
+  ]
+  ]
+
+end
+
+
+
+
+to update-epistemic-status
+
+;keep track of people who die or survive via hospitals
+;update their networks beliefs
+
+;;if relative died at hospital, reduce trust
+;;stronger effect for housemates
+if infection-status = hospitalised-to-dead-infectious-infection-status
+[ 
+  ask my-housemates[
+    set my-trust-in-hospital my-trust-in-hospital - 0.4
+    set epistemic-status "if you go to the hospital, you will die"]
+
+    ;cap
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
+      
+  ]
+  ask my-network[
+    set my-trust-in-hospital my-trust-in-hospital - 0.1
+    ;cap
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
+      set epistemic-status "if you go to the hospital, you will die"
+     ; print (sentence "telling my network of" count my-network "people that I died")
+
+]
+
+;;if relative recovered via hospital, increase trust
+if infection-status = hospitalised-to-immune-infection-status
+[
+  ask my-housemates[
+    set my-trust-in-hospital my-trust-in-hospital + 0.4
+    ;cap
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
+      set epistemic-status "ebola is survivable, go to the hospital"]
+
+  ]
+ask my-network[
+    set my-trust-in-hospital my-trust-in-hospital - 0.1
+    ;cap
+      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
+          set epistemic-status "ebola is survivable, go to the hospital"]
+  ]
+       ; print (sentence "telling my network of" count my-network "people that I survived")
+
+]
+
+
+
+;let deceased people know they are dead  
+   if infection-status = "dead" [
+     set epistemic-status "dead"
+     stop
+   ]
+
+
+
+
+    
+;the internal choice of seeking care
+if is-observing-critical-symptoms? or other-disease?
+[
+  evaluate-messages
+]
+end
+
+
+
+to evaluate-messages
+  ;;here is when the agent with symptoms deliberates on their decision
+  ;;this is done by evaluating the advice of the people they trust
+
+  ;needs trust links
+  ;if established link of trust wit healthcare workers before, believe them
+
+
+;if agent believes ebola is a business, they interpret their sickness as some other disease
+    if believes-ebola-business? and is-observing-critical-symptoms?
+     [
+       set epistemic-status "sick-with-other-disease"
+     ]
+
+    if not believes-ebola-business? and is-observing-critical-symptoms?
+     [
+       set epistemic-status "sick-with-ebola"
+     ]
+
+
+  print "I have symptoms, seeking advice"
+
+end
+
+
+
+
+
+;;;;REPORTERS;;;;;;
+
+
+to-report not-going-to-unsafe-burials
+;threshold level at 98% to not go to unsafe burials
+;;only people with near absolute trust in government institutions will choose not to attend a dear one funeral
+  if my-trust-in-institutions >= 0.98[
+    report true
+  ]
+    report false
+end
+
+to-report unwilling-to-go-hospital
+;threshold level at 85% to not go to hospital under any circumstance determined by needs or social influence
+  if my-trust-in-hospital <= 0.15[
+    report true
+  ]
+    report false
+end
+
+
+to-report believes-ebola-business?
+  report epistemic-status = "ebola business"
+end
+
+
+;incorporates the belief that "I can infect others"
+to-report sick-with-ebola
+  report epistemic-status = "I am sick with ebola"
+end
+
+to-report sick-with-other-disease
+  report epistemic-status = "I am sick but not with ebola"
+end
+
+to-report ebola-is-survivable
+  report epistemic-status = "I can survive"
+end
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;INFO DYNAMICS
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+to info-dynemics
+;;INFO DYNAMICS - REMOVE
 ;;converge opinions within households
   ask homes [influence-relatives]
 ;;model radio via civil societic
   ask civil-societies [radio-dissemination]
 ;;churches
  ask churches [influence-congregation]
-
 end
-
 
 to influence-relatives
   let home-id self
@@ -61,8 +232,6 @@ to influence-relatives
       if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
   ]
 end
-
-
 
 
 to radio-dissemination
@@ -107,119 +276,4 @@ let congregation current-gatherers
     ]
   ]
 
-end
-
-
-;;;;REPORTERS;;;;;;
-
-
-to-report not-going-to-unsafe-burials
-;threshold level at 98% to not go to unsafe burials
-;;only people with near absolute trust in government institutions will choose not to attend a dear one funeral
-  if my-trust-in-institutions >= 0.98[
-    report true
-  ]
-    report false
-end
-
-to-report unwilling-to-go-hospital
-;threshold level at 85% to not go to hospital under any circumstance determined by needs or social influence
-  if my-trust-in-hospital <= 0.15[
-    report true
-  ]
-    report false
-end
-
-
-
-
-
-to-report believes-ebola-business?
-  report epistemic-status = "ebola business"
-end
-
-
-;incorporates the belief that "I can infect others"
-to-report sick-with-ebola
-  report epistemic-status = "I am sick with ebola"
-end
-
-to-report sick-with-other-disease
-  report epistemic-status = "I am sick but not with ebola"
-end
-
-to-report ebola-is-survivable
-  report epistemic-status = "I can survive"
-end
-
-
-
-
-to update-epistemic-status
-
-;keep track of people who die or survive via hospitals
-;update their networks beliefs
-
-;;if relative died at hospital, reduce trust
-;;stronger effect for housemates
-if infection-status = hospitalised-to-dead-infectious-infection-status
-[ 
-  ask my-housemates[
-    set my-trust-in-hospital my-trust-in-hospital - 0.4
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-  ]
-  ask my-network[
-    set my-trust-in-hospital my-trust-in-hospital - 0.1
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-  ]
-     ; print (sentence "telling my network of" count my-network "people that I died")
-
-]
-
-;;if relative recovered via hospital, increase trust
-if infection-status = hospitalised-to-immune-infection-status
-[
-  ask my-housemates[
-    set my-trust-in-hospital my-trust-in-hospital + 0.4
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
-      set epistemic-status "ebola-is-survivable"]
-
-  ]
-ask my-network[
-    set my-trust-in-hospital my-trust-in-hospital - 0.1
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
-          set epistemic-status "ebola-is-survivable"]
-
-  ]
-       ; print (sentence "telling my network of" count my-network "people that I survived")
-
-]
-
-
-
-;let deceased people know they are dead  
-   if infection-status = "dead" [
-     set epistemic-status "dead"
-     stop
-   ]
-
-
-
-;if agent believes ebola is a business, they interpret their sickness as some other disease
-    if believes-ebola-business? and is-observing-critical-symptoms?
-     [
-       set epistemic-status "sick-with-other-disease"
-     ]
-
-    if not believes-ebola-business? and is-observing-critical-symptoms?
-     [
-       set epistemic-status "sick-with-ebola"
-     ]
-
-
-    
 end

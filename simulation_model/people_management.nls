@@ -22,27 +22,25 @@ people-own [
               
 ;; @group Debugging
   schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
+
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
   epistemic-status            ;;< what this person believes about ebola
-  last-day-observed-symptoms  ;;< day symptoms were last noticed; `nobody` until then, so that reading it too early raises an error
-  am-I-experiencing-fake-symptoms? ;;< true when the symptoms shown are from something other than the modelled disease
-  infection-state             ;;< the true disease state, independent of what the person believes
+  other-disease?              ;;< true when the symptoms shown are from something other than the modelled ebola disease
+  infection-state             ;;< the true ebola state, independent of what the person believes
+
+  received-messages           ;;list that stores the messages received
 
 ;; @group Intervention model
   is-currently-allocated-a-bed-in-hospital? ;;< true while this person occupies one of the hospital's beds
-  has-been-tested-infected?   ;;< true once a test has come back positive
-  last-test-tick              ;;< tick of the most recent test
-  has-been-tested-immune?     ;;< true once a test has shown immunity
-  I-know-of-social-distancing? ;;< true once this person has learned that social distancing is advised
-  I-know-of-working-from-home? ;;< true once this person has learned that working from home is possible
+ ; has-been-tested-infected?   ;;< true once a test has come back positive
+ ; last-test-tick              ;;< tick of the most recent test
+ ; has-been-tested-immune?     ;;< true once a test has shown immunity
   
 ;; @group Decision-making model
   current-activity            ;;< the gathering point this person is at on this tick
   current-motivation          ;;< the motive string behind `current-activity`, see motives.nls
   is-activity-successful?     ;;< false when the chosen place turned the person away, e.g. over capacity
-  did-my-network-socially-distance? ;;< true when more than half this person's network distanced last tick
-  did-my-network-quarantine?  ;;< true when more than half the network that was asked to quarantine complied
 
 ;; @group Network memory
   what-my-network-did-week-day ;;< the most common (place type, motive) among this person's network, one entry per weekday tick, oldest first
@@ -65,11 +63,7 @@ people-own [
   #people-in-my-transport     ;;< COVID era: how many shared the vehicle, used for contagion
   is-moving-outside-for-reaching-current-activity? ;;< true when this tick's activity is somewhere other than where the person already was
 
-;; @group Contact-tracing app (dormant)
-  list-of-people-met-per-day-as-recorded-by-the-tracking-app ;;< COVID era: contacts recorded by the tracing app
-  is-user-of-tracking-app?    ;;< COVID era: whether this person runs the tracing app
-  has-mobile-phone?           ;;< COVID era: whether this person owns a phone at all
-    
+
 
 ;; @group epistemic model
   my-trust-in-hospital
@@ -104,13 +98,6 @@ people-own [
   social-safety-satisfaction-level ;;< satisfaction of the social-safety need, in [0, 1]
   
   
-
-;; @group Social contact
-  social-distance-profile     ;;< willingness to keep distance, in [0, 1]; only ever set by `set-social-distance-profile`, which is commented out
-  is-I-apply-social-distancing? ;;< whether this person is distancing on this tick
-  days-since-seen-relatives   ;;< ticks since more than half this person's relatives were in the same place
-  days-since-seen-colleagues  ;;< ticks since more than half this person's colleagues were in the same place
-  days-since-seen-friends     ;;< ticks since more than half this person's friends were in the same place
 
 
 ;; @group Money

@@ -1,13 +1,23 @@
 __includes [ "contagion/ebola_contagion_factor.nls"]
 
 to spread-contagion
-  ;spread-by-travelling
+  spread-other ;this only concerns the spread of other diseases (not ebola) and is therefore simplified
   spread-by-activity-proximity
   ;Delay distribution (days) before seeking care; multiplier on community transmission duration; ~20-40% of symptomatic patients not presenting promptly
   
   ;spread-by-care ;split in hospital(ppe, facilities), homestead(density, caretaking habits, gender dynamics), isolation wards
   ;Increase transmission probability per contact with deceased; model funeral cluster events; resistance rate parameter ~40-70% in high-tension zones
   ;spread-by-funeral-rites ;(safe burials vs unsafe burials, depends on group affiliation and high-tension zones) OBVIATED WITH DENSITY FACTOR
+end
+
+
+
+to spread-other
+   ask people with [other-disease?] [
+    if random 100 > 95 [
+    ask one-of my-network [ set other-disease? true ]
+    ]
+   ]
 end
 
 

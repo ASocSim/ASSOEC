@@ -65,6 +65,13 @@ to setup-ebola
      set first-infected-people n-of (min list 3 count people) people
      ask first-infected-people [contaminate nobody ("setup")]
      set #first-infected-people count first-infected-people
+    
+
+    ;;other diseases
+     let #malaria-patients-at-start 10
+     ask n-of #malaria-patients-at-start people with [infection-state = "healthy"] [
+      set other-disease? true
+      ]
    ]
 ;   setup-phasing-out
 
@@ -405,9 +412,11 @@ to setup-person [current-home l-sex displacement-status]
     set sex l-sex
     set displaced? displacement-status
     set time-when-infected "never"
-    set has-been-tested-infected? false
+   ; set has-been-tested-infected? false
     set priest? false
     set am-I-mourning? false
+    set other-disease? false
+    set received-messages (list "neutral")
 
     ;currently random distribution, must be changed if we understand this better as the initial condition impacts outcome strongly
     set my-trust-in-hospital random-float 1
@@ -427,7 +436,7 @@ to setup-person [current-home l-sex displacement-status]
     ]
 
 
-    set has-been-tested-immune? false
+   ; set has-been-tested-immune? false
 
     create-gathering-link-to current-home [set features (list "rest" "visits" "work" "care for the sick" "get treatment" "family belonging" "group belonging")]
     
@@ -447,13 +456,11 @@ to setup-person [current-home l-sex displacement-status]
     set epistemic-status "healthy"
 
     
-    set last-day-observed-symptoms nobody ;should raise an error if used before being initialized
     set stayed-out-queuing-for-bus? false
     set is-activity-successful? true
 
     set what-my-network-did-week-day []
     set what-my-network-did-weekend []
-    set did-my-network-socially-distance? false
     
     set #days-I-should-remain-in-self-quarantining 0
     set  events-to-process (list)

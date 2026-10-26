@@ -73,7 +73,6 @@ end
     <button x="10" y="271" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Month Run"><![CDATA[let starting-day current-day
 let end-day starting-day + 28
 while [current-day <= end-day] [ go ]]]></button>
-    <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="go once">go</button>
     <button x="10" actionKey="I" y="361" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="inspect person">inspect one-of people</button>
     <button x="10" y="179" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="1 Day run">if slice-of-the-day = "morning" [go]
 while [slice-of-the-day != "morning"] [go]</button>
@@ -150,6 +149,14 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
       <pen interval="0.1" mode="0" display="Illegal burials" color="-7500403" legend="true">
         <setup></setup>
         <update>;plot count people with [am-I-mourning?]</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="safely buried" color="-13345367" legend="true">
+        <setup></setup>
+        <update>plot #safely-buried</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="unsafely buries" color="-5298144" legend="true">
+        <setup></setup>
+        <update>plot #unsafely-buried</update>
       </pen>
     </plot>
     <monitor x="2777" precision="17" y="24" height="60" fontSize="11" width="195">#healthy-hospital-personel</monitor>
@@ -638,6 +645,7 @@ save-world-state</button>
     <slider x="2550" step="1" y="1675" max="10" width="250" display="cost-of-leisure" height="50" min="0" direction="Horizontal" default="1.0" variable="cost-of-leisure"></slider>
     <slider x="2551" step="1" y="1735" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="2.0" variable="hospital-stay-costs"></slider>
     <monitor x="1418" precision="17" y="586" height="60" fontSize="11" width="100">count people with [is-at-leisure-point?]</monitor>
+    <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="go once">go</button>
   </widgets>
   <info>## WHAT IS IT?
 

@@ -16,15 +16,6 @@
         set available-food-rations available-food-rations - min (list (count gatherers) available-food-rations)
       ]
     ]
-    ;remove for ebola eventually
-    
-    ;;A bit ugly and has not much to do here.
-   ;;Proposed fix: record when was the last day (tick?) where relatives were seen for the last time and a reporter for deducing how long they have not been seen
-    ask people [
-      set days-since-seen-relatives days-since-seen-relatives + 1
-      set days-since-seen-colleagues days-since-seen-colleagues + 1
-      set days-since-seen-friends days-since-seen-friends + 1
-    ]
     
     increment-day-of-the-week
   ]

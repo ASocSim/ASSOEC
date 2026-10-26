@@ -1,3 +1,10 @@
+
+
+;OTHER DISEASE
+to-report other-disease
+  report "otherwise sick"
+end
+
 ;EBOLA ONLY
 
 ;SUSCEPTIBLE
