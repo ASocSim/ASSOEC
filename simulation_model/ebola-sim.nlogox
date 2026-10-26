@@ -7,16 +7,15 @@ breed [people person]
 globals [
   slice-of-the-day
   day-of-the-week
-  is-lockdown-active?
   current-day
 
   #dead-people
   #dead-females
   #dead-males
+
   away-gathering-point
   #who-became-sick-while-travelling-locally
   import-scenario-name
-  ;funeral-cemetery
 ]
 
 
@@ -27,11 +26,11 @@ to go
   
   update-within-agent-disease-status
   spread-information
+  update-trustees
   update-people-mind
   
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)
   perform-people-activities
-
 
   update-display
   ;inspect-agents
@@ -556,7 +555,6 @@ As simplifications: each person relates to a fix set of spaces over time (same s
     <monitor x="1071" precision="17" y="148" height="60" fontSize="11" width="100" display="#females">count female-agentset</monitor>
     <monitor x="1071" precision="17" y="75" height="60" fontSize="11" width="100" display="#people">count people</monitor>
     <note x="608" y="21" backgroundDark="0" fontSize="16" width="232" markdown="false" height="40" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Simulation management</note>
-    <switch x="770" y="143" height="40" on="false" variable="show-social-links?" width="196" display="show-social-links?"></switch>
     <switch x="603" y="194" height="40" on="true" variable="animate?" width="111" display="animate?"></switch>
     <switch x="874" y="390" height="40" on="false" variable="inspect-to-file?" width="117" display="inspect-to-file?"></switch>
     <switch x="728" y="194" height="40" on="false" variable="static-seed?" width="113" display="static-seed?"></switch>
@@ -646,6 +644,8 @@ save-world-state</button>
     <slider x="2551" step="1" y="1735" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="2.0" variable="hospital-stay-costs"></slider>
     <monitor x="1418" precision="17" y="586" height="60" fontSize="11" width="100">count people with [is-at-leisure-point?]</monitor>
     <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="95" display="go once">go</button>
+    <switch x="770" y="143" height="40" on="false" variable="show-social-links?" width="137" display="show-social-links?"></switch>
+    <switch x="914" y="144" height="40" on="true" variable="show-trust-links?" width="137" display="show-trust-links?"></switch>
   </widgets>
   <info>## WHAT IS IT?
 

@@ -1,53 +1,22 @@
-;; @file social_networks.nls
-;; @brief The three social circles a person has, and the link breeds behind them.
-;;
-;; A person's network is the union of three groups: relatives (whoever else lives
-;; in their home), colleagues (whoever else is hired by their workplace) and
-;; friends (an explicit `my-friends-links` network built at setup). Only the
-;; friends network is stored as links; the other two are derived on demand from
-;; the gathering links.
-;;
-;; The file also holds the age-class predicates, which sit here for historical
-;; reasons rather than because they belong to the network model.
-;;
-;; @see people_management.nls
-;; @see docs/WIP_ISSUES.md
 
-;; A child's link to the adult responsible for them, directed from the child.
-;;
-;; Read the other way round with `people-that-depend-on-me`. Created only by the
-;; commented-out branch of `setup-social-networks-random`, so no such links exist
-;; in the current build.
-;directed-link-breed [dependable-adult-links dependable-adult-link]
 
-;; A friendship, symmetric between the two people it joins.
-;;
-;; The only social tie stored as links: relatives and colleagues are derived on
-;; demand from the gathering links instead.
 undirected-link-breed [my-kin-links my-kin-link]
 
 undirected-link-breed [my-friends-links my-friends-link]
 
-;;this representation works as long as the workplace network does not become too large
-;directed-link-breed [workplace-colleague-links workplace-colleague-link]
+directed-link-breed [my-trustees-links my-trustee-link]
 
-;breed [work-social-networks work-social-network]
-
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @todo Empty body and no callers; what it is meant to replace is undecided. See
-;; docs/WIP_ISSUES.md#setup-social-network-ebola.
 to setup-social-network-ebola
   setup-kin-network
   setup-friends-networks
+  ;colleagues calculated via gps
+  setup-trust-network
 end
 
 
-;displaced people will not have kin networks as extensive as non-displaced people
+;;KIN
 
+;displaced people will not have kin networks as extensive as non-displaced people
 to setup-kin-network
 ask people [
   let me self
@@ -77,14 +46,7 @@ ask people [
 end
 
 
-;; Build the friendship network for the whole population.
-;; @context observer
-;; @side-effects creates `my-friends-links`
-;; @see setup-social-networks-random
-;;to setup-social-networks
-;;  setup-friends-networks
-;;  print("I made friends!")
-;;end
+;;FRIENDS
 
 ;; Everyone this person could still befriend.
 ;;
@@ -109,28 +71,14 @@ to setup-friends-networks
   ;  ask workers [  create-workplace-colleague-links-to other workers with [my-workplace = [my-workplace] of myself]]
   ask people [
     ;everyone has the same n of friends
-    ; Its up to n so this does not throw an error if there are a lot of leisure places and not enough agents to become friends with
+    ; Its up to n so this does not throw an error if there are not enough agents to become friends with
     create-my-friends-links-with up-to-n-of 3 possible-friends
   ]
   
 end
 
 
-;; The other people living in this person's home.
-;;
-;; @context person
-;; @return agentset of people, excluding self
-to-report my-relatives
-  report my-kin-link-neighbors
-end
-
-to-report my-sick-relatives
-  report my-relatives with [is-observing-critical-symptoms?] 
-end
-
-to-report my-networks-homes
-  report [my-home] of my-relatives
-end
+;;COLLEAGUES
 
 ;; The other people hired by this person's workplace.
 ;;
@@ -146,16 +94,54 @@ to-report my-colleagues
    report (turtle-set nobody)
 end
 
+
+;;TRUSTEES
+
+to setup-trust-network
+  ;establish trust towards priest
+ask people with [priest? = false][
+if my-church != nobody [
+  let my-priest one-of people with [priest?] ;and [gathering-type] of my-work = my-church] PUT THIS BACK, OTHERWISE WE TRUST RANDOM PRIESTS
+  create-my-trustee-link-to my-priest
+  print "trusting my priest"
+ ]
+]
+
+  ask people with [displaced? = true] [
+    let trustee one-of other [gatherers] of my-home
+  create-my-trustee-link-to trustee
+  print "trusting one of my cohabitants"
+  ]
+
+ask my-trustees-links [set color blue]
+
+end
+
+
+to update-trustees
+;;HERE IS WHERE WE INCLUDE PEOPLE IN OUR TRUSTED SOURCES OF INFORMATION DEPENDING ON PAST EVENT (e.g. has a healthcare worker saved a relative?)
+end
+
+
+
+
+;;REPORTERS
+
 ;; The people this person is linked to by `my-friends-links`.
-;;
 ;; @context person
 ;; @return agentset of people
 to-report my-friends
   report my-friends-link-neighbors
 end
 
+;; The other people living in this person's home.
+;; @context person
+;; @return agentset of people, excluding self
+to-report my-relatives
+  report my-kin-link-neighbors
+end
+
 ;; Everyone this person knows: relatives, colleagues and friends together.
-;;
 ;; @context person
 ;; @return agentset of people, with duplicates across the three groups collapsed
 ;; @see my-relatives
@@ -165,8 +151,19 @@ to-report my-network
   report (turtle-set my-relatives my-colleagues my-friends)
 end
 
+to-report my-sick-relatives
+  report my-relatives with [is-observing-critical-symptoms?] 
+end
+
+to-report my-networks-homes
+  report [my-home] of my-relatives
+end
 
 
+
+to-report my-trustees
+  report people ;with [trusted?] in my-network
+end
 
 
 

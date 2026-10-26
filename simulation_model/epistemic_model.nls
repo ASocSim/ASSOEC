@@ -36,13 +36,13 @@ end
 to send-message
 ;message has content and source
   ;people share their messages if they have acquired any content by a trusted source
-  ;exceptions are radios, and healthcare workers
+  ;exceptions are radios, and healthcare workers (priests have asymmetric power, not modeled here but later)
   ask people [
-  let content "test msg"  ;acquire-message
+  let content epistemic-status  ;acquire-message
   let source self
   let current-message (list content source)
   ask my-network [
-    set received-messages current-message
+    set received-messages lput current-message received-messages
   ]
   ]
 
@@ -138,7 +138,7 @@ to evaluate-messages
      ]
 
 
-  print "I have symptoms, seeking advice"
+  ;print "I have symptoms, seeking advice"
 
 end
 

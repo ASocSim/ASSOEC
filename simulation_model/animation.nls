@@ -50,6 +50,11 @@ to update-social-link-visibility
   ifelse show-social-links?
   [ ask my-friends-links [show-link] ask my-kin-links [show-link]]
   [ ask my-friends-links [hide-link] ask my-kin-links [hide-link]]
+
+  ifelse show-trust-links?
+  [ ask my-trustees-links [show-link] ask my-trustees-links [show-link]]
+  [ ask my-trustees-links [hide-link] ask my-trustees-links [hide-link]]
+
 end
 
 ;; Colour this person by sex, lightened while they are still susceptible.
