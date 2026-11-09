@@ -1,3 +1,6 @@
+
+
+
 ;; @file decision/select_activity.nls
 ;; @brief Which activities a person may choose from this tick, and committing to one.
 ;;
@@ -50,6 +53,7 @@ set activities []
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;; activities for healthy people
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 if ( not is-observing-critical-symptoms?)
   [
 ;;if someone dies,  agents have a strong incentive to go to the funeral
@@ -148,6 +152,12 @@ if ( not is-observing-critical-symptoms?)
   ]]
 
 ]
+
+
+;;##ADD STAGE ONE DECISIONS HERE
+;;##MOD STAGE TWO WITH EPI STATES
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;activities for severely sick people (stage 2 and above)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -181,14 +191,17 @@ if infection-status = in-hospital-infection-status [
   if money > hospital-stay-costs
   [
   ;;cost expressed in money units, but represents travel distance and general costs to go hospital
-     if not unwilling-to-go-hospital [
+     if not unwilling-to-go-hospital [ ;if epistemic-status = go-to-hospital
     if any? people with [[gathering-type] of my-work = "hospital"]
      [set activities lput (list my-hospital treatment-motive) activities]
      ]
   ]
+
+;  if epistemic-status = go-to-traditional-healer
   if any? people with [[gathering-type] of my-work = "traditional healer"][
     set activities lput (list my-traditional-healer treatment-motive) activities
   ]
+ ; if epistemic-status = go-to-church
     if any? people with [[gathering-type] of my-work = "church"][
   set activities lput (list my-church treatment-motive) activities
   ]
@@ -208,14 +221,13 @@ end
 
 ;; Commit this person to their preferred activity for this tick.
 ;;
-;; The chosen place and motive are appended to `schedule` as a
-;; (place, motive, slice-of-day, day) entry, the movement flag is worked out while
+;; The movement flag is worked out while
 ;; `current-activity` still holds the previous place, and only then is the new
 ;; place stored.
 ;;
 ;; @context person
 ;; @side-effects sets `current-activity`, `current-motivation` and
-;; `is-moving-outside-for-reaching-current-activity?`, and appends to `schedule`
+;; `is-moving-outside-for-reaching-current-activity?`
 ;; @see my-preferred-available-activity-descriptor
 ;; @see select-activity-wtf?
 to select-activity
@@ -223,11 +235,7 @@ to select-activity
 
   let loc location-of c-a
   let motive motive-of c-a
-  let schedule-entry (list loc motive slice-of-the-day day-of-the-week)
-  set schedule lput schedule-entry schedule
 
-
-  
     ;print (sentence "my preferred activity is" c-a)
   
   ;;select if migration takes over and people move around

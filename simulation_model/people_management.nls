@@ -21,7 +21,7 @@ people-own [
   displaced?                  ;;boolean for agent displaced status, not this applies only to men
               
 ;; @group Debugging
-  schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
+
 
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
@@ -277,16 +277,6 @@ end
 
 
 
-;; True when anyone in this person's household believes themselves to be infected.
-;;
-;; The test is about the household rather than the person, because this is what a
-;; person can reasonably suspect about themselves.
-;;
-;; @context person
-;; @return true if any housemate believes they are infected
-to-report might-I-be-contagious?
-  report not believes-ebola-business?
-end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; RELATION TO GATHERING POINTS;;;;;;

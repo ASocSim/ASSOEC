@@ -9,7 +9,7 @@ directed-link-breed [my-trustees-links my-trustee-link]
 to setup-social-network-ebola
   setup-kin-network
   setup-friends-networks
-  ;colleagues calculated via gps
+  ;colleagues calculated on demand via gps, not a fixed social network per se
   setup-trust-network
 end
 
@@ -78,7 +78,7 @@ to setup-friends-networks
 end
 
 
-;;COLLEAGUES
+;;COLLEAGUES (reporter only)
 
 ;; The other people hired by this person's workplace.
 ;;
@@ -95,6 +95,7 @@ to-report my-colleagues
 end
 
 
+
 ;;TRUSTEES
 
 to setup-trust-network
@@ -103,14 +104,14 @@ ask people with [priest? = false][
 if my-church != nobody [
   let my-priest one-of people with [priest?] ;and [gathering-type] of my-work = my-church] PUT THIS BACK, OTHERWISE WE TRUST RANDOM PRIESTS
   create-my-trustee-link-to my-priest
-  print "trusting my priest"
+  ;print "trusting my priest"
  ]
 ]
 
   ask people with [displaced? = true] [
-    let trustee one-of other [gatherers] of my-home
+    let trustee one-of my-friends
   create-my-trustee-link-to trustee
-  print "trusting one of my cohabitants"
+  ;print "trusting one of my friends"
   ]
 
 ask my-trustees-links [set color blue]
@@ -118,28 +119,34 @@ ask my-trustees-links [set color blue]
 end
 
 
+
+
+to establish-trust [new-trustee]
+  create-my-trustee-link-to new-trustee
+  show (sentence "established my trust in " new-trustee)
+
+end
+
+to revoke-trust [no-longer-trusted]
+  ask out-my-trustee-link-to no-longer-trusted [ die ]
+  show (sentence "removed my trust in " no-longer-trusted)
+end
+
+
 to update-trustees
 ;;HERE IS WHERE WE INCLUDE PEOPLE IN OUR TRUSTED SOURCES OF INFORMATION DEPENDING ON PAST EVENT (e.g. has a healthcare worker saved a relative?)
+
+
 end
+
+
+
 
 
 
 
 ;;REPORTERS
 
-;; The people this person is linked to by `my-friends-links`.
-;; @context person
-;; @return agentset of people
-to-report my-friends
-  report my-friends-link-neighbors
-end
-
-;; The other people living in this person's home.
-;; @context person
-;; @return agentset of people, excluding self
-to-report my-relatives
-  report my-kin-link-neighbors
-end
 
 ;; Everyone this person knows: relatives, colleagues and friends together.
 ;; @context person
@@ -151,6 +158,14 @@ to-report my-network
   report (turtle-set my-relatives my-colleagues my-friends)
 end
 
+;; The other people living in this person's home.
+;; @context person
+;; @return agentset of people, excluding self
+to-report my-relatives
+  report my-kin-link-neighbors
+end
+
+
 to-report my-sick-relatives
   report my-relatives with [is-observing-critical-symptoms?] 
 end
@@ -159,17 +174,31 @@ to-report my-networks-homes
   report [my-home] of my-relatives
 end
 
+;; The people this person is linked to by `my-friends-links`.
+;; @context person
+;; @return agentset of people
+to-report my-friends
+  report my-friends-link-neighbors
+end
 
 
+;;Report the agentset of trusted people
 to-report my-trustees
-  report people ;with [trusted?] in my-network
+  report my-trustee-link-neighbors
 end
 
 
 
 
-;;LEGACY COVID
 
+
+
+
+
+
+;;;;;;;;;;;;;;;
+;;LEGACY COVID
+;;;;;;;;;;;;;;;
 
 ;; The people who depend on this person, through `dependable-adult-links`.
 ;;

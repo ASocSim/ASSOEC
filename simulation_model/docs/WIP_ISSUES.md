@@ -245,28 +245,7 @@ Three gathering-type strings that do not exist:
 A one-word fix each, but note they would still report 0 because of `age` and the
 motive fork, so fixing the strings alone will not make them work.
 
-<a id="proximity-factor"></a>
 
-### `proximity-factor`
-
-[gathering_points.nls](../gathering_points.nls)
-
-Every branch compares the string `gathering-type` against a reporter from
-[gathering_points/gathering_types.nls](../gathering_points/gathering_types.nls),
-which returns an **agentset**:
-
-```netlogo
-if gathering-type = hospital-gathering-type [report density-factor-hospitals]
-```
-
-No branch can ever match, so every call reaches `error (word gathering-type " not defined")`.
-This is live: [contagion/contagion.nls](../contagion/contagion.nls) calls it as
-`[proximity-factor] of context`.
-
-**Fix:** compare against the type strings (`"hospital"`, `"school"`, ...) or
-against the existing predicates (`is-hospital?`, `is-school?`, ...). The
-`gathering-type` reporters are agentset lookups and are correctly used as such in
-`select_activity`, so it is this file that has the wrong idea of them.
 
 <a id="is-alone-at-"></a>
 

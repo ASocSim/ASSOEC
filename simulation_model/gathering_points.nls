@@ -421,16 +421,7 @@ to-report males-in-all-male-homes
   report people with [member? my-home displaced-male-homes]
 end
 
-;; True when anyone in the population believes themselves to be infected.
-;;
-;; @return true if at least one person believes they are infected
-;; @todo Should be refined once there is a reporting system, or once hospital care
-;; determines who counts as officially sick.
-to-report is-someone-officially-sick? 
-  if any? people with [not believes-ebola-business? and infection-status != "healthy"]
-  [report true]
-   report false
-end
+
 
 
 

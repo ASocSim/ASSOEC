@@ -203,9 +203,9 @@ to update-within-agent-disease-status
   ]
 
   ask people with [other-disease?] [
-    print "update within agent malaria status"
+    ;print "update within agent malaria status"
     ;;here people know they have symptoms of SOMETHING, trigger advice seeking behaviour
-  
+  evaluate-messages-care
    ; set infection-state other-disease
   ]
 

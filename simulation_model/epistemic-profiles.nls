@@ -1,0 +1,40 @@
+
+;BELIEFS aka EPISTEMIC STATES
+
+
+;;;;;;;;;;;;
+;;CARE CHOICE
+;;;;;;;;;;;;
+
+
+;;these become relevant once the choice of treatment is needed
+;;and discordant actions and beliefs do impact the needs as external events do (unimplemented for now)
+
+to-report go-to-hospital
+  report "I should go to the Hospital"
+end
+
+to-report go-to-traditional-healer
+  report "I should try traditional remedy"
+end
+
+to-report go-to-church
+  report "I should go to the church"
+end
+
+
+
+;;;;;;;;;;;;
+;;RITES CHOICE
+;;;;;;;;;;;;
+
+
+
+to-report wants-traditional-burials
+    report "We should hold a Traditional Burial rite"
+end
+
+
+to-report wants-SDB
+   report "We should have a Safe Dignified Burial rite"
+end

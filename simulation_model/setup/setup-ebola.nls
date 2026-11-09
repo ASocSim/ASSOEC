@@ -67,9 +67,8 @@ to setup-ebola
      set #first-infected-people count first-infected-people
     
 
-    ;;other diseases
-     let #malaria-patients-at-start 10
-     ask n-of #malaria-patients-at-start people with [infection-state = "healthy"] [
+    ;;other diseases initial patients
+     ask n-of #other-disease-patients-at-start people with [infection-state = "healthy"] [
       set other-disease? true
       ]
    ]
@@ -80,9 +79,6 @@ to setup-ebola
   ask gathering-links
    [hide-link]
 
-;   set is-lockdown-active? false
-;   set list-of-buses (list)
-;   set list-of-shared-cars (list)
   
 ;   if log-setup? [foreach sort gathering-points [[x]-> log-file-print [(word "description_gathering_poing(" who "," gathering-type ")")] of x]]
 
@@ -416,7 +412,11 @@ to setup-person [current-home l-sex displacement-status]
     set priest? false
     set am-I-mourning? false
     set other-disease? false
-    set received-messages (list "neutral")
+    ;set received-messages (list "neutral")
+    set received-messages "neutral"
+
+    ;epistemic status is now different: one line only to transform into nested list pls
+    set epistemic-status "hospital hurts"
 
     ;currently random distribution, must be changed if we understand this better as the initial condition impacts outcome strongly
     set my-trust-in-hospital random-float 1
@@ -428,7 +428,6 @@ to setup-person [current-home l-sex displacement-status]
 
     set current-activity current-home
     set my-home current-home
-    set schedule (list "hello" "its a-meeee, maaaaario")
     
     if(sex = "female")
     [
@@ -436,7 +435,6 @@ to setup-person [current-home l-sex displacement-status]
     ]
 
 
-   ; set has-been-tested-immune? false
 
     create-gathering-link-to current-home [set features (list "rest" "visits" "work" "care for the sick" "get treatment" "family belonging" "group belonging")]
     
@@ -445,15 +443,12 @@ to setup-person [current-home l-sex displacement-status]
     set is-currently-allocated-a-bed-in-hospital? false
 
 
- ;   set can-I-perform-solo-transportation? random-float 1  <  owning-solo-transportation-probability   ;; IS THIS RELEVANT IN EBOLA?
 
     set current-person-I-depend-on nobody   ;;MOD FOR CARETAKING
     set color default-color
     set size 0.5
     set infection-state susceptible-infection-status
 
-    ;epistemic status is now different: how to model this? start with random distribution?
-    set epistemic-status "healthy"
 
     
     set stayed-out-queuing-for-bus? false

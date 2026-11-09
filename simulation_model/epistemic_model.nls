@@ -14,12 +14,15 @@
 ;;if someone is ambivalent, they can be influenced either way (this should depend on who is there)
 ;modeling this at civil societies only for now
 
+__includes ["epistemic-profiles.nls"]
+
+
 globals
 [
   ;globals prep, not used
-  #ebola-business-believers
-  #ratio-willing-to-trust-hospital
-  #ratio-willing-to-trust-institutional-advice
+  ;#ebola-business-believers
+  ;#ratio-willing-to-trust-hospital
+  ;#ratio-willing-to-trust-institutional-advice
   ;let ebola-business-narrative-value mean [my-trust-in-institutions] of current-gatherers
   ;print ebola-business-narrative-value 
 ]
@@ -37,12 +40,18 @@ to send-message
 ;message has content and source
   ;people share their messages if they have acquired any content by a trusted source
   ;exceptions are radios, and healthcare workers (priests have asymmetric power, not modeled here but later)
+  
   ask people [
-  let content epistemic-status  ;acquire-message
+  let content epistemic-status
   let source self
   let current-message (list content source)
-  ask my-network [
-    set received-messages lput current-message received-messages
+  let my-location current-activity
+
+  ask my-trustees with [current-activity = my-location] [
+    ;overwrite only
+    set received-messages current-message
+    ;print "i receive "
+    ;print current-message
   ]
   ]
 
@@ -53,6 +62,11 @@ end
 
 to update-epistemic-status
 
+;;CREDULOUS BEHAVIOR FOR TEST, NOT FINAL
+set epistemic-status received-messages
+
+
+
 ;keep track of people who die or survive via hospitals
 ;update their networks beliefs
 
@@ -61,13 +75,12 @@ to update-epistemic-status
 if infection-status = hospitalised-to-dead-infectious-infection-status
 [ 
   ask my-housemates[
-    set my-trust-in-hospital my-trust-in-hospital - 0.4
-    set epistemic-status "if you go to the hospital, you will die"]
-
+    set my-trust-in-hospital my-trust-in-hospital - 0.4]
     ;cap
       if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-      
+
   ]
+
   ask my-network[
     set my-trust-in-hospital my-trust-in-hospital - 0.1
     ;cap
@@ -75,8 +88,9 @@ if infection-status = hospitalised-to-dead-infectious-infection-status
       set epistemic-status "if you go to the hospital, you will die"
      ; print (sentence "telling my network of" count my-network "people that I died")
 
-]
 
+
+]
 ;;if relative recovered via hospital, increase trust
 if infection-status = hospitalised-to-immune-infection-status
 [
@@ -110,16 +124,28 @@ ask my-network[
 
     
 ;the internal choice of seeking care
-if is-observing-critical-symptoms? or other-disease?
+;if is-observing-critical-symptoms?  ;mod this to encompass s1 and s2
+if infection-status = stage-one-to-stage-two-infection-status or infection-status = stage-two-infection-status
 [
-  evaluate-messages
+  evaluate-messages-care
 ]
+
+
+if infection-status = hospitalised-to-immune-infection-status[
+  update-belief-hospitals
+]
+
+if infection-status = hospitalised-to-dead-infectious-infection-status or infection-status = stage-two-to-non-hospitalised-infection-status [
+  evaluate-messages-rites
+]
+
+
 end
 
 
 
-to evaluate-messages
-  ;;here is when the agent with symptoms deliberates on their decision
+to evaluate-messages-care
+  ;;here is when the agent with symptoms deliberates on their decision of care seeking
   ;;this is done by evaluating the advice of the people they trust
 
   ;needs trust links
@@ -127,22 +153,32 @@ to evaluate-messages
 
 
 ;if agent believes ebola is a business, they interpret their sickness as some other disease
-    if believes-ebola-business? and is-observing-critical-symptoms?
-     [
-       set epistemic-status "sick-with-other-disease"
-     ]
-
-    if not believes-ebola-business? and is-observing-critical-symptoms?
-     [
-       set epistemic-status "sick-with-ebola"
-     ]
+ ;   if believes-ebola-business? [ set epistemic-status "sick-with-other-disease"]
+ ;   if not believes-ebola-business?     [  set epistemic-status "sick-with-ebola"]
 
 
-  ;print "I have symptoms, seeking advice"
+
+;print "considering"
+;print received-messages
+
+;;MAKE FUNCTION EVAL CARE HERE
+
+
+
+end
+
+to update-belief-hospitals
+  ;here we make people trus thospitals more via messages
 
 end
 
 
+to evaluate-messages-rites
+;;here is when the agent with symptoms deliberates on their decision of which rites should be done for the deceased
+  ;;this is done by evaluating the advice of the people they trust
+
+
+end
 
 
 
@@ -167,23 +203,14 @@ to-report unwilling-to-go-hospital
 end
 
 
-to-report believes-ebola-business?
-  report epistemic-status = "ebola business"
-end
+;to-report believes-ebola-business?  report epistemic-status = "ebola business" end
 
 
 ;incorporates the belief that "I can infect others"
-to-report sick-with-ebola
-  report epistemic-status = "I am sick with ebola"
-end
+;to-report sick-with-ebola report epistemic-status = "I am sick with ebola" end
 
-to-report sick-with-other-disease
-  report epistemic-status = "I am sick but not with ebola"
-end
+;to-report sick-with-other-disease report epistemic-status = "I am sick but not with ebola" end
 
-to-report ebola-is-survivable
-  report epistemic-status = "I can survive"
-end
 
 
 
@@ -197,7 +224,7 @@ end
 
 
 
-to info-dynemics
+to info-dynamics
 ;;INFO DYNAMICS - REMOVE
 ;;converge opinions within households
   ask homes [influence-relatives]
