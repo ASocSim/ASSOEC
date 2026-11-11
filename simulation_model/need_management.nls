@@ -241,36 +241,33 @@ end
 
 
 
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo A reporter that writes: it sets `my-expected-income` on every person in
-;; the world on each call. See docs/WIP_ISSUES.md#sue-financial-survival.
+;;financial survival
+
 to-report SUE-financial-survival [ad]
   
     let gp location-of ad
     let motive motive-of ad
     let eating-costs price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets
 
-  
-    if motive = work-motive
-  [
-      ;get money from work, except work in the household
+    ;get money from work, except work in the household
+    if (motive = work-motive) [
+      if (not member? gp homes)[
        report min list (my-expected-income / eating-costs) 1
-      ; report max (list ((- my-expected-income) / eating-costs) 0)
      ]
+    ]  
   
-  
+
+  ;; to get food we spend money, which hurts financial survival a little
     if motive = food-motive [
        let money-left-over [amount-of-household-capital] of my-home - eating-costs
-
        ; If we spend all our money, financial-survival will drop to 0
-       if money-left-over <= 0 [
+       ifelse money-left-over <= 0 [
          report (- financial-survival-satisfaction-level)
-       ]
-      report (- min (list (money-left-over / eating-costs) 1))
-     
-    report -0.2 ]
+       ][
+      ;uncomment here if you want lifelike famine issues (buying food bankrupts people)
+       ;report (- min (list (money-left-over / eating-costs) 1))
+       report -0.2 
+       ]]
 
     if motive = leisure-motive [
       report -0.3
@@ -320,13 +317,6 @@ end
 ;this could be tied to financial survival
 ;will decrease once treatment at hospital is working
 ;implement social status increase for leisure activity
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 ;; @todo Compares a gathering-type string against `my-work`, an agent. See
 ;; docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-social-status [ad]
@@ -368,45 +358,35 @@ end
 
 ;providing (for family)
 ;the getting treatment part can use some attention + might need more guard conditions as it might break e.g. locations where we are at work but not working for providing
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 to-report SUE-providing [ad]
   let gp location-of ad
   let motive motive-of ad
+
   ;female provide by getting food (more like cooking it but we think about this later)
   if is-female? [
   if ([gathering-type] of gp = "store" or [gathering-type] of gp = "market") and (motive = food-motive)[
       report 0.2]
   ]
-  
-   ;religious gathering attending is providing too
-    if [gathering-type] of gp = "church" and motive = spiritual-motive [
+
+  if is-male? [
+    if gp = my-work and motive = work-motive [ report 0.4]
+    ]
+
+  ;religious gathering attending is providing too
+  if [gathering-type] of gp = "church" and motive = spiritual-motive [
     ifelse is-female? [report 0.8] [report 0.4]]
   
-    ;in case of sickness, getting treatment at home and at hospital reduces the satisfaction of providing
-    ;this should also depend on social networks and beliefs
+  ;in case of sickness, getting treatment at home and at hospital reduces the satisfaction of providing
+  ;this should also depend on social networks and beliefs
     if motive = treatment-motive [ report -0.4 ]
   
-  if is-male? [
-    ifelse gp = my-work and motive = work-motive [report 0.4] [report -0.1]]
+
 
     report 0
 end
 
 
 ;autonomy
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 to-report SUE-autonomy [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -416,37 +396,26 @@ to-report SUE-autonomy [ad]
     report 0.4
   ]
 
-
   ;working increases autonomy
     if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
       ifelse motive = work-motive [
       ;currently, not working decreases autonomy
       if ( gp = my-work ) [report 0.9]][report -0.3]]
       
-  ;so does going to school
-;       ifelse ([gathering-type] of gp = "school" and motive = learning-motive)
-;       [ report  0.2 ]
-;       [ report -0.1 ]
-;     ]
-  
   ;for the funeral rites, a SDB damages autonomy, while a traditional rite increases it (expectedly)
-  if (motive = SDB-motive) [
-    ;ifelse (funeral-type = "SDB") [report -0.1][
-    report -0.5] 
-
-  if (motive = funeral-motive)
-    [report 0.5]
-  ;]
+  if (motive = SDB-motive) [report -0.5] 
+  if (motive = funeral-motive) [report 0.5]
   
   ;getting treatment also impacts autonomy
-  ;REFACTORING NEEDED, use switch?
-  if (motive = treatment-motive and gp = my-home) [
-  report 0.2]
-    if (motive = treatment-motive and gp = my-traditional-healer) [
-  report 0.2]
-  if (motive = treatment-motive and gp =  my-hospital) [
-  report -0.2]
-     report 0
+  ;EPISTEMIC STATE IMPCTS HERE
+  if (motive = treatment-motive and gp = my-home) [report 0.2]
+  if (motive = treatment-motive and gp = my-traditional-healer) [report 0.2]
+  if (motive = treatment-motive and gp =  my-hospital) [report -0.2]
+
+  ; going to school to learn should increase autonomy
+;       if ([gathering-type] of gp = "school" and motive = learning-motive)[ report  0.2 ]     ]
+
+  report 0
 
 end
 

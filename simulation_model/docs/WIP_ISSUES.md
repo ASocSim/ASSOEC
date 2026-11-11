@@ -62,61 +62,9 @@ is always false!
 
 There is no explicit action for caring at the hospital, which is what female relatives can do if someone is sick and at the hospital
 
-| Reporter | Line | Effect |
-| --- | --- | --- | |
-| `SUE-physical-safety` | `if gp = "hospital"` | unreachable anyway, see below |
-| `SUE-social-status` | `if ([gathering-type] of gp = my-work)` | compares a type string against an agent |
 
-`SUE-physical-safety` also has its hospital and school lines *inside* the
-`if motive = "work"` block but *after* an `ifelse` in which both branches report,
-so they can never run. `SUE-health` tests the motive `"get treatmet"`.
-`SUE-providing`'s male branch reports `-0.4` for every activity that is not
-tagged `"work"` at a place whose type is `"work"` - a type that does not exist -
-so men lose providing satisfaction whatever they do.
+# DEBUG BREAK HERE
 
-**Needed:** these read as a first pass written against the intended Ebola motive
-set rather than the one the model emits. Probably best fixed as one sweep after
-the motive vocabulary is settled, comparing `[gathering-type] of gp` against type
-strings throughout.
-
-<a id="sue-autonomy"></a>
-
-### `SUE-autonomy`
-
-[need_management.nls](../need_management.nls)
-
-```netlogo
-ifelse (motive = "organize funeral") [report 0.5] [report 0.5]
-```
-
-Both branches report the same value, so the reporter returns 0.5 for every
-activity that reaches this line, and the treatment logic below it is unreachable.
-The commented-out lines around it suggest the intent was for a safe-and-dignified
-burial to damage autonomy and a traditional rite to raise it, which needs
-`funeral-type` to exist first.
-
-The working block above it also has a hole: if the motive is `"work"` but the
-place is not `my-work`, no branch reports and execution falls through.
-
-<a id="sue-financial-survival"></a>
-
-### `SUE-financial-survival`
-
-[need_management.nls](../need_management.nls)
-
-The reporter opens with
-
-```netlogo
-ask people [set my-expected-income 10]
-```
-
-A reporter that writes to every agent in the world, on every call - and it is
-called once per candidate activity, per person, per tick. Besides being O(n²) on
-the hot path, it means `my-expected-income` can never hold anything but 10.
-
-The rest of the body is mostly commented out: the `"get food"` branch reports 0
-with the real calculation disabled, and the `"work"` branch reports
-`min (expected income / eating costs) 1`.
 
 <a id="workers-working-at-mine-agriculture-house"></a>
 
