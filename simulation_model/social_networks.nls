@@ -67,7 +67,6 @@ end
 ;; @side-effects creates `my-friends-links`
 to setup-friends-networks
   
-  ;ask children with [any? [gatherers with [is-adult?]] of my-home ][create-dependable-adult-link-to one-of [gatherers with [is-adult?]] of my-home ]
   ;  ask workers [  create-workplace-colleague-links-to other workers with [my-workplace = [my-workplace] of myself]]
   ask people [
     ;everyone has the same n of friends

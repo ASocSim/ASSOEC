@@ -95,7 +95,7 @@ if (motive = leisure-motive) [
   if ([gathering-type] of loc = [gathering-type] of my-leisure-point) [
     depleat-household-capital cost-of-leisure
   ] 
-;;placeholder costs of sending children to school
+;;placeholder costs of sending kids to school
 
 ]
 
@@ -284,15 +284,7 @@ to-report follow-person-in-charge-motive
 end
 
 
-;; True when this person owes work time on this tick: a working-age adult, on a
-;; weekday, in the morning or afternoon.
-;;
-;; @context person
-;; @return true if this person should be at work now
-to-report is-I-have-contractual-obligations?
-  report (slice-of-the-day = "morning" or slice-of-the-day = "afternoon")
-  and not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
-end
+
 
 ;; True when the descriptor means "rest at my own home".
 ;;

@@ -27,32 +27,6 @@ open.
 
 ---
 
-## Cross-cutting
-
-Two problems that are not confined to one procedure. Both invalidate a lot of
-code at once, and several entries below are only symptoms of them.
-
-<a id="age-is-never-assigned"></a>
-
-### `age` is never assigned
-
-`set age` does not appear anywhere in the model, and `worker-age`,
-`student-age` and `retired-age` are commented out in
-[people/classes.nls](../people/classes.nls). Only `young-age` survives, and
-nothing assigns it either.
-
-Everything that tests `age` is therefore permanently false or empty:
-`is-worker?`, `is-student?`, `is-adult?`, `is-child?`, `is-young?`,
-`is-parent?`, `workers`, `children`, `students`, `youngs`, `parents`, every
-`#workers-working-at-*` and `#*-workers` reporter, `my-colleagues`,
-`is-I-have-contractual-obligations?`, `is-currently-in-situation-of-active-dependence?`,
-`is-currently-watching-a-child?` and `is-currently-watched-by-an-adult?`. The
-four `*-average-amount-of-capital` reporters divide by zero if called.
-
-**Needed:** decide whether the Ebola model keeps age classes at all. If it does,
-`setup-person` is where they would be assigned, and the age reporters in
-`people/classes.nls` need uncommenting. If it does not, the predicates above
-should go rather than sit permanently false.
 
 <a id="motive-strings-have-forked"></a>
 

@@ -70,7 +70,7 @@ to-report is-working-day-for-me?
     report not (day-of-the-week = "saturday" or day-of-the-week = "sunday")
   ]
   
-  error (sentence "wrong user of this function" self [age] of self)
+  error (sentence "wrong user of this function" self [sex] of self)
 end
 
 ;; Whether shops trade today.

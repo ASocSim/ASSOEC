@@ -80,10 +80,6 @@ end
 to-report default-color
   if sex = "female" [report green]
   if sex = "male" [report red]
-   if age = "young" [report blue]
-;   if age = "student" [report orange]
-;   if age = "worker" [report blue]
-;   if age = "retired" [report red]
 end
 
 ;#endregion

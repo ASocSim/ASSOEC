@@ -16,7 +16,6 @@ __includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" 
 
 people-own [
 ;; @group Demographics
-  age                         ;;< age class, "young"/"student"/"worker"; never assigned in the Ebola build, so every age predicate is false
   sex                         ;;< "female" or "male", see people/classes.nls
   displaced?                  ;;boolean for agent displaced status, not this applies only to men
               
@@ -238,13 +237,6 @@ end
 
 
 
-;; Everyone of the "young" age class.
-;;
-;; @return agentset of people
-;; @note Empty in the current build: nothing assigns `age`.
-to-report children
-  report people with [is-young?]
-end
 
 ;; True when this person is female.
 ;;
@@ -264,15 +256,6 @@ end
 
 
 
-;; True when this person is of the "young" age class.
-;;
-;; @context person
-;; @return true if `age` is `young-age`
-;; @note Never true in the current build: nothing assigns `age`.
-to-report is-young?
-  ;report age = young-age
-  report true
-end
 
 
 

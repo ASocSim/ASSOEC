@@ -270,7 +270,7 @@ to  increment-contacts-due-to-group-gathering-global-metrics [ts context]
 end
 
 to increase-people-being-severe-event-global-metrics [p]
-  table:put number-of-people-per-sex-having-ever-reached-severe-table [age] of p (table:get number-of-people-per-sex-having-ever-reached-severe-table [age] of p + 1)
+  table:put number-of-people-per-sex-having-ever-reached-severe-table [sex] of p (table:get number-of-people-per-sex-having-ever-reached-severe-table [sex] of p + 1)
 end
 
 to-report ratio-people-having-ever-reached-severe-infection-status [a]
@@ -280,7 +280,6 @@ end
 to-report #initial-people-with-sex [a]
   if a = female-sex [report    #females-at-start]
   if a = male-sex [report    #males-at-start]
-;  if a = worker-age [report    #workers-at-start]
 end
 
 to-report sex-group-to-sex-group-#contacts [infector-sex infected-sex]

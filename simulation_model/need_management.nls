@@ -291,8 +291,8 @@ to-report SUE-financial-survival [ad]
     ]
   report 0
   
-  ;add decrease in finances for children going to school
-  ; if (age = "young" and gp = "school") [decrease financial survival] 
+  ;add decrease in finances for kids going to school
+  ; if (gp = "school") [decrease financial survival] ;add check if person works there
 end
 
 
@@ -385,10 +385,9 @@ to-report SUE-social-status [ad]
     if ([gathering-type] of gp = [gathering-type] of my-work ) and (motive = work-motive)
     [report 0.4]
   ]
-;   if age = "young" [
+;kids at school, unimplemented
 ;       if (gp = my-school ) and (motive = "learn")[
 ;       report 0.9]
-;   ]
   
 ;;leisure activity replenishes autonomy
   if motive = leisure-motive and gp = my-leisure-point [
@@ -471,8 +470,7 @@ to-report SUE-autonomy [ad]
       if ( gp = my-work ) [report 0.9]][report -0.3]]
       
   ;so does going to school
-;   if age = "young" [
-;       ifelse [gathering-type] of gp = "school"
+;       ifelse ([gathering-type] of gp = "school" and motive = "learn")
 ;       [ report  0.2 ]
 ;       [ report -0.1 ]
 ;     ]
