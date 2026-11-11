@@ -124,25 +124,3 @@ to update-memory
   ]
 end
 
-
-;;COVID LEGACY
-
-;; True when a child is present wherever this person currently is.
-;;
-;; @context person
-;; @return true if any child shares this person's current gathering point
-;; @note Never true in the current build: `is-child?` tests `age`, which nothing
-;; assigns.
-to-report is-currently-watching-a-child?
-  report any? [current-gatherers with [is-child?]] of current-activity
-end
-
-;; True when an adult is present wherever this person currently is.
-;;
-;; @context person
-;; @return true if any adult shares this person's current gathering point
-;; @note Never true in the current build: `is-adult?` tests `age`, which nothing
-;; assigns.
-to-report is-currently-watched-by-an-adult?
-  report any? [current-gatherers with [is-adult?]] of current-activity
-end

@@ -196,69 +196,20 @@ end
 
 
 
-;;;;;;;;;;;;;;;
-;;LEGACY COVID
-;;;;;;;;;;;;;;;
 
-;; The people who depend on this person, through `dependable-adult-links`.
-;;
-;; @context person
 ;; @return agentset of people
-;;to-report people-that-depend-on-me
-;;  report in-dependable-adult-link-neighbors
-;;end
+;;this is the same as people agentset, but we call it workers here to avoid confusion
 
-;; Everyone of working age.
-;;
-;; @return agentset of people
-;; @note Empty in the current build: nothing assigns `age`.
 to-report workers
   report people with [is-worker?]
 end
 
-;; True when this person is of the "young" age class.
-;;
-;; @context person
-;; @return true if `age` is "young"
-;; @note Never true in the current build: nothing assigns `age`.
-to-report is-child?
-  report age = "young"
-end
 
-;; Everyone of student age.
-;;
-;; @return agentset of people
-;; @note Empty in the current build: nothing assigns `age`.
-to-report students
-  report people with [ is-student?]
-end
 
-;; True when this person is a student or a worker.
-;;
-;; Retirees were part of this test in the COVID model and are commented out.
-;;
-;; @context person
-;; @return true if `age` is "student" or "worker"
-;; @note Never true in the current build: nothing assigns `age`.
-to-report is-adult?
-  report is-student? or is-worker?
-end
-
-;; True when this person is of the "student" age class.
-;;
-;; @context person
-;; @return true if `age` is "student"
-;; @note Never true in the current build: nothing assigns `age`.
-to-report is-student?
-  report age = "student"
-end
-
-;; True when this person is of the "worker" age class.
-;;
 ;; @context person
 ;; @return true unless unemployed
 ;; @note Always true in the current build
-;; age is commented out in people/classes.nls.
+
 to-report is-worker?
   ifelse my-work != nobody
   [report true] [

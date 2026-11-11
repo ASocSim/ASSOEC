@@ -195,15 +195,15 @@ end
 ;; How many workers are working right now, anywhere.
 ;;
 ;; @return a count of people
-;; @note 0 in the current build, on both counts: `workers` is gated on `age`,
-;; which nothing assigns, and `is-working?` tests a motive string the Ebola build
-;; never produces.
 to-report #workers-working
   report count workers with [is-at-work?]
 end
 
-;;;WORKERS AT EACH WORKING PLACE
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;WORKERS AT EACH WORKING PLACE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; How many workers are working at a hospital right now.
 ;;
