@@ -12,10 +12,8 @@
 ;; `current-motivation`, so that the rest of the model can ask "is this person at
 ;; work?" without knowing how that is stored.
 ;;
-;; @note Motive strings are in transition. motives.nls defines constants
-;; (`work-motive` is "contractual obligation"), while `select_activity.nls`
-;; records bare strings such as "work". Predicates below that test the constants
-;; therefore never fire on descriptors the Ebola build actually produces.
+;; @note Motive strings are in transition. `select_activity.nls`
+;; records bare strings such as "work". 
 ;; @see decision/select_activity.nls
 ;; @see motives.nls
 ;; @see docs/WIP_ISSUES.md
@@ -422,14 +420,7 @@ to-report is-a-leisure-motivation? [a-motive]
   report a-motive = "leisure"
 end
 
-;; True when `a-motive` is the work motive.
-;;
-;; @param a-motive  the motive string to test
-;; @return true if the motive is "contractual obligation"
-;; @see is-working-motive?
-to-report  is-contractual-obligation? [a-motive]
-  report a-motive = "contractual obligation"
-end
+
 
 ;; True when `location` is a home.
 ;;
@@ -439,32 +430,7 @@ to-report is-home-gathering-point? [location]
   report [gathering-type] of location = "home"
 end
 
-;; Whether a child in someone's care could be brought along to this activity.
-;;
-;; Anything at a home, a hospital test, shopping, leisure and treatment can be
-;; done with a dependant in tow. Work and school cannot. Anything else raises an
-;; error rather than guessing, so that a new activity type is noticed here.
-;;
-;; @param an-activity-descriptor  the activity being considered
-;; @return true if a dependant can come along
-;; @context person
-;; @side-effects raises an error for any descriptor the rules above do not cover
-to-report can-be-done-with-a-dependable-person? [an-activity-descriptor]
-  if
-  is-home-gathering-point? location-of an-activity-descriptor
-  or ([is-hospital?] of first an-activity-descriptor and motive-of an-activity-descriptor = "get-tested")
-  or (is-a-leisure-motivation? motive-of an-activity-descriptor)
-  or motive-of an-activity-descriptor = treatment-motive
-  [report true]
 
-  if
-  ([ is-hospital? or is-workplace? or is-store? or is-school?] of location-of an-activity-descriptor)
-  and (motive-of an-activity-descriptor = learning-motive or
-    is-contractual-obligation? motive-of an-activity-descriptor)
-  [report false]
-
-  error (sentence "unimplemented" [gathering-type] of first an-activity-descriptor last an-activity-descriptor)
-end
 
 ;; Work in progress.
 ;;

@@ -28,35 +28,6 @@ open.
 ---
 
 
-<a id="motive-strings-have-forked"></a>
-
-### Motive strings have forked
-
-[motives.nls](../motives.nls) defines the motive vocabulary as constants:
-`work-motive` is `"contractual obligation"`, `treatment-motive` is
-`"get treatment"`, plus `travelling-motive`, `learning-motive` and the
-`"mandatory"` forced motive.
-
-[decision/select_activity.nls](../decision/select_activity.nls) does not use
-them. The motives it actually produces are the bare strings `"rest"`,
-`"get food"`, `"work"` and `"attend religious gathering"`.
-
-Consequences: `is-working?` and `is-working-motive?` never fire, so
-`ratio-personnel-here` and every `#workers-working*` reporter stay at zero
-independently of the `age` problem. In [need_management.nls](../need_management.nls)
-the `SUE-*` reporters test a third vocabulary again - `"relaxing"`,
-`"religious gathering"`, `"organize funeral"`, `"care for the sick"`,
-`"visits"`, `"providing"`, `"get treatmet"`, `"get treatment at home"`,
-`"get treatment at hospital"`, `"get treatment get at home"` - most of which
-nothing produces, so those branches are dead and the needs they were meant to
-serve never move.
-
-**Needed:** one vocabulary. The cheapest fix is to make `select_activity` emit
-the constants from `motives.nls`, add constants for the Ebola-specific motives
-(food, religious attendance, funerals, care, visits), and then sweep the `SUE-*`
-reporters onto them. Until that happens, activity scoring is running on a small
-subset of the rules that are written down.
-
 ---
 
 ## Red: the code contradicts itself
@@ -529,5 +500,3 @@ no discussion:
   incremented.
 - `SUE-leisure` computes a need that does not exist among the eleven satisfaction
   levels.
-- `is-working-motive?` and `is-contractual-obligation?` are duplicates, and both
-  inline the string instead of calling `work-motive`.

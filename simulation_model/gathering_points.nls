@@ -67,16 +67,7 @@ gathering-links-own [
   features                    ;;< the reasons this person has for coming to this place, as a list of motive strings
 ]
 
-;; The share of this place's staff who are here and working right now.
-;;
-;; @context gathering-point
-;; @return a number in [0, 1]
-;; @note Two current caveats: it divides by zero where nobody is hired, and the
-;; motive it tests for is `work-motive` ("contractual obligation") while
-;; `select-activity` records the motive as "work", so the numerator stays 0.
-to-report ratio-personnel-here
-  report count hired-workers with [current-activity = myself and current-motivation = work-motive] / count hired-workers
-end
+
 
 ;keep enough cash to pay people for 2 ticks
 ;; How much cash this place should keep on hand: two ticks of wages for its staff.

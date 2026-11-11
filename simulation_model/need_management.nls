@@ -74,11 +74,7 @@ __includes ["need_definition.nls"]
 ;; @param current-activity-descriptor  the activity that was performed
 ;; @context person
 ;; @side-effects updates all eleven satisfaction levels
-;; @note Food and the two belonging needs are topped up from their `SDA`
-;; reporters, the other eight from `SDE`. That is the difference between "what it
-;; actually gave" and "what it was expected to give", and while expectations stay
-;; perfect the two agree.
-;; @see decay-satisfaction-level-ebo
+
 to update-needs-for-playing [current-activity-descriptor]
 
   decay-satisfaction-level-ebo
@@ -87,11 +83,11 @@ to update-needs-for-playing [current-activity-descriptor]
     
   set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
   set health-satisfaction-level clamp 0 1 (health-satisfaction-level + SDE-health current-activity-descriptor)
-  set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDA-food current-activity-descriptor)
+  set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDE-food current-activity-descriptor)
   set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
   
-  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDA-group-belonging current-activity-descriptor) 
-   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDA-family-belonging current-activity-descriptor)  
+  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDE-group-belonging current-activity-descriptor) 
+   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDE-family-belonging current-activity-descriptor)  
 
   set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)  
   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
@@ -206,9 +202,6 @@ end
 ;; @param ad  the activity descriptor being considered
 ;; @context person
 ;; @return a gain in [0, 1]
-;; @note There is no leisure need among the eleven satisfaction levels and nothing
-;; calls this, so it is currently inert. The Ebola build also never offers a
-;; "relaxing" activity.
 to-report SUE-leisure [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -304,7 +297,6 @@ end
 ;; @param ad  work in progress
 ;; @context work in progress
 ;; @return work in progress
-;; @todo Tests the motive "get treatmet". See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-health [ad]
   let base 0.4
   let belief-modifier 1
@@ -386,7 +378,7 @@ to-report SUE-social-status [ad]
     [report 0.4]
   ]
 ;kids at school, unimplemented
-;       if (gp = my-school ) and (motive = "learn")[
+;       if (gp = my-school ) and (motive = learning-motive)[
 ;       report 0.9]
   
 ;;leisure activity replenishes autonomy
@@ -470,7 +462,7 @@ to-report SUE-autonomy [ad]
       if ( gp = my-work ) [report 0.9]][report -0.3]]
       
   ;so does going to school
-;       ifelse ([gathering-type] of gp = "school" and motive = "learn")
+;       ifelse ([gathering-type] of gp = "school" and motive = learning-motive)
 ;       [ report  0.2 ]
 ;       [ report -0.1 ]
 ;     ]
