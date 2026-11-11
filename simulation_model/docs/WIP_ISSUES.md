@@ -55,40 +55,15 @@ count all-people > current-capacity
 is always false!
 
 
-<a id="decay-satisfaction-level-ebo"></a>
-
-### `decay-satisfaction-level-ebo`
-
-[need_management.nls](../need_management.nls)
-
-**Belonging decays by subtraction.** Every other need decays multiplicatively
-(`level * 0.8`), but group- and family-belonging use `level - 0.8`. Since levels
-live in [0, 1], both tanks empty completely in one tick from any level at or
-below 0.8, then clamp to 0. Belonging is effectively always maximally urgent.
-
-**Social status and providing never decay at all.** `social-status-decay` and
-`providing-decay` are declared, and adjusted for hospitalised men with the
-comment "Double the decay", but neither is ever applied to
-`social-status-satisfaction-level` or `providing-satisfaction-level`. The two
-lines that would do it are missing rather than commented out.
-
-Also worth deciding while you are here: every decay factor is the same 0.8 except
-autonomy at 0.99, and the comment about age and gender exclusions at the bottom
-is unimplemented.
-
-<a id="the-sue-family"></a>
 
 ### The `SUE-*` family
 
 [need_management.nls](../need_management.nls)
 
-Beyond the motive vocabulary problem above, four of these compare a
-gathering-point agent against a string, which is never true:
+There is no explicit action for caring at the hospital, which is what female relatives can do if someone is sick and at the hospital
 
 | Reporter | Line | Effect |
-| --- | --- | --- |
-| `SUE-group-belonging` | `ifelse (gp = "home")` | the caring-for-the-sick branch always takes the `else` |
-| `SUE-family-belonging` | `if gp = "home"`, `if gp = "hospital"` | the care branch always falls through to 0 |
+| --- | --- | --- | |
 | `SUE-physical-safety` | `if gp = "hospital"` | unreachable anyway, see below |
 | `SUE-social-status` | `if ([gathering-type] of gp = my-work)` | compares a type string against an agent |
 

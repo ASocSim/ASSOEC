@@ -177,8 +177,6 @@ if infection-status = in-hospital-infection-status [
     
     ]
 
-
-
  ;enable one treatment motive at hospital and healher and church
  ;note that non of these are mutually exclusive!
  

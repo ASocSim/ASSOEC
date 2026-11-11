@@ -369,7 +369,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
         <setup></setup>
         <update>plot mean [physical-safety-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+      <pen interval="1.0" mode="0" display="social-safety" color="-5825686" legend="true">
         <setup></setup>
         <update>plot mean [social-safety-satisfaction-level] of people</update>
       </pen>
@@ -417,7 +417,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
         <setup></setup>
         <update>plot mean [physical-safety-satisfaction-level] of people with [is-male?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+      <pen interval="1.0" mode="0" display="social-safety" color="-5825686" legend="true">
         <setup></setup>
         <update>plot mean [social-safety-satisfaction-level] of people with [is-male?]</update>
       </pen>
@@ -465,7 +465,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
         <setup></setup>
         <update>plot mean [physical-safety-satisfaction-level] of people with [is-female?]</update>
       </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+      <pen interval="1.0" mode="0" display="social-safety" color="-5825686" legend="true">
         <setup></setup>
         <update>plot mean [social-safety-satisfaction-level] of people with [is-female?]</update>
       </pen>
@@ -535,7 +535,7 @@ As simplifications: each person relates to a fix set of spaces over time (same s
         <setup></setup>
         <update>plot standard-deviation [physical-safety-satisfaction-level] of people</update>
       </pen>
-      <pen interval="1.0" mode="0" display="social-safety" color="-15302303" legend="true">
+      <pen interval="1.0" mode="0" display="social-safety" color="-5825686" legend="true">
         <setup></setup>
         <update>plot standard-deviation [social-safety-satisfaction-level] of people</update>
       </pen>

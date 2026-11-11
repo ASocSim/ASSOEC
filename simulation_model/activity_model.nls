@@ -455,7 +455,7 @@ to perform-people-activities
     ; keeping track of whomst activity is successfull according to capacity of gp
     let all-people current-gatherers
     ;if there are too many people trying to get to one gp to perform activity,
-    ;select some for whom the activity will fail
+    ;select some for whom the activity will faila
     ifelse count all-people > current-capacity [
       let succesful-people n-of current-capacity all-people
       ask succesful-people [
