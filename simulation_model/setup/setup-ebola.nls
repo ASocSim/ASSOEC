@@ -56,8 +56,6 @@ to setup-ebola
   setup-relation-to-gathering-points
   setup-worker-relation-to-gathering-point
 
-
-  setup-gathering-point-capacities
   setup-person-values-and-needs
   setup-social-network-ebola
   
@@ -841,33 +839,7 @@ ask civil-societies
   
 end
 
-;; Decide how many people each place can hold at once.
-;;
-;; Everywhere is uncapped by default. Markets, stores and churches are then capped
-;; at the size of their own attached population, which is the cap
-;; `perform-people-activities` enforces.
-;;
-;; @context observer
-;; @side-effects sets `capacity` on every gathering point
-;; @see disabled-capacity
-to setup-gathering-point-capacities
-  ask gathering-points [
-    set capacity disabled-capacity
-  ]
-  ask markets [
-    set capacity count gatherers
-  ]
-  ask stores [
-    set capacity count gatherers
-  ]
-  
-  ask churches [
-    set capacity count gatherers
-  ]
-;ask burial-rites [
- ;   set capacity count gatherers
-  ;]
-end
+
 
 ;; Scatter the gathering points across the view without overlapping them.
 ;;

@@ -188,25 +188,7 @@ to-report SUE-food [ad]
   report 0
 end
 
-;; Expected leisure satisfaction from an activity, before discounting.
-;;
-;; Relaxing is worth much more than resting at home.
-;;
-;; @param ad  the activity descriptor being considered
-;; @context person
-;; @return a gain in [0, 1]
-to-report SUE-leisure [ad]
-  let gp location-of ad
-  let motive motive-of ad
 
-  if motive = leisure-motive [
-    report 0.6
-  ]
-  if gp = my-home and motive = rest-motive [
-    report 0.01
-  ]
-  report 0
-end
 
 
 ;; Expected sleep satisfaction from an activity, before discounting.

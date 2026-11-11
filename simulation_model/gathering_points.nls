@@ -8,7 +8,7 @@
 ;; `current-activity`, so "who is here" is a query over the links.
 ;;
 ;; The file is mostly small predicates over `gathering-type`, plus the occupancy
-;; and capacity reporters used by `perform-people-activities`.
+;; reporters used by `perform-people-activities`.
 ;;
 ;; @see gathering_points/gathering_types.nls
 ;; @see activity_model.nls
@@ -49,7 +49,6 @@ gathering-points-own [
   
   vacancies                   ;;< jobs still unfilled, counted down during setup hiring
   cached-number-of-participants ;;< memoised result of `expected-number-of-other-participants`, 0 until first computed
-  capacity                    ;;< how many people may be here at once, or `disabled-capacity` for no limit
   crowd-slots-taken           ;;< display only: how many of the standing spots around this place have been handed out this tick, see `assign-crowd-positions`
   crowd-size                  ;;< display only: how many people are here this tick, counted by `assign-crowd-positions`
   crowd-radius                ;;< display only: how far this place's crowd may spread without touching its neighbour's, set by `arrange-on-grid`
@@ -136,19 +135,7 @@ to-report is-practicable-at-home?
 end
 
 
-;might be to be revised later as "to-be-expected-to-be-alone-at" based on whether people show(ed) up at the gathering point.
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param gp  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo Reports true when somebody else is there, which is the opposite of the
-;; name. See docs/WIP_ISSUES.md#is-alone-at-.
-to-report is-alone-at? [gp]
-  report any? other [in-gathering-link-neighbors] of gp
-end 
+
 
 ;; The share of this place's staff showing symptoms.
 ;;
@@ -315,35 +302,8 @@ to-report is-accessible?
   report true
 end
 
-;; Whether this kind of place stays open under a hard lockdown.
-;;
-;; @context gathering-point
-;; @return true, always
-;; @todo Stub, as `is-accessible?`. No lockdowns exist in the Ebola model.
-to-report is-open-during-lockdown?
-  ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
-;   if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-public-leisure?
-;   or is-private-leisure? [report false]
-;   if is-essential-shop? or is-hospital? or is-home? [report true]
-  
-;   report (sentence "unimplemented for:" [gathering-type] of self)
-  report true
-end
 
-;; Whether this kind of place stays open during curfew hours.
-;;
-;; @context gathering-point
-;; @return true, always
-;; @todo Stub, as `is-accessible?`. No curfews exist in the Ebola model.
-to-report is-open-during-curfew?
-    ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
-;   if is-workplace? or is-school? or is-university? or is-non-essential-shop? or is-essential-shop? or is-private-leisure? [report false]
-;   if is-hospital? or is-home? [report true]
-;   if is-public-leisure? [report true] ; So the agents have somewhere to go so they can break curfew
-  
-;   report (sentence "unimplemented for:" [gathering-type] of self)
-  report true
-end
+
 
 ;; Everyone attached to this place, whether or not they are here now.
 ;;
@@ -372,27 +332,8 @@ to-report current-gatherers
   report (turtle-set in-gathering-link-neighbors w) with [current-activity = myself]
 end
 
-;; The sentinel `capacity` value meaning "no limit on how many people fit here".
-;;
-;; @return the string "disabled-capacity"
-;; @see current-capacity
-to-report disabled-capacity
-  report "disabled-capacity"
-end
 
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @return work in progress
-;; @todo Both branches of the guard report the same thing, so what
-;; `disabled-capacity` should mean here is undecided. See
-;; docs/WIP_ISSUES.md#current-capacity.
-to-report current-capacity
-  if capacity = disabled-capacity [report capacity]
-  report capacity
-end
+
 
 ;; Every home nobody lives in.
 ;;

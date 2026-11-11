@@ -383,14 +383,7 @@ end
 ;;;please modify from here for ebola
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @return work in progress
-;; @todo Passes a motive to a predicate that names a gathering point. See
-;; docs/WIP_ISSUES.md#is-performing-essential-shopping--and-is-essential-shop-gathering-point-.
+
 to-report is-getting-food?
   report current-motivation = food-motive
 end
@@ -432,46 +425,14 @@ end
 
 
 
-;; @context work in progress
-;; @side-effects work in progress
-;; @todo The capacity pass selects the people whose activity is *not* here, and
-;; the procedure still prints and resets the timer every tick. See
-;; docs/WIP_ISSUES.md#perform-people-activities.
 to perform-people-activities
   reset-timer
   ask people [
-
     select-activity
-
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
-
-  ]
-
-  ask people with [[capacity = disabled-capacity] of current-activity or not [is-operating?] of current-activity] [
-    set is-activity-successful? true
-  ]
-  
-  ask gathering-points with [capacity != disabled-capacity] [
-    ; keeping track of whomst activity is successfull according to capacity of gp
-    let all-people current-gatherers
-    ;if there are too many people trying to get to one gp to perform activity,
-    ;select some for whom the activity will faila
-    ifelse count all-people > current-capacity [
-      let succesful-people n-of current-capacity all-people
-      ask succesful-people [
-        print "I could do the activity"
-        set is-activity-successful? true]
-      ask all-people with [not member? self succesful-people] [
-        print "I could not to the activity"
-        set is-activity-successful? false
-      ]
-    ] [
-      ask all-people [ set is-activity-successful? true ]
-    ]
   ]
 
   ask people [
-   ; if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
     execute-activity-effect
     update-needs-for-playing (list current-activity current-motivation false) ;false PREVIOUSLY is-I-apply-social-distancing?
   ]

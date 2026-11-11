@@ -43,17 +43,6 @@ open.
    `social-distancing-of` reads. Is the flag meant to stay constant, and does the
    reversal matter?
 
-<a id="perform-people-activities"></a>
-
-### `perform-people-activities`
-
-[activity_model.nls](../activity_model.nls)
-
-The capacity is used to determine whether an activity is (un)successful
-BUT this is never actually called, I suspect because 
-count all-people > current-capacity
-is always false!
-
 
 
 ### The `SUE-*` family
@@ -66,92 +55,7 @@ There is no explicit action for caring at the hospital, which is what female rel
 # DEBUG BREAK HERE
 
 
-<a id="workers-working-at-mine-agriculture-house"></a>
 
-### `#workers-working-at-mine`, `-at-agriculture`, `-at-house`
-
-[activity_model.nls](../activity_model.nls)
-
-Three gathering-type strings that do not exist:
-
-| Reporter | Tests | Should be |
-| --- | --- | --- |
-| `#workers-working-at-mine` | `"workplace-mines"` | `"workplace-mine"` |
-| `#workers-working-at-agriculture` | `"agriculture"` | `"workplace-agriculture"` |
-| `#workers-working-at-house` | `"house"` | `"home"` |
-
-A one-word fix each, but note they would still report 0 because of `age` and the
-motive fork, so fixing the strings alone will not make them work.
-
-
-
-<a id="is-alone-at-"></a>
-
-### `is-alone-at?`
-
-[gathering_points.nls](../gathering_points.nls)
-
-```netlogo
-to-report is-alone-at? [gp]
-  report any? other [in-gathering-link-neighbors] of gp
-end
-```
-
-Reports true when somebody **else** is attached to `gp` - the opposite of the
-name. It also tests who is linked to the place rather than who is currently
-there, which the comment above it already flags ("might be to be revised later as
-to-be-expected-to-be-alone-at"). Nothing calls it at the moment, so fixing it is
-free.
-
-<a id="update-alive-status"></a>
-
-### `update-alive-status`
-
-[people_management.nls](../people_management.nls)
-
-```netlogo
-if random 100 > 80 [ ask one-of people [ die ] ]
-```
-
-One random person dies on roughly 19% of ticks, chosen without regard to
-infection, symptoms, age or anything else, and `#dead-people` is not incremented.
-The comment says this is scaffolding for the funeral work, which is fair - but as
-it stands it is a background mortality process running alongside the disease
-model and quietly shrinking the population.
-
-**Needed:** either gate it behind a `debug`-style switch until deaths come from
-the disease model, or replace it now with a per-person mortality hazard.
-
-<a id="calibrate-importance-weights-of-needs"></a>
-
-### `calibrate-importance-weights-of-needs`
-
-[country_specific_features/cultural_model.nls](../country_specific_features/cultural_model.nls)
-
-The file's own comments already say "calculate wrong" and "not calculate
-correctly, review". Concretely:
-
-- `importance-weight-autonomy` is assigned twice - once in the safety block, once
-  in the esteem block. The second wins, so the safety-block formula is dead.
-- The normalising sum lists `importance-weight-autonomy` **twice** and omits
-  `importance-weight-social-safety` and `importance-weight-providing` - yet both
-  of those are divided by that sum afterwards. The eleven weights therefore do not
-  sum to 1.
-- `importance-weight-providing` is scaled by `weight-safety-needs-category` while
-  sitting under the esteem heading.
-- `importance-weight-social-status` uses the conformity/tradition value under the
-  safety category, which looks like a copy of the autonomy line above it.
-
-There is a further problem upstream: `set-values-based-on-culture` is commented
-out of the setup path, so all nine `importance-given-to-*-value` variables are 0
-when this runs. Every weight derived from them is 0, and only the four survival
-weights - which do not depend on values - are non-zero. In effect the population
-currently has survival needs and nothing else.
-
-**Needed:** this one probably wants rewriting rather than patching, alongside the
-decision about whether the Schwartz layer is in or out for Ebola.
-
-<a id="social-distancing-of"></a>
 
 ### `social-distancing-of`
 
@@ -165,45 +69,12 @@ question in the original comment - "Why only 2 elements in the returned list?" -
 is still open, and the answer decides whether the flag belongs in
 `activity-descriptor` itself.
 
-<a id="is-performing-essential-shopping--and-is-essential-shop-gathering-point-"></a>
-
-### `is-performing-essential-shopping?` and `is-essential-shop-gathering-point?`
-
-[activity_model.nls](../activity_model.nls)
-
-`is-performing-essential-shopping?` passes `current-motivation` to
-`is-essential-shop-gathering-point?`, which is named for a place but compares its
-argument against the motive string `"essential shopping"`. One of the two names
-is wrong. Neither string is produced by the Ebola build, so both are inert; the
-Ebola equivalent is the `"get food"` motive at a store or market.
-
-<a id="current-capacity"></a>
-
-### `current-capacity`
-
-[gathering_points.nls](../gathering_points.nls)
-
-```netlogo
-to-report current-capacity
-  if capacity = disabled-capacity [report capacity]
-  report capacity
-end
-```
-
-Both paths report the same thing, so the guard does nothing and the reporter is
-an alias for `capacity`. Since `disabled-capacity` is the string
-`"disabled-capacity"`, `perform-people-activities` ends up comparing a count
-against a string when a place is uncapped - it guards against that with
-`capacity != disabled-capacity` before the comparison, so nothing breaks today,
-but the intent of this reporter is missing. Most likely it was meant to report a
-very large number, or `false`, for an uncapped place.
 
 ---
 
 ## Amber: needs a decision, not a fix
 
 <a id="is-away--and-is-at-work-"></a>
-
 ### `is-away?` and `is-at-work?`
 
 [gathering_points.nls](../gathering_points.nls)
@@ -342,44 +213,10 @@ is its own question.
 whether these tests are being kept. They are the only automated behavioural checks
 in the model, so they are worth rescuing rather than deleting.
 
----
-
-## Checklist
-
-| # | Item | File | Kind |
-| --- | --- | --- | --- |
-| 1 | [`age` is never assigned](#age-is-never-assigned) | model-wide | cross-cutting |
-| 2 | [Motive strings have forked](#motive-strings-have-forked) | model-wide | cross-cutting |
-| 3 | [`my-available-activity-descriptors`](#my-available-activity-descriptors) | select_activity.nls | red |
-| 4 | [`perform-people-activities`](#perform-people-activities) | activity_model.nls | red |
-| 5 | [`decay-satisfaction-level-ebo`](#decay-satisfaction-level-ebo) | need_management.nls | red |
-| 6 | [The `SUE-*` family](#the-sue-family) | need_management.nls | red |
-| 7 | [`SUE-autonomy`](#sue-autonomy) | need_management.nls | red |
-| 8 | [`SUE-financial-survival`](#sue-financial-survival) | need_management.nls | red |
-| 9 | [`#workers-working-at-mine` and friends](#workers-working-at-mine-agriculture-house) | activity_model.nls | red |
-| 10 | [`proximity-factor`](#proximity-factor) | gathering_points.nls | red |
-| 11 | [`is-alone-at?`](#is-alone-at-) | gathering_points.nls | red |
-| 12 | [`update-alive-status`](#update-alive-status) | people_management.nls | red |
-| 13 | [`calibrate-importance-weights-of-needs`](#calibrate-importance-weights-of-needs) | cultural_model.nls | red |
-| 14 | [`social-distancing-of`](#social-distancing-of) | activity_model.nls | red |
-| 15 | [`is-performing-essential-shopping?`](#is-performing-essential-shopping--and-is-essential-shop-gathering-point-) | activity_model.nls | red |
-| 16 | [`current-capacity`](#current-capacity) | gathering_points.nls | red |
-| 17 | [`is-away?` and `is-at-work?`](#is-away--and-is-at-work-) | gathering_points.nls | amber |
-| 18 | [`is-technically-feasible-to-work-from-home?`](#is-technically-feasible-to-work-from-home-) | people_decision.nls | amber |
-| 19 | [`update-memory`](#update-memory) | people_decision.nls | amber |
-| 20 | [`drc-hofstede-partial`](#drc-hofstede-partial) | cultural_model.nls | amber |
-| 21 | [`setup-social-network-ebola`](#setup-social-network-ebola) | social_networks.nls | amber |
-| 22 | [The two quarantining reactions](#the-two-quarantining-reactions) | quarantining.nls | amber |
-| 23 | [The BehaviorSpace checks](#the-behaviourspace-checks) | sanity.nls | amber |
-| 24 | [The `check-*` reporters](#the-check-reporters) | sanity.nls | amber |
 
 ## Smaller things, noted in the code rather than here
 
-These are recorded as `@note` or `@todo` on the definitions themselves and need
-no discussion:
 
-- `is-university?`, `is-workplace?`, `is-a-non-essential-gathering-point?` and
-  `is-relaxing?` test types and motives the Ebola build never creates.
 - `#healthy-personel` and `#sick-personel` are missing an `n`.
 - `ratio-personnel-here` and `ratio-sick-personnel` divide by zero at a place
   with no staff.
@@ -391,5 +228,4 @@ no discussion:
   per queued event.
 - `days-since-seen-relatives`, `-colleagues` and `-friends` are reset but never
   incremented.
-- `SUE-leisure` computes a need that does not exist among the eleven satisfaction
   levels.
