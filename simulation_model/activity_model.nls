@@ -432,10 +432,6 @@ end
 
 
 
-;; Work in progress.
-;;
-;; work in progress
-;;
 ;; @context work in progress
 ;; @side-effects work in progress
 ;; @todo The capacity pass selects the people whose activity is *not* here, and
@@ -443,35 +439,30 @@ end
 ;; docs/WIP_ISSUES.md#perform-people-activities.
 to perform-people-activities
   reset-timer
-  ;print (sentence "performing activities for" count people "people")
   ask people [
-    ;if not is-being-away? current-activity and current-motivation = travelling-motive [error "wrong place while travelling"]
+
     select-activity
 
     if not is-being-away? current-activity and current-motivation = travelling-motive [error (sentence "wrong place while travelling" current-activity current-motivation)]
 
   ]
 
-  ;travelling-to-activity-phase
-  
-  ;; there are more failure conditions in this model than just whether the place is open and under capacity. 
-  ;;For example, a person might be turned away from a hospital if they are not sick enough to be treated, or from a school if they are not enrolled there. 
-  ;;The model currently does not implement those checks, so it assumes that if a person has selected an activity, 
-  ;they will be able to perform it successfully, unless the place is closed or over capacity.
   ask people with [[capacity = disabled-capacity] of current-activity or not [is-operating?] of current-activity] [
     set is-activity-successful? true
   ]
   
   ask gathering-points with [capacity != disabled-capacity] [
-    ;error "why?"
-    ;ask gatherers [show myself show current-activity]
-    ; everyone actually standing here this tick - `gatherers` is everyone attached to
-    ; the place whether they came or not, which is not who the cap applies to
+    ; keeping track of whomst activity is successfull according to capacity of gp
     let all-people current-gatherers
+    ;if there are too many people trying to get to one gp to perform activity,
+    ;select some for whom the activity will fail
     ifelse count all-people > current-capacity [
       let succesful-people n-of current-capacity all-people
-      ask succesful-people [set is-activity-successful? true]
+      ask succesful-people [
+        print "I could do the activity"
+        set is-activity-successful? true]
       ask all-people with [not member? self succesful-people] [
+        print "I could not to the activity"
         set is-activity-successful? false
       ]
     ] [

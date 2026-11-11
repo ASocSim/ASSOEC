@@ -24,7 +24,6 @@ ask people [
   ask cohabitants [
     if not my-kin-link-neighbor? me 
     [create-my-kin-link-with me
-    ;print (word "i have kin link " self me)
     ]
   ]
   if not displaced?
@@ -37,7 +36,6 @@ ask people [
         if not my-kin-link-neighbor? me 
         [
           create-my-kin-link-with me
-          ;print (word "i have extended kin link " self me)
         ]
       ]
     ]

@@ -932,7 +932,7 @@ end
 
 
 
-;; Print the per-need breakdown behind `global-prevalence-of` for one activity.
+;; Prints the per-need breakdown behind `global-prevalence-of` for one activity.
 ;;
 ;; @param ad  the activity descriptor to explain
 ;; @context person

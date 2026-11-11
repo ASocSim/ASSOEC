@@ -24,7 +24,6 @@ globals
   ;#ratio-willing-to-trust-hospital
   ;#ratio-willing-to-trust-institutional-advice
   ;let ebola-business-narrative-value mean [my-trust-in-institutions] of current-gatherers
-  ;print ebola-business-narrative-value 
 ]
 
 
@@ -50,8 +49,7 @@ to send-message
   ask my-trustees with [current-activity = my-location] [
     ;overwrite only
     set received-messages current-message
-    ;print "i receive "
-    ;print current-message
+
   ]
   ]
 

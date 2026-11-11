@@ -821,7 +821,6 @@ ask civil-societies
 
   ask people with [my-work = 0 ]
   [
-    ;print "I am unemployed, can I work in mine?"
     let mine one-of workplace-mines
     set my-work mine
   ]

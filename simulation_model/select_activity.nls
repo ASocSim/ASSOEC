@@ -95,8 +95,8 @@ if ( not is-observing-critical-symptoms?)
     ]
 
   ;get food
-  ;from markets on any afternoon 
-  if slice-of-the-day = "afternoon"
+  ;from markets on saturday mornings and afternoon 
+  if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week = "saturday")
     [
       set activities (lput (activity-descriptor my-market food-motive) activities)
     ]
@@ -235,8 +235,6 @@ to select-activity
 
   let loc location-of c-a
   let motive motive-of c-a
-
-    ;print (sentence "my preferred activity is" c-a)
   
   ;;select if migration takes over and people move around
 ;   if (migration? and random-float 1 < probability-going-abroad) [

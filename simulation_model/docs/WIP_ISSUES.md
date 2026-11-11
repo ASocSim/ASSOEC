@@ -38,31 +38,10 @@ open.
 
 [decision/select_activity.nls](../decision/select_activity.nls)
 
-Three separate problems in the one reporter.
-
-1. **Religious gatherings happen every afternoon.** The condition is
-   `(day-of-the-week = "sunday" and slice-of-the-day = "morning" or slice-of-the-day = "afternoon")`.
-   NetLogo's `and` and `or` have equal precedence and associate left to right, so
-   this reads `(sunday and morning) or afternoon` - true every afternoon of the
-   week. The comment above it says "on sunday we can go to religious gathering".
-   Parenthesise to fix.
-2. **Activities point at random places, not this person's.** The descriptors are
-   built from `one-of home-gathering-type`, `one-of stores-gathering-type` and
-   `one-of churches-gathering-type`, which draw from every such place in the
-   world. `my-home`, `my-store` and `my-church` exist and are unused, so a woman
-   "works" at a stranger's house and people shop wherever chance sends them. This
-   also defeats the gathering links, since the place chosen is usually not one
-   this person is linked to.
 3. **The trailing `foreach` appends a hardcoded `false`** to every descriptor and
    reverses the list with `fput`. That third element is what
    `social-distancing-of` reads. Is the flag meant to stay constant, and does the
    reversal matter?
-
-The market condition
-(`saturday or sunday and afternoon` → `(sat or sun) and afternoon`) and the store
-condition (`morning or afternoon and not sunday` → `(morning or afternoon) and not sunday`)
-happen to parse the way the comments intend, but only by accident of
-left-associativity. Worth parenthesising all four while you are in there.
 
 <a id="perform-people-activities"></a>
 
@@ -70,20 +49,11 @@ left-associativity. Worth parenthesising all four while you are in there.
 
 [activity_model.nls](../activity_model.nls)
 
-The capacity pass reads:
+The capacity is used to determine whether an activity is (un)successful
+BUT this is never actually called, I suspect because 
+count all-people > current-capacity
+is always false!
 
-```netlogo
-let all-people (gatherers with [current-activity != myself])
-```
-
-Inside `ask gathering-points`, that selects the people attached to this place who
-are **not** here, and then caps *them* against the place's capacity and sets
-`is-activity-successful?` on them. The people who actually turned up are never
-capped. `!=` looks like it should be `=`.
-
-Two smaller things in the same procedure: it calls `reset-timer` and prints
-`"performing activities for N people"` on every tick, both left over from
-profiling.
 
 <a id="decay-satisfaction-level-ebo"></a>
 
