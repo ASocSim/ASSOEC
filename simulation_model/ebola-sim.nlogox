@@ -25,8 +25,10 @@ to go
   spread-contagion
   
   update-within-agent-disease-status
+
   spread-information
-  update-trustees
+  ;update-from-evidence
+  ;update-from-information-exchange
   update-people-mind
   
   ;destruction-event ;Periodic facility destruction events in ABM; capacity shock; reduction in effective isolation beds; security parameter limits RRT deployment --> driven by internal state (collective)

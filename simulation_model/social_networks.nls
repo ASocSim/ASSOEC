@@ -4,13 +4,18 @@ undirected-link-breed [my-kin-links my-kin-link]
 
 undirected-link-breed [my-friends-links my-friends-link]
 
-directed-link-breed [my-trustees-links my-trustee-link]
+undirected-link-breed [my-trustees-links my-trustee-link]
+
+my-trustees-links-own [trust-value]
+
+
 
 to setup-social-network-ebola
   setup-kin-network
   setup-friends-networks
   ;colleagues calculated on demand via gps, not a fixed social network per se
-  setup-trust-network
+  setup-baseline-trust-network
+  ;setup-roles ;(includes update trust in roles)
 end
 
 
@@ -95,48 +100,59 @@ end
 
 ;;TRUSTEES
 
-to setup-trust-network
-  ;establish trust towards priest
-ask people with [priest? = false][
-if my-church != nobody [
-  let my-priest one-of people with [priest?] ;and [gathering-type] of my-work = my-church] PUT THIS BACK, OTHERWISE WE TRUST RANDOM PRIESTS
-  create-my-trustee-link-to my-priest
-  ;print "trusting my priest"
- ]
-]
+to-report possible-trustees
+  report other people with [not my-trustee-link-neighbor? myself ]
+    ;not member? self my-trustee-link-neighbors ]
+end
 
-  ask people with [displaced? = true] [
-    let trustee one-of my-friends
-  create-my-trustee-link-to trustee
-  ;print "trusting one of my friends"
+to setup-baseline-trust-network
+;firstly we create a trust link between all agents
+ask people [
+  let me self
+    ask possible-trustees [
+     if not my-trustee-link-neighbor? me [
+       create-my-trustee-link-with me]
+    ]   
+]
+ask my-trustees-links
+  [
+    set color blue
+   ;and default it to 0
+    set trust-value 0
   ]
 
-ask my-trustees-links [set color blue]
-
 end
+
+
 
 
 
 
 to establish-trust [new-trustee]
-  create-my-trustee-link-to new-trustee
+ ; create-my-trustee-link-to new-trustee
+ set trust-value 1
   show (sentence "established my trust in " new-trustee)
 
 end
 
 to revoke-trust [no-longer-trusted]
-  ask out-my-trustee-link-to no-longer-trusted [ die ]
+ ; ask out-my-trustee-link-to no-longer-trusted [ die ]
+ set trust-value -1
   show (sentence "removed my trust in " no-longer-trusted)
 end
 
 
-to update-trustees
-;;HERE IS WHERE WE INCLUDE PEOPLE IN OUR TRUSTED SOURCES OF INFORMATION DEPENDING ON PAST EVENT (e.g. has a healthcare worker saved a relative?)
+to update-from-evidence
+;;HERE IS WHERE WE update trust
+;; DEPENDING ON PAST EVENT (e.g. has a healthcare worker saved a relative?)
 
 
 end
 
+to update-from-information-exchange
+;;information mill effectively
 
+end
 
 
 
@@ -179,7 +195,7 @@ to-report my-friends
 end
 
 
-;;Report the agentset of trusted people
+;;Report the agentset of mistrusted and trusted people
 to-report my-trustees
   report my-trustee-link-neighbors
 end
