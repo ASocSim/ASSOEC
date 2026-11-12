@@ -4,10 +4,15 @@ undirected-link-breed [my-kin-links my-kin-link]
 
 undirected-link-breed [my-friends-links my-friends-link]
 
-undirected-link-breed [my-trustees-links my-trustee-link]
-
+directed-link-breed [my-trustees-links my-trustee-link]
 my-trustees-links-own [trust-value]
 
+breed [radios radio]
+radios-own [channel ];placeholder for beliefs (later)
+
+to setup-radios
+  create-radios n-radios
+end
 
 
 to setup-social-network-ebola
@@ -15,7 +20,7 @@ to setup-social-network-ebola
   setup-friends-networks
   ;colleagues calculated on demand via gps, not a fixed social network per se
   setup-baseline-trust-network
-  ;setup-roles ;(includes update trust in roles)
+  setup-roles-trust ;; (update trust in roles)
 end
 
 
@@ -97,7 +102,6 @@ to-report my-colleagues
 end
 
 
-
 ;;TRUSTEES
 
 to-report possible-trustees
@@ -111,25 +115,59 @@ ask people [
   let me self
     ask possible-trustees [
      if not my-trustee-link-neighbor? me [
-       create-my-trustee-link-with me]
+       create-my-trustee-link-to me]
     ]   
 ]
 ask my-trustees-links
-  [
-    set color blue
+  [ set color blue
    ;and default it to 0
     set trust-value 0
   ]
 
 end
 
+;then we make roles for priests, hcw, radios and government
+
+to setup-roles-trust
+;establish trust towards PRIESTS
+;called from priests to reduce computational requirements
+ask people with [priest? = true][
+  let priest self
+  ask in-my-trustee-link-neighbors[
+    ask out-my-trustee-link-to priest [
+    set trust-value 1
+    ]
+  ]
+]
+
+;;establish mistrust to HCW
+ask healthcare-workers[
+  let hcw self
+    ask in-my-trustee-link-neighbors[
+    ask out-my-trustee-link-to hcw [
+    set trust-value -1
+    ]
+  ]
+]
+
+;each agent trusts one of the radios and mistrusts others?
+ask radios [
+
+]
+
+;;establish mistrust to GOVERNMENT
+
+end
 
 
 
+to-report rand-trust [lower upper]
+  report upper - random-float (upper - lower)
+end
 
+;;UNUSED functions, might make use of later tho
 
 to establish-trust [new-trustee]
- ; create-my-trustee-link-to new-trustee
  set trust-value 1
   show (sentence "established my trust in " new-trustee)
 
@@ -207,22 +245,21 @@ end
 
 
 
-
-
+;; @return agentset of people
+;; specifically anyone who works at the hospital
+to-report healthcare-workers
+  report people with [[gathering-type] of my-work = "hospital"]
+end
 
 ;; @return agentset of people
 ;;this is the same as people agentset, but we call it workers here to avoid confusion
-
 to-report workers
   report people with [is-worker?]
 end
 
-
-
 ;; @context person
 ;; @return true unless unemployed
 ;; @note Always true in the current build
-
 to-report is-worker?
   ifelse my-work != nobody
   [report true] [

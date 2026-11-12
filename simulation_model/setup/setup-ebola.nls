@@ -29,9 +29,7 @@ globals[]
 ;;
 ;; @context observer
 ;; @side-effects clears the world and creates every turtle and link in it
-;; @note Nobody is infected at setup: the COVID block that seeded the first
-;; infections is commented out, so a run stays disease-free until something else
-;; introduces a case.
+
 to setup-ebola
   clear-all
   reset-ticks
@@ -56,6 +54,8 @@ to setup-ebola
   layout-gathering-points
   setup-relation-to-gathering-points
   setup-worker-relation-to-gathering-point
+
+  setup-radios
 
   setup-person-values-and-needs
   setup-social-network-ebola
