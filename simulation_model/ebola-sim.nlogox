@@ -647,6 +647,7 @@ save-world-state</button>
     <switch x="914" y="144" height="40" on="false" variable="show-trust-links?" width="137" display="show-trust-links?"></switch>
     <slider x="734" step="1" y="485" max="100" width="250" display="#other-disease-patients-at-start" height="50" min="0" direction="Horizontal" default="10.0" variable="#other-disease-patients-at-start"></slider>
     <slider x="2787" step="1" y="874" max="30" width="250" display="n-radios" height="50" min="1" direction="Horizontal" default="5.0" variable="n-radios"></slider>
+    <switch x="870" y="21" height="40" on="true" variable="information-mill?" width="129" display="information-mill?"></switch>
   </widgets>
   <info>## WHAT IS IT?
 

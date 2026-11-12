@@ -19,8 +19,11 @@ to setup-social-network-ebola
   setup-kin-network
   setup-friends-networks
   ;colleagues calculated on demand via gps, not a fixed social network per se
+  if information-mill?[
   setup-baseline-trust-network
   setup-roles-trust ;; (update trust in roles)
+
+  ]
 end
 
 
@@ -109,6 +112,10 @@ to-report possible-trustees
     ;not member? self my-trustee-link-neighbors ]
 end
 
+to-report possible-radio-trustees
+  report radios with [not my-trustee-link-neighbor? myself ]
+end
+
 to setup-baseline-trust-network
 ;firstly we create a trust link between all agents
 ask people [
@@ -118,6 +125,16 @@ ask people [
        create-my-trustee-link-to me]
     ]   
 ]
+
+ask people [
+  let me self
+  ask possible-radio-trustees [
+    if not my-trustee-link-neighbor? me [
+      create-my-trustee-link-to me
+    ]
+  ]
+]
+
 ask my-trustees-links
   [ set color blue
    ;and default it to 0
@@ -151,19 +168,32 @@ ask healthcare-workers[
 ]
 
 ;each agent trusts one of the radios and mistrusts others?
-ask radios [
 
+ask radios [
+  let radio-channel self
+  ask in-my-trustee-link-neighbors [
+    ask out-my-trustee-link-to radio-channel [
+    set trust-value -1
+    ]
+]
 ]
 
+ask people [
+  ask one-of radios [
+  let trusted-radio-channel self
+  ask in-my-trustee-link-neighbors [
+    ask out-my-trustee-link-to trusted-radio-channel [
+    set trust-value 1
+    ]
+  ]
+]
+]
 ;;establish mistrust to GOVERNMENT
 
 end
 
 
 
-to-report rand-trust [lower upper]
-  report upper - random-float (upper - lower)
-end
 
 ;;UNUSED functions, might make use of later tho
 

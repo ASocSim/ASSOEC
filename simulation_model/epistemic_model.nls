@@ -29,7 +29,8 @@ globals
 
 to spread-information
 
-  send-message
+  ;send-message
+  ;send-msg-radio
 
 end
 
