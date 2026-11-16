@@ -15,7 +15,7 @@ globals [
 
 
 to set-contaminated-disease-status
-  set-infection-status just-exposed-infection-status
+  set-infection-status timed-state just-exposed-infection-status tau-incubation-ebo
   set time-when-infected ticks
 end
 
@@ -71,7 +71,12 @@ to set-infection-status [infection]
     set #hospitalised #hospitalised + 1
   ]
   set #non-hospitalised #infected - #hospitalised
-  
+
+  ;symptom onset: the contagiousness profile counts from here
+  let new-status ifelse-value is-timed-state? infection [state-of-timed-state infection] [infection]
+  if new-status = exposed-to-stage-one-infection-status and infection-status != exposed-to-stage-one-infection-status
+  [ set time-when-symptomatic ticks ]
+
   set infection-state infection
 end
 

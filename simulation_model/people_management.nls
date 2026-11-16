@@ -23,6 +23,7 @@ people-own [
 
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
+  time-when-symptomatic       ;;< tick at which this person's symptoms started (entered stage 1), or the string "never"
   other-disease?              ;;< true when the symptoms shown are from something other than the modelled ebola disease
   infection-state             ;;< the true ebola state, independent of what the person believes
 

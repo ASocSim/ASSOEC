@@ -401,6 +401,7 @@ to setup-person [current-home l-sex displacement-status]
     set sex l-sex
     set displaced? displacement-status
     set time-when-infected "never"
+    set time-when-symptomatic "never"
    ; set has-been-tested-infected? false
     set priest? false
     set am-I-mourning? false

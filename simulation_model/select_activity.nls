@@ -40,6 +40,13 @@ set activities []
 
 ]
 
+;;IN HOSPITAL
+;;patients stay in hospital until they die or are discharged immune; checked before the
+;;healthy-people block so that a recovering patient does not leave for a funeral
+if infection-status = in-hospital-infection-status or infection-status = hospitalised-to-immune-infection-status [
+  report (list (list my-hospital treatment-motive false))
+]
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -153,19 +160,7 @@ if ( not is-observing-critical-symptoms?)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;if they are very sick, their choices for activities are limited and the motive get-treatment shows strongest
-;;once the infection status changes to recovered or dead the patients can leave the hospital
-;;IN HOSPITAL
-if infection-status = in-hospital-infection-status [
-    set activities []
-    set activities lput (list my-hospital treatment-motive) activities 
-    
-  let ret []
-  foreach activities [ activity ->
-    set ret fput (lput false activity) ret
-  ]
-  report ret
-    
-    ]
+;;(patients already in hospital are handled at the top of this reporter)
 
  ;enable one treatment motive at hospital and healher and church
  ;note that non of these are mutually exclusive!
@@ -192,7 +187,9 @@ if infection-status = in-hospital-infection-status [
   
   if epistemic-state-hospital <= 0.4 and epistemic-state-medicine <= 0.4 [
     if any? people with [[gathering-type] of my-work = "church"][
-  set activities lput (list my-church treatment-motive) activities ]
+
+  ;set activities lput (list my-church treatment-motive) activities 
+  ]
   ]
 ] 
 
