@@ -18,13 +18,11 @@ people-own [
 ;; @group Demographics
   sex                         ;;< "female" or "male", see people/classes.nls
   displaced?                  ;;boolean for agent displaced status, not this applies only to men
-              
-;; @group Debugging
+  priest?                     ;; true if this person a priest at a church
 
 
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
-  epistemic-status            ;;< what this person believes about ebola
   other-disease?              ;;< true when the symptoms shown are from something other than the modelled ebola disease
   infection-state             ;;< the true ebola state, independent of what the person believes
 
@@ -32,9 +30,6 @@ people-own [
 
 ;; @group Intervention model
   is-currently-allocated-a-bed-in-hospital? ;;< true while this person occupies one of the hospital's beds
- ; has-been-tested-infected?   ;;< true once a test has come back positive
- ; last-test-tick              ;;< tick of the most recent test
- ; has-been-tested-immune?     ;;< true once a test has shown immunity
   
 ;; @group Decision-making model
   current-activity            ;;< the gathering point this person is at on this tick
@@ -51,24 +46,23 @@ people-own [
 ;; @group Attachments
   my-home                     ;;< the gathering point this person lives at
   my-work                     ;;< the gathering point this person is employed at; equal to `my-home` for unemployed women at setup
-  priest?                     ;; true if this person a priest at a church
   my-cemetery                 ;;< the gathering point this person will be buried at if they die
-  current-person-I-depend-on  ;;< the person this one is currently following, or `nobody`
+
+
+;; @group epistemic model
+  epistemic-state-hospital            ;;< what this person believes about hospitals
+  epistemic-state-medicine            ;;< what this person believes about traditional remedies
+  epistemic-state-ebola               ;;< what this person believes about ebola
+  epistemic-state-SDB                 ;;< what this person believes about SDBs
+;deprecated
+  my-trust-in-hospital
+  my-trust-in-institutions
 
 ;; @group Transport model (dormant)
   my-means-of-transportation-I-currently-use ;;< COVID-era transport mode; the Ebola model does not move people by vehicle
   can-I-perform-solo-transportation? ;;< COVID era: whether this person owns private transport
   stayed-out-queuing-for-bus? ;;< COVID era: whether this person was left behind at a bus stop
   #people-in-my-transport     ;;< COVID era: how many shared the vehicle, used for contagion
-  is-moving-outside-for-reaching-current-activity? ;;< true when this tick's activity is somewhere other than where the person already was
-
-
-
-;; @group epistemic model
-  my-trust-in-hospital
-  my-trust-in-institutions
-  
-  ; Memory of the network's actions
 
   ;Need satisfaction levels (i.e. level of watertanks)
 ;; @group Need satisfaction levels

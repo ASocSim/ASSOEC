@@ -53,13 +53,13 @@ if ( not is-observing-critical-symptoms?)
   if am-I-mourning? ;;and not enforce-SDB?
   [
 
-    if attending_sdb?[
+    if attending_sdb? [ ;and epistemic-state-SDB >= 0.2
     ;;this activity is available only if the decease has a SDB
     set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
     ]
 
       ;; if I'm ok with unsafe burial
-      if not not-going-to-unsafe-burials [
+      if not not-going-to-unsafe-burials [ ;and epistemic-state-SDB < 0.2
         set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
       ]
 
@@ -69,8 +69,6 @@ if ( not is-observing-critical-symptoms?)
       set ret fput (lput false activity) ret
   ]
   report ret
-    
-
     ]
 
 
@@ -178,22 +176,23 @@ if infection-status = in-hospital-infection-status [
     set activities [] 
     ;agent with critical symptoms is forced to seek treatment
     let money [amount-of-household-capital] of my-home
+  ;;cost expressed in money units, but represents travel distance and general costs to go hospital
   if money > hospital-stay-costs
   [
-  ;;cost expressed in money units, but represents travel distance and general costs to go hospital
-     if not unwilling-to-go-hospital [ ;if epistemic-status = go-to-hospital
+     if epistemic-state-hospital > 0.4 [
     if any? people with [[gathering-type] of my-work = "hospital"]
      [set activities lput (list my-hospital treatment-motive) activities]
      ]
   ]
 
-;  if epistemic-status = go-to-traditional-healer
+  if epistemic-state-medicine > 0.4 [
   if any? people with [[gathering-type] of my-work = "traditional healer"][
-    set activities lput (list my-traditional-healer treatment-motive) activities
+    set activities lput (list my-traditional-healer treatment-motive) activities]
   ]
- ; if epistemic-status = go-to-church
+  
+  if epistemic-state-hospital <= 0.4 and epistemic-state-medicine <= 0.4 [
     if any? people with [[gathering-type] of my-work = "church"][
-  set activities lput (list my-church treatment-motive) activities
+  set activities lput (list my-church treatment-motive) activities ]
   ]
 ] 
 
@@ -211,51 +210,18 @@ end
 
 ;; Commit this person to their preferred activity for this tick.
 ;;
-;; The movement flag is worked out while
-;; `current-activity` still holds the previous place, and only then is the new
-;; place stored.
-;;
 ;; @context person
-;; @side-effects sets `current-activity`, `current-motivation` and
-;; `is-moving-outside-for-reaching-current-activity?`
 ;; @see my-preferred-available-activity-descriptor
-;; @see select-activity-wtf?
 to select-activity
   let c-a my-preferred-available-activity-descriptor
 
   let loc location-of c-a
   let motive motive-of c-a
-  
-  ;;select if migration takes over and people move around
-;   if (migration? and random-float 1 < probability-going-abroad) [
-;     set c-a (list away-gathering-point travelling-motive false)
-;   ]
 
     update-resources-based-on-current-activity c-a
 
-  select-activity-wtf? loc
   set current-activity loc
   set current-motivation motive-of c-a
-
- ; if current-activity != away-gathering-point and current-motivation = travelling-motive [error "wrong place while travelling"]
   
 end
 
-
-
-
-;; Record whether reaching `loc` means leaving where this person already is.
-;;
-;; Must be called before `current-activity` is updated, since it compares the new
-;; place against the old one.
-;;
-;; @param loc  the place this person is about to move to
-;; @context person
-;; @side-effects sets `is-moving-outside-for-reaching-current-activity?`
-;; @note Measured at roughly 0.2 ms per call, which made it the main bottleneck of
-;; the whole application; hence the name, and hence taking the place as an
-;; argument rather than recomputing it.
-to select-activity-wtf? [loc]
- ; set is-moving-outside-for-reaching-current-activity? not (current-activity = location-of c-a)
-  set is-moving-outside-for-reaching-current-activity? not (current-activity = loc)
-end

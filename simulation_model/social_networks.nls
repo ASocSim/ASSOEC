@@ -216,7 +216,6 @@ ask people [
   ask my-kin-link-neighbors [
     if (in-my-trustee-link-from me != nobody) [
     ask in-my-trustee-link-from me [
-      print "debug"
       set trust-value 1
       set color blue
       ]

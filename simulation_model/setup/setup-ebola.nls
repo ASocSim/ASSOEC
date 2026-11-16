@@ -45,10 +45,6 @@ to setup-ebola
   set #dead-people 0
 
   
- ; set when-has-2%-infected-threshold-first-been-met? "never"
- ; set when-has-5%-infected-threshold-first-been-met? "never"
-
-  
   setup-gathering-points-as-turtle-sets
   create-all-households
   layout-gathering-points
@@ -398,8 +394,6 @@ end
 ;; @param l-sex         `female-sex` or `male-sex`
 ;; @context observer
 ;; @side-effects creates one person and their gathering link to the home
-;; @note `age` is never set here, or anywhere else, so every age predicate in the
-;; model is false for everyone.
 to setup-person [current-home l-sex displacement-status]
   
   create-people 1 
@@ -411,11 +405,17 @@ to setup-person [current-home l-sex displacement-status]
     set priest? false
     set am-I-mourning? false
     set other-disease? false
+
+    ;placeholder for information mill messages, deprecated
     ;set received-messages (list "neutral")
     set received-messages "neutral"
 
-    ;epistemic status is now different: one line only to transform into nested list pls
-    set epistemic-status "hospital hurts"
+    ;epistemic states A,B and C
+    ;template
+    set epistemic-state-hospital 0
+    set epistemic-state-medicine 0
+    set epistemic-state-ebola 0
+    set epistemic-state-SDB 0
 
     ;currently random distribution, must be changed if we understand this better as the initial condition impacts outcome strongly
     set my-trust-in-hospital random-float 1
@@ -437,13 +437,10 @@ to setup-person [current-home l-sex displacement-status]
 
     create-gathering-link-to current-home [set features (list "rest" "visits" "work" "care for the sick" "get treatment" "family belonging" "group belonging")]
     
-    set is-moving-outside-for-reaching-current-activity? false
 
     set is-currently-allocated-a-bed-in-hospital? false
 
 
-
-    set current-person-I-depend-on nobody   ;;MOD FOR CARETAKING
     set color default-color
     set size 0.5
     set infection-state susceptible-infection-status

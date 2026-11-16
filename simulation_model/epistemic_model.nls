@@ -42,14 +42,14 @@ to send-message
   ;exceptions are radios, and healthcare workers (priests have asymmetric power, not modeled here but later)
   
   ask people [
-  let content epistemic-status
+  ;let content epistemic-status
   let source self
-  let current-message (list content source)
+  ;let current-message (list content source)
   let my-location current-activity
 
   ask my-trustees with [current-activity = my-location] [
     ;overwrite only
-    set received-messages current-message
+   ; set received-messages current-message
 
   ]
   ]
@@ -62,7 +62,7 @@ end
 to update-epistemic-status
 
 ;;CREDULOUS BEHAVIOR FOR TEST, NOT FINAL
-set epistemic-status received-messages
+;set epistemic-status received-messages
 
 
 
@@ -84,7 +84,7 @@ if infection-status = hospitalised-to-dead-infectious-infection-status
     set my-trust-in-hospital my-trust-in-hospital - 0.1
     ;cap
       if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-      set epistemic-status "if you go to the hospital, you will die"
+     ; set epistemic-status "if you go to the hospital, you will die"
      ; print (sentence "telling my network of" count my-network "people that I died")
 
 
@@ -97,14 +97,16 @@ if infection-status = hospitalised-to-immune-infection-status
     set my-trust-in-hospital my-trust-in-hospital + 0.4
     ;cap
       if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
-      set epistemic-status "ebola is survivable, go to the hospital"]
+    ;  set epistemic-status "ebola is survivable, go to the hospital"
+    ]
 
   ]
 ask my-network[
     set my-trust-in-hospital my-trust-in-hospital - 0.1
     ;cap
       if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
-          set epistemic-status "ebola is survivable, go to the hospital"]
+    ;      set epistemic-status "ebola is survivable, go to the hospital"
+    ]
   ]
        ; print (sentence "telling my network of" count my-network "people that I survived")
 
@@ -114,7 +116,7 @@ ask my-network[
 
 ;let deceased people know they are dead  
    if infection-status = "dead" [
-     set epistemic-status "dead"
+    ; set epistemic-status "dead"
      stop
    ]
 
