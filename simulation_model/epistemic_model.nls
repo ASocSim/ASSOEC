@@ -279,7 +279,7 @@ end
 
 to influence-congregation
 ;;for the baseline, the priest's individual belief will be propagated to the congregation
-let priests hired-workers with [priest?]
+;let priests hired-workers with [priest?]
 let congregation current-gatherers
 
   ask priests

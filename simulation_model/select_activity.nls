@@ -14,15 +14,7 @@
 
 ;; @see people_decision.nls
 ;; @see activity_model.nls
-;; @see docs/WIP_ISSUES.md
 
-;; Work in progress.
-;;
-;; @context work in progress
-;; @return work in progress
-;; @todo Operator precedence puts religious gatherings on every afternoon, and the
-;; activities point at random places rather than this person's own. See
-;; docs/WIP_ISSUES.md#my-available-activity-descriptors.
 to-report my-available-activity-descriptors
 
       ;add resting at home for SLEEP need

@@ -310,6 +310,16 @@ to-report my-church
   report my-gathering-point-of-type "church"
 end
 
+;;returns an agentset with one priest inside
+to-report my-priest [current-church]
+  ifelse priest? = false [
+    report priests with [my-work = current-church]
+  ]
+  ;priests do not have a priest, they are the priest
+[report self]
+end
+
+
 ;; The store this person shops at.
 ;;
 ;; @context person

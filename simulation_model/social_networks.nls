@@ -19,10 +19,12 @@ to setup-social-network-ebola
   setup-kin-network
   setup-friends-networks
   ;colleagues calculated on demand via gps, not a fixed social network per se
+
+  ;INFORMATION MILL
   if information-mill?[
   setup-baseline-trust-network
-  setup-roles-trust ;; (update trust in roles)
-
+  setup-roles-trust ;; (this updates initial trust in roles)
+  setup-person-to-person-trust
   ]
 end
 
@@ -108,7 +110,7 @@ end
 ;;TRUSTEES
 
 to-report possible-trustees
-  report other people with [not my-trustee-link-neighbor? myself ]
+  report up-to-n-of 10 other people with [not my-trustee-link-neighbor? myself ] ;up-to-n-of 10 magic number to reduce comp time when building
     ;not member? self my-trustee-link-neighbors ]
 end
 
@@ -116,13 +118,31 @@ to-report possible-radio-trustees
   report radios with [not my-trustee-link-neighbor? myself ]
 end
 
+
+
 to setup-baseline-trust-network
+;establish trust towards PRIESTS
+
+ask people with [priest? = false][
+  let me self
+    ask one-of my-priest(my-church) [
+     if not my-trustee-link-neighbor? me [
+       create-my-trustee-link-to me
+       ]
+    ask my-out-my-trustees-links [
+      set trust-value 1
+      set color green
+    ]
+  ]
+]
+
 ;firstly we create a trust link between all agents
 ask people [
   let me self
     ask possible-trustees [
      if not my-trustee-link-neighbor? me [
        create-my-trustee-link-to me]
+
     ]   
 ]
 
@@ -130,13 +150,15 @@ ask people [
   let me self
   ask possible-radio-trustees [
     if not my-trustee-link-neighbor? me [
-      create-my-trustee-link-to me
+      create-my-trustee-link-from me
+      set color magenta
     ]
   ]
 ]
 
 ask my-trustees-links
-  [ set color blue
+  [ 
+    hide-link
    ;and default it to 0
     set trust-value 0
   ]
@@ -146,23 +168,14 @@ end
 ;then we make roles for priests, hcw, radios and government
 
 to setup-roles-trust
-;establish trust towards PRIESTS
-;called from priests to reduce computational requirements
-ask people with [priest? = true][
-  let priest self
-  ask in-my-trustee-link-neighbors[
-    ask out-my-trustee-link-to priest [
-    set trust-value 1
-    ]
-  ]
-]
-
+;priests already established 
 ;;establish mistrust to HCW
 ask healthcare-workers[
   let hcw self
     ask in-my-trustee-link-neighbors[
     ask out-my-trustee-link-to hcw [
     set trust-value -1
+    set color orange
     ]
   ]
 ]
@@ -173,16 +186,17 @@ ask radios [
   let radio-channel self
   ask in-my-trustee-link-neighbors [
     ask out-my-trustee-link-to radio-channel [
+    set color violet
     set trust-value -1
     ]
+  ]
 ]
-]
-
 ask people [
   ask one-of radios [
   let trusted-radio-channel self
   ask in-my-trustee-link-neighbors [
     ask out-my-trustee-link-to trusted-radio-channel [
+    set color green
     set trust-value 1
     ]
   ]
@@ -191,6 +205,36 @@ ask people [
 ;;establish mistrust to GOVERNMENT
 
 end
+
+
+
+to setup-person-to-person-trust
+;now we select links to the kin to increase trust towards
+;individual agent gives trust from kin
+ask people [
+  let me self
+  ask my-kin-link-neighbors [
+    if (in-my-trustee-link-from me != nobody) [
+    ask in-my-trustee-link-from me [
+      print "debug"
+      set trust-value 1
+      set color blue
+      ]
+    ]
+  ]
+]
+
+;and a few strangers to actively mistrust
+ask people [
+  ask up-to-n-of 5 my-out-my-trustees-links with [trust-value = 0][
+      set trust-value -1
+      set color red
+    ]
+
+]
+
+end
+
 
 
 
@@ -272,7 +316,11 @@ end
 
 
 
-
+;; @return agentset of people
+;; specifically anyone who works as a priest at a church
+to-report priests
+  report people with [[gathering-type] of my-work = "church" and priest?]
+end
 
 
 ;; @return agentset of people
