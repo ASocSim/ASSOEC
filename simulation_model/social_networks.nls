@@ -8,10 +8,23 @@ directed-link-breed [my-trustees-links my-trustee-link]
 my-trustees-links-own [trust-value]
 
 breed [radios radio]
-radios-own [channel ];placeholder for beliefs (later)
+radios-own [
+  broadcast-hospital
+  broadcast-medicine
+  broadcast-ebola
+  broadcast-SDB
+ ]
 
 to setup-radios
   create-radios n-radios
+
+  ask radios[
+     set broadcast-hospital random-float 2 - 1
+     set broadcast-medicine random-float 2 - 1
+     set broadcast-ebola random-float 2 - 1
+     set broadcast-SDB random-float 2 - 1
+  ]
+
 end
 
 

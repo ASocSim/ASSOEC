@@ -151,8 +151,14 @@ if ( not is-observing-critical-symptoms?)
 ]
 
 
+
 ;;##ADD STAGE ONE DECISIONS HERE
 ;;##MOD STAGE TWO WITH EPI STATES
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;activities for moderately sick people (stage 1 )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -174,24 +180,25 @@ if ( not is-observing-critical-symptoms?)
   ;;cost expressed in money units, but represents travel distance and general costs to go hospital
   if money > hospital-stay-costs
   [
-     if epistemic-state-hospital > 0.4 [
+;     if epistemic-state-hospital > 0.4 [
     if any? people with [[gathering-type] of my-work = "hospital"]
      [set activities lput (list my-hospital treatment-motive) activities]
-     ]
+ ;    ]
   ]
 
-  if epistemic-state-medicine > 0.4 [
+ ; if epistemic-state-medicine > 0.4 [
   if any? people with [[gathering-type] of my-work = "traditional healer"][
     set activities lput (list my-traditional-healer treatment-motive) activities]
-  ]
+ ; ]
   
-  if epistemic-state-hospital <= 0.4 and epistemic-state-medicine <= 0.4 [
+  ;if no strong beliefs are held towards hospitals and trad remedies, try church
+ ; if epistemic-state-hospital <= 0.4 and epistemic-state-medicine <= 0.4 [
     if any? people with [[gathering-type] of my-work = "church"][
 
   ;set activities lput (list my-church treatment-motive) activities 
   ]
   ]
-] 
+;] 
 
   let ret []
   foreach activities [ activity ->

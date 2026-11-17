@@ -57,7 +57,7 @@ to setup-ebola
   setup-social-network-ebola
   
    if with-infected? [
-     set first-infected-people n-of (min list 3 count people) people
+     set first-infected-people n-of (min list 10 count people) people
      ask first-infected-people [contaminate nobody ("setup")]
      set #first-infected-people count first-infected-people
     

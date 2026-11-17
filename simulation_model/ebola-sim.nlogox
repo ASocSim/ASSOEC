@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<model version="NetLogo 7.0.4" snapToGrid="false">
+<model version="NetLogo 7.0.3" snapToGrid="false">
   <code><![CDATA[extensions [profiler table]
 __includes [ "setup/setup-ebola.nls" "people_management.nls" "global_metrics.nls" "environment_dynamics.nls" "animation.nls" "utils/all_utils.nls" "inspector.nls" ]
 breed [people person]
@@ -144,15 +144,11 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
         <setup></setup>
         <update>plot count people with [infection-status = "safe-burial"]</update>
       </pen>
-      <pen interval="0.1" mode="0" display="Illegal burials" color="-7500403" legend="true">
-        <setup></setup>
-        <update>;plot count people with [am-I-mourning?]</update>
-      </pen>
       <pen interval="1.0" mode="0" display="safely buried" color="-13345367" legend="true">
         <setup></setup>
         <update>plot #safely-buried</update>
       </pen>
-      <pen interval="1.0" mode="0" display="unsafely buries" color="-5298144" legend="true">
+      <pen interval="1.0" mode="0" display="unsafely buried" color="-5298144" legend="true">
         <setup></setup>
         <update>plot #unsafely-buried</update>
       </pen>

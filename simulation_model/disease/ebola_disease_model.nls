@@ -96,8 +96,9 @@ end
 to-report p-hosp
   ;THIS DEPENDS ON TRUST IN HOSPITAL agent value
   ;is the agent likely to accept treatment at the hospital based on their experiences and knowledge of biomedicine?
-  if not unwilling-to-go-hospital
-  [report my-trust-in-hospital]
+  ;two way split only depending on epi state hospital
+  if epistemic-state-hospital <= 0
+  [report 1]
   report 0 
 end
 
@@ -110,13 +111,16 @@ end
 
 to-report p-safe-burial
 ;THIS DEPENDS ON TRUST IN institutions of the deceased's network
-  report my-networks-trust-in-institutions
+  report my-networks-belief-on-SDB
 end
 
-to-report my-networks-trust-in-institutions
+to-report my-networks-belief-on-SDB
 ;;simplified procedure for considering networks opinion on SDB
 ;;does not consider that close relatives have more impact on choice, as do people with higher social status (could connect to need!)
-   report mean [my-trust-in-institutions] of my-kin-link-neighbors
+   if ( mean [epistemic-state-SDB] of my-kin-link-neighbors >= 0 ) [
+    report 1
+   ]
+   report 0
 end
 
 

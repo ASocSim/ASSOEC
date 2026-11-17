@@ -23,20 +23,44 @@ globals
   ;#ebola-business-believers
   ;#ratio-willing-to-trust-hospital
   ;#ratio-willing-to-trust-institutional-advice
-  ;let ebola-business-narrative-value mean [my-trust-in-institutions] of current-gatherers
 ]
 
 
 to spread-information
 
-  ;send-message
-  ;send-msg-radio
+  if slice-of-the-day = "evening"[
+    radio-dissemination
+  ]
+  ;person-to-person
+  ;influence-congregation ;to rework
+end
+
+
+
+to radio-dissemination
+ask radios[
+;;the messages of radio channels are set by the government
+;;they spread to a set of agents (random for now) every evening
+let speaker one-of radios ;turn to agentset
+let listener up-to-n-of 10 people
+let belief-set (list broadcast-hospital broadcast-medicine broadcast-ebola broadcast-SDB)
+let message one-of belief-set
+;send-message
+]
+end
+
+
+to send-message [speaker listener message belief-strength source]
+;tell(a,b,x.a,c)
+;stands for tell(speaker, listener, message.belief-strength, source)
+
 
 end
 
 
 
-to send-message
+
+to send-message-person
 ;message has content and source
   ;people share their messages if they have acquired any content by a trusted source
   ;exceptions are radios, and healthcare workers (priests have asymmetric power, not modeled here but later)
@@ -63,8 +87,6 @@ to update-epistemic-status
 
 ;;CREDULOUS BEHAVIOR FOR TEST, NOT FINAL
 ;set epistemic-status received-messages
-
-
 
 ;keep track of people who die or survive via hospitals
 ;update their networks beliefs
@@ -187,9 +209,8 @@ end
 
 
 to-report not-going-to-unsafe-burials
-;threshold level at 98% to not go to unsafe burials
 ;;only people with near absolute trust in government institutions will choose not to attend a dear one funeral
-  if my-trust-in-institutions >= 0.98[
+  if epistemic-state-SDB >= 0.98 and epistemic-state-ebola <= -0.4 [
     report true
   ]
     report false
@@ -197,22 +218,11 @@ end
 
 to-report unwilling-to-go-hospital
 ;threshold level at 85% to not go to hospital under any circumstance determined by needs or social influence
-  if my-trust-in-hospital <= 0.15[
+  if epistemic-state-medicine <= -0.4[
     report true
   ]
     report false
 end
-
-
-;to-report believes-ebola-business?  report epistemic-status = "ebola business" end
-
-
-;incorporates the belief that "I can infect others"
-;to-report sick-with-ebola report epistemic-status = "I am sick with ebola" end
-
-;to-report sick-with-other-disease report epistemic-status = "I am sick but not with ebola" end
-
-
 
 
 
@@ -221,8 +231,6 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;INFO DYNAMICS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 
 
 to info-dynamics
@@ -262,19 +270,7 @@ to influence-relatives
 end
 
 
-to radio-dissemination
-;this only happens at civil societies
-;;first check how different our opinions are
-;;polarizing
-if any? current-gatherers [
-;;here it gets probabilistic
-ask current-gatherers[
-  ifelse my-trust-in-institutions >= 0.5
-  [set my-trust-in-institutions my-trust-in-institutions + 0.01]
-  [set my-trust-in-institutions my-trust-in-institutions - 0.01]
- ]
-]
-end
+
 
 
 
