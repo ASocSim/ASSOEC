@@ -42,15 +42,16 @@ ask radios[
 ;;the messages of radio channels are set by the government
 ;;they spread to a set of agents (random for now) every evening
 let speaker one-of radios ;turn to agentset
-let listener up-to-n-of 10 people
-let belief-set (list broadcast-hospital broadcast-medicine broadcast-ebola broadcast-SDB)
-let message one-of belief-set
-;send-message
+let listener one-of people
+let belief-set broadcast-hospital ;(list broadcast-hospital broadcast-medicine broadcast-ebola broadcast-SDB)
+let message belief-set ;one-of
+let government -1
+;send-message( speaker listener message government)
 ]
 end
 
 
-to send-message [speaker listener message belief-strength source]
+to send-message [speaker listener message source]
 ;tell(a,b,x.a,c)
 ;stands for tell(speaker, listener, message.belief-strength, source)
 
@@ -84,85 +85,10 @@ end
 
 
 to update-epistemic-status
-
-;;CREDULOUS BEHAVIOR FOR TEST, NOT FINAL
-;set epistemic-status received-messages
-
 ;keep track of people who die or survive via hospitals
 ;update their networks beliefs
-
 ;;if relative died at hospital, reduce trust
 ;;stronger effect for housemates
-if infection-status = hospitalised-to-dead-infectious-infection-status
-[ 
-  ask my-housemates[
-    set my-trust-in-hospital my-trust-in-hospital - 0.4]
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-
-  ]
-
-  ask my-network[
-    set my-trust-in-hospital my-trust-in-hospital - 0.1
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-     ; set epistemic-status "if you go to the hospital, you will die"
-     ; print (sentence "telling my network of" count my-network "people that I died")
-
-
-
-]
-;;if relative recovered via hospital, increase trust
-if infection-status = hospitalised-to-immune-infection-status
-[
-  ask my-housemates[
-    set my-trust-in-hospital my-trust-in-hospital + 0.4
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
-    ;  set epistemic-status "ebola is survivable, go to the hospital"
-    ]
-
-  ]
-ask my-network[
-    set my-trust-in-hospital my-trust-in-hospital - 0.1
-    ;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0
-    ;      set epistemic-status "ebola is survivable, go to the hospital"
-    ]
-  ]
-       ; print (sentence "telling my network of" count my-network "people that I survived")
-
-]
-
-
-
-;let deceased people know they are dead  
-   if infection-status = "dead" [
-    ; set epistemic-status "dead"
-     stop
-   ]
-
-
-
-
-    
-;the internal choice of seeking care
-;if is-observing-critical-symptoms?  ;mod this to encompass s1 and s2
-if infection-status = stage-one-to-stage-two-infection-status or infection-status = stage-two-infection-status
-[
-  evaluate-messages-care
-]
-
-
-if infection-status = hospitalised-to-immune-infection-status[
-  update-belief-hospitals
-]
-
-if infection-status = hospitalised-to-dead-infectious-infection-status or infection-status = stage-two-to-non-hospitalised-infection-status [
-  evaluate-messages-rites
-]
-
-
 end
 
 
@@ -173,25 +99,10 @@ to evaluate-messages-care
 
   ;needs trust links
   ;if established link of trust wit healthcare workers before, believe them
-
-
-;if agent believes ebola is a business, they interpret their sickness as some other disease
- ;   if believes-ebola-business? [ set epistemic-status "sick-with-other-disease"]
- ;   if not believes-ebola-business?     [  set epistemic-status "sick-with-ebola"]
-
-
-
-;print "considering"
-;print received-messages
-
-;;MAKE FUNCTION EVAL CARE HERE
-
-
-
 end
 
 to update-belief-hospitals
-  ;here we make people trus thospitals more via messages
+  ;here we make people trust thospitals more
 
 end
 
@@ -222,82 +133,4 @@ to-report unwilling-to-go-hospital
     report true
   ]
     report false
-end
-
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;INFO DYNAMICS
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-to info-dynamics
-;;INFO DYNAMICS - REMOVE
-;;converge opinions within households
-  ask homes [influence-relatives]
-;;model radio via civil societic
-  ask civil-societies [radio-dissemination]
-;;churches
- ask churches [influence-congregation]
-end
-
-to influence-relatives
-  let home-id self
-  let residents people with [my-home = home-id] 
-  ask residents
-  [
-    ;;calculate the mean
-    let mean-trust-in-hospital mean ([my-trust-in-hospital] of residents)
-    let mean-trust-in-institutions mean ([my-trust-in-institutions] of residents)
-
-    ;;converge within households
-    ifelse my-trust-in-hospital < mean-trust-in-hospital [
-        set my-trust-in-hospital my-trust-in-hospital + 0.01 ;will make dynamic later
-      ][set my-trust-in-hospital my-trust-in-hospital - 0.01]
-;cap
-      if my-trust-in-hospital < 0 [set my-trust-in-hospital 0]
-      if my-trust-in-hospital > 1 [set my-trust-in-hospital 1]
-
-    ifelse my-trust-in-institutions < mean-trust-in-institutions [
-        set my-trust-in-institutions my-trust-in-institutions + 0.01 ;will make dynamic later
-      ][set my-trust-in-institutions my-trust-in-institutions - 0.01]
-;cap
-      if my-trust-in-institutions < 0 [set my-trust-in-institutions 0]
-      if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
-  ]
-end
-
-
-
-
-
-
-
-to influence-congregation
-;;for the baseline, the priest's individual belief will be propagated to the congregation
-;let priests hired-workers with [priest?]
-let congregation current-gatherers
-
-  ask priests
-  [
-    ;;this can be influenced in scenarios
-    ifelse my-trust-in-institutions >= 0.5 
-    [
-    ask congregation 
-     [set my-trust-in-institutions my-trust-in-institutions + 0.01
-     ]]
-     [
-    ask congregation 
-      [set my-trust-in-institutions my-trust-in-institutions - 0.01
-     ]
-
-     ;cap
-      if my-trust-in-institutions < 0 [set my-trust-in-institutions 0]
-      if my-trust-in-institutions > 1 [set my-trust-in-institutions 1]
-
-    ]
-  ]
-
 end

@@ -61,15 +61,6 @@ end
 
 
 
-
-to apply-risk-of-contamination-when-away
-  if random-float 1 < probability-infection-when-abroad and infection-status = susceptible-infection-status
-  [
-    increment-contagion-metrics-from "away" self nobody
-    contaminate nobody "away"
-  ]
-end
-
 to apply-risk-of-contamination [infector context]  
   if infector = nobody [error "assertion error"]
   let contagion-risks risks-of-contamination infector self context

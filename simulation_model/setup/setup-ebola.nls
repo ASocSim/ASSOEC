@@ -246,16 +246,6 @@ end
 
 ; setup-economy
 
-  if migration?
-  [
-    create-gathering-points 1
-    [
-      set gathering-type "away"
-      set away-gathering-point self
-      set shape "airplane"
-    ]
-  ]
-
   ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
 end
 
@@ -402,14 +392,9 @@ to setup-person [current-home l-sex displacement-status]
     set displaced? displacement-status
     set time-when-infected "never"
     set time-when-symptomatic "never"
-   ; set has-been-tested-infected? false
     set priest? false
     set am-I-mourning? false
     set other-disease? false
-
-    ;placeholder for information mill messages, deprecated
-    ;set received-messages (list "neutral")
-    set received-messages "neutral"
 
     ;epistemic states A,B and C
     ;template
@@ -417,10 +402,6 @@ to setup-person [current-home l-sex displacement-status]
     set epistemic-state-medicine 0
     set epistemic-state-ebola 0
     set epistemic-state-SDB 0
-
-    ;currently random distribution, must be changed if we understand this better as the initial condition impacts outcome strongly
-    set my-trust-in-hospital random-float 1
-    set my-trust-in-institutions random-float 1
     
     ;;money handling
     set my-current-income 0
@@ -447,14 +428,11 @@ to setup-person [current-home l-sex displacement-status]
     set infection-state susceptible-infection-status
 
 
-    
-    set stayed-out-queuing-for-bus? false
-    set is-activity-successful? true
+      set is-activity-successful? true
 
     set what-my-network-did-week-day []
     set what-my-network-did-weekend []
     
-    set #days-I-should-remain-in-self-quarantining 0
     set  events-to-process (list)
   ]
 end
