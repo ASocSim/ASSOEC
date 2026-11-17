@@ -225,7 +225,7 @@ to increment-contagion-metrics-from [context infected infector]
     if gt = "traditional healer" [set #people-infected-in-traditional-healer #people-infected-in-traditional-healer + 1 stop]
     if gt = "civil society" [set #people-infected-in-civil-society #people-infected-in-civil-society + 1 stop]
   ]
-  
+  ; deprecated
   if context = "bus" [set #people-infected-in-pubtrans #people-infected-in-pubtrans + 1 stop]
   if context = "queue-waiting-for-bus" [set #people-infected-in-queuing #people-infected-in-queuing + 1 stop]
   if context = "cars" [set #people-infected-in-shared-cars #people-infected-in-shared-cars + 1 stop]

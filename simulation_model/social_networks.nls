@@ -33,7 +33,7 @@ to setup-social-network-ebola
   setup-friends-networks
   ;colleagues calculated on demand via gps, not a fixed social network per se
 
-  ;INFORMATION MILL
+  ;INFORMATION MILL SETUP
   if information-mill?[
   setup-baseline-trust-network
   setup-roles-trust ;; (this updates initial trust in roles)

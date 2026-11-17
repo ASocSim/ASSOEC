@@ -125,7 +125,7 @@ end
 
 
 to contaminate [infector context]
-  ;if log? and log-contamination? [let infector-str "nobody"if infector != nobody [set infector-str [who] of infector] log-file-print (word "infection(" ticks "," who "," infector-str "," context ")")]
+  if log? and log-contamination? [let infector-str "nobody"if infector != nobody [set infector-str [who] of infector] log-file-print (word "infection(" ticks "," who "," infector-str "," context ")")]
   
   if infector != nobody [
     if any? first-infected-people with [self = infector] [set #infected-by-first-infected-people  #infected-by-first-infected-people + 1]
@@ -155,52 +155,3 @@ end
 to-report infection-rate-of [context]
   report density-factor-of context
 end
-
-
-
-;;;;;;;;;;;;
-;not used
-to-report is-alive?
-  report not (infection-status = "removed") and not (infection-status = "safe-burial") and not (infection-status = "unsafe-burial")
-end
-
-to-report abc
-  report r0
-end
-
-
-
-;WHAT ARE THE CONTEXTUAL MITIGATION FACTORS FOR EBOLA, IF ANY?
-; to-report contextual-contagion-modificators
-;   report age-infection-risk-mitigation-factor * social-distancing-risk-mitigation-factor
-; end
-
-;;if any contextual mitigation factors are discovered, multiply infection probabilities with contextual-contagion-modificators in apply-risk-of-contamination functions
-
-
-
-;; this process is a bit shitty as it does some mathematical merging of probability
-; to apply-risk-of-contamination-when-travelling [travellers contagious]
-;   let #travellers count travellers
-;   let ratio-contagion sum [risks-of-contamination self  myself "walking outside"] of contagious
-;   if not any? contagious [stop]
-;   if density-walking-outside = 0 [stop]
-;   if not is-moving-outside-for-reaching-current-activity? [stop]  
-   
-;   let ratio-contagious ratio-contagion / count people;;this should be related to space
-  
-;   ;;these are "intuitive maths", to be confirmed if relevant
-;   ;;the squared root represents the risk of two people picking the same item when each pick n items on a n*n space (x*x -> n * 1)
-;   ;;it could be cubic if the people we would consider a 3D space (or time)
-;   let number-encounters sqrt #travellers
-  
-;   let probability-avoiding-all-contagious (1 - ratio-contagious) ^ number-encounters
-;   let probability-getting-sick 1 - probability-avoiding-all-contagious
-  
-;  ; show (sentence count travellers with [is-contagious?] "/" ratio-contagious "#contacts" number-encounters "avoid all:" probability-avoiding-all-contagious "sick?" probability-getting-sick)
-  
-;   ;;could be fastened with a bit of math, like 1-(1-p)^k
-;   let was-sick? is-infected?
-;   apply-risk-of-contamination one-of contagious  "travelling outside"
-;   if not was-sick? and is-infected? [set #who-became-sick-while-travelling-locally #who-became-sick-while-travelling-locally + 1]
-; end
