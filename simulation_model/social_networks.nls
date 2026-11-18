@@ -5,7 +5,9 @@ undirected-link-breed [my-kin-links my-kin-link]
 undirected-link-breed [my-friends-links my-friends-link]
 
 directed-link-breed [my-trustees-links my-trustee-link]
+
 my-trustees-links-own [trust-value]
+
 
 breed [radios radio]
 radios-own [
@@ -18,13 +20,23 @@ radios-own [
 to setup-radios
   create-radios n-radios
 
-  ask radios[
+ask radios[
+
+set xcor random 69
+set ycor 0
+
+  ifelse government-message-radios? [
+  set broadcast-hospital -1
+  set broadcast-medicine -1
+  set broadcast-ebola -1
+  set broadcast-SDB 1
+][
      set broadcast-hospital random-float 2 - 1
      set broadcast-medicine random-float 2 - 1
      set broadcast-ebola random-float 2 - 1
      set broadcast-SDB random-float 2 - 1
   ]
-
+]
 end
 
 
@@ -90,7 +102,6 @@ end
 
 ;; Give every person up to three friends drawn at random from the whole population.
 ;; @context observer
-;; @side-effects creates `my-friends-links`
 to setup-friends-networks
   
   ;  ask workers [  create-workplace-colleague-links-to other workers with [my-workplace = [my-workplace] of myself]]
@@ -108,7 +119,7 @@ end
 ;; The other people hired by this person's workplace.
 ;;
 ;; @context person
-;; @return agentset of people, excluding self; empty for anyone who is not a worker
+;; @return agentset of people, excluding self; empty for anyone who is not a worker (nobody)
 to-report my-colleagues
   ;report other [hired-workers] of my-work
   ;report workplace-colleague-link-neighbors
@@ -121,12 +132,13 @@ end
 
 
 ;;TRUSTEES
-
+;;people
 to-report possible-trustees
-  report up-to-n-of 10 other people with [not my-trustee-link-neighbor? myself ] ;up-to-n-of 10 magic number to reduce comp time when building
-    ;not member? self my-trustee-link-neighbors ]
+  report up-to-n-of 10 other people with [not my-trustee-link-neighbor? myself ]
+  ;up-to-n-of 10 magic number to reduce comp time when building
 end
 
+;;radios that could be trusted, returns agentset
 to-report possible-radio-trustees
   report radios with [not my-trustee-link-neighbor? myself ]
 end
@@ -155,16 +167,16 @@ ask people [
     ask possible-trustees [
      if not my-trustee-link-neighbor? me [
        create-my-trustee-link-to me]
-
     ]   
 ]
 
+;create trust links from all agents to all radio (channels)
 ask people [
   let me self
   ask possible-radio-trustees [
     if not my-trustee-link-neighbor? me [
       create-my-trustee-link-from me
-      set color magenta
+      set color white
     ]
   ]
 ]
@@ -193,6 +205,7 @@ ask healthcare-workers[
   ]
 ]
 
+;RADIO trust set
 ;each agent trusts one of the radios and mistrusts others?
 
 ask radios [
@@ -202,15 +215,10 @@ ask radios [
     set color violet
     set trust-value -1
     ]
-  ]
-]
-ask people [
-  ask one-of radios [
-  let trusted-radio-channel self
-  ask in-my-trustee-link-neighbors [
-    ask out-my-trustee-link-to trusted-radio-channel [
-    set color green
-    set trust-value 1
+    ask one-of in-my-trustee-link-neighbors [
+    ask out-my-trustee-link-to radio-channel [
+      set color green
+      set trust-value 1
     ]
   ]
 ]
