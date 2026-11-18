@@ -22,7 +22,6 @@ globals [
    markets                     ;;< every market, as a turtle-set fixed at setup
    workplace-mines             ;;< every mine, as a turtle-set fixed at setup
    workplace-agriculture       ;;< every agricultural workplace, as a turtle-set fixed at setup
-   workplace-homes             ;;< declared but never assigned; homes double as workplaces instead
    stores                      ;;< every store, as a turtle-set fixed at setup
    churches                    ;;< every church, as a turtle-set fixed at setup
    cemeteries                  ;;< every cemetery, as a turtle-set fixed at setup
@@ -78,17 +77,6 @@ to-report max-amount-of-capital-to-retain
   report count hired-workers * workers-wages * 2
 end
 
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @return work in progress
-;; @todo Reads person variables from the gathering-points file; the agent context
-;; it is meant for is undecided. See docs/WIP_ISSUES.md#is-away--and-is-at-work-.
-to-report is-away?
-  report current-activity = away-gathering-point
-end
 
 
 ;; Work in progress.
@@ -136,15 +124,6 @@ end
 
 
 
-
-;; The share of this place's staff showing symptoms.
-;;
-;; @context gathering-point
-;; @return a number in [0, 1]
-;; @note Divides by zero where nobody is hired.
-to-report ratio-sick-personnel
-  report count hired-workers with [is-observing-critical-symptoms?] / count hired-workers
-end
 
 ;; How many of this place's staff show no symptoms.
 ;;

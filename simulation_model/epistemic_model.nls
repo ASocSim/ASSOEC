@@ -41,12 +41,19 @@ to radio-dissemination
 ask radios[
 ;;the messages of radio channels are set by the government
 ;;they spread to a set of agents (one randomly chosen for now) every evening
-let speaker self ;turn to agentset
-let listener one-of people
-let belief-set broadcast-hospital ;(list broadcast-hospital broadcast-medicine broadcast-ebola broadcast-SDB)
-let message belief-set ;one-of
-let government -1
-send-message speaker listener message government
+let speaker self
+let listener n-of n-radio-listeners people
+
+let message one-of (list
+  (list "hospital" broadcast-hospital)
+  (list "medicine" broadcast-medicine)
+  (list "ebola" broadcast-ebola)
+  (list "SDB" broadcast-SDB)
+)
+let source one-of governments
+
+send-message speaker listener message source
+
 ]
 end
 
@@ -54,30 +61,71 @@ end
 to send-message [speaker listener message source]
 ;tell(a,b,x.a,c)
 ;stands for tell(speaker, listener, message.belief-strength, source)
-ask listener [
-;  print "current belief"
-;    print epistemic-state-hospital
-;check if speaker is a trustee link (and what value the trust link has)
-ask out-my-trustee-link-to speaker
-[
-;  print "link and trust value towards speaker" print self
-;  print trust-value
-]
-
-
 ;If Trust(b,a)=0 then b will update its belief on a with (x times 0.1) 
 ;if Trust(b,c)>0 and  with (-x times 0.1) if Trust(b,c)<0 with a maximum of 1
 ;If Trust(b,a)=1 then b will update its belief on a with (x times 0.4) 
 ;if Trust(b,c)>0 and  with (x times 0.2) ;if Trust(b,c)<0 with a maximum of 1
 ;If Trust(b,a)=-1 then b will update its belief on a with (-x times 0.2) 
 ;if Trust(b,c)>0 and  with (-x times 0.4) ;if Trust(b,c)<0 with a minimum of -1
-  
 
-  set epistemic-state-hospital epistemic-state-hospital + message * source
+ask listener [
+  let speaker-link out-my-trustee-link-to speaker
+  let source-link out-my-trustee-link-to source
 
-;  print "new belief force:"
-;  print epistemic-state-hospital
+  if speaker-link = nobody [
+    error "Listener has no trust link to radio speaker"
+  ]
+  if source-link = nobody [
+    error "Listener has no trust link to message source"
+  ]
+
+  let speaker-trust [trust-value] of speaker-link
+  let source-trust [trust-value] of source-link
+  let influence 0
+
+  if source-trust > 0 [
+    ifelse speaker-trust = 0 [
+      set influence 0.1
+    ][
+      ifelse speaker-trust > 0
+        [ set influence 0.4 ]
+        [ set influence -0.2 ]
+    ]
+  ]
+
+  if source-trust < 0 [
+    ifelse speaker-trust = 0 [
+      set influence -0.1
+    ][
+      ifelse speaker-trust > 0
+        [ set influence 0.2 ]
+        [ set influence -0.4 ]
+    ]
+  ]
+
+  let topic item 0 message
+  let message-value item 1 message
+  let current-belief 0
+
+  if topic = "hospital" [ set current-belief epistemic-state-hospital ]
+  if topic = "medicine" [ set current-belief epistemic-state-medicine ]
+  if topic = "ebola" [ set current-belief epistemic-state-ebola ]
+  if topic = "SDB" [ set current-belief epistemic-state-SDB ]
+
+  if not member? topic ["hospital" "medicine" "ebola" "SDB"] [
+    error (word "Unknown message topic: " topic)
+  ]
+
+  let updated-belief max (list -1 (min (list 1
+    (current-belief + message-value * influence)
+  )))
+print "updating views"
+  if topic = "hospital" [ set epistemic-state-hospital updated-belief ]
+  if topic = "medicine" [ set epistemic-state-medicine updated-belief ]
+  if topic = "ebola" [ set epistemic-state-ebola updated-belief ]
+  if topic = "SDB" [ set epistemic-state-SDB updated-belief ]
 ]
+
 end
 
 

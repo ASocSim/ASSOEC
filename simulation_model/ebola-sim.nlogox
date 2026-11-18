@@ -243,7 +243,6 @@ while [day-of-the-week != "monday" or slice-of-the-day != "morning"] [go]</butto
     <monitor x="1716" precision="17" y="1220" height="60" fontSize="11" width="126" display="#@church">count people with [[gathering-type] of current-activity = "church"]</monitor>
     <monitor x="1716" precision="17" y="1150" height="60" fontSize="11" width="126" display="#@market">count people with [[gathering-type] of current-activity = "market"]</monitor>
     <monitor x="1716" precision="17" y="1080" height="60" fontSize="11" width="126" display="#@store">count people with [[gathering-type] of current-activity = "store"]</monitor>
-    <monitor x="1716" precision="17" y="673" height="60" fontSize="11" width="126" display="#away">count people with [is-away?]</monitor>
     <monitor x="1716" precision="17" y="1387" height="60" fontSize="11" width="126" display="#@leisure">count people with [[gathering-type] of current-activity = "leisure"]</monitor>
     <monitor x="1716" precision="17" y="840" height="60" fontSize="11" width="126" display="#@hospital">count people with [[gathering-type] of current-activity = "hospital"]</monitor>
     <monitor x="1716" precision="17" y="773" height="60" fontSize="11" width="126" display="#@home">count people with [[gathering-type] of current-activity = "home"]</monitor>
@@ -597,7 +596,7 @@ save-world-state</button>
     <switch x="2714" y="761" height="40" on="false" variable="target-priests?" width="115" display="target-priests?"></switch>
     <button x="10" actionKey="G" y="316" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="101" display="go once">go</button>
     <switch x="770" y="143" height="40" on="false" variable="show-social-links?" width="137" display="show-social-links?"></switch>
-    <switch x="914" y="144" height="40" on="true" variable="show-trust-links?" width="137" display="show-trust-links?"></switch>
+    <switch x="914" y="144" height="40" on="false" variable="show-trust-links?" width="137" display="show-trust-links?"></switch>
     <slider x="734" step="1" y="485" max="100" width="250" display="#other-disease-patients-at-start" height="50" min="0" direction="Horizontal" default="10.0" variable="#other-disease-patients-at-start"></slider>
     <switch x="870" y="21" height="40" on="true" variable="information-mill?" width="129" display="information-mill?"></switch>
     <button x="10" y="409" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="101" display="3 Months Run"><![CDATA[let starting-day current-day
@@ -624,6 +623,7 @@ while [current-day <= end-day] [ go ]]]></button>
     <slider x="1902" step="1" y="1477" max="10" width="250" display="cost-of-leisure" height="50" min="0" direction="Horizontal" default="1.0" variable="cost-of-leisure"></slider>
     <slider x="1903" step="1" y="1537" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="2.0" variable="hospital-stay-costs"></slider>
     <switch x="2726" y="875" height="40" on="false" variable="government-message-radios?" width="198" display="government-message-radios?"></switch>
+    <slider x="2993" step="1" y="807" max="100" width="250" display="n-radio-listeners" height="50" min="0" direction="Horizontal" default="1.0" variable="n-radio-listeners"></slider>
   </widgets>
   <info>## WHAT IS IT?
 

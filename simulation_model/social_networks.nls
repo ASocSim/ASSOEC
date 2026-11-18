@@ -1,4 +1,4 @@
-
+breed [governments government]
 
 undirected-link-breed [my-kin-links my-kin-link]
 
@@ -47,9 +47,12 @@ to setup-social-network-ebola
 
   ;INFORMATION MILL SETUP
   if information-mill?[
+  
+  create-governments 1 [ hide-turtle ]
+
   setup-baseline-trust-network
   setup-roles-trust ;; (this updates initial trust in roles)
-  ;setup-person-to-person-trust
+  setup-person-to-person-trust
   ]
 end
 
@@ -146,15 +149,27 @@ end
 
 
 to setup-baseline-trust-network
-;establish trust towards PRIESTS and immediately set it to +1
 
-ask people with [priest? = false][
+;setup mistrust to gvmnt
+let government-agent one-of governments
+ask people [
+  create-my-trustee-link-to government-agent [
+    set trust-value -1
+    set color orange
+  ]
+]
+
+;establish trust towards PRIESTS and immediately set it to +1
+ask people with [priest? = false] [
   let me self
-    ask my-priest(my-church) [
-     if not my-trustee-link-neighbor? me [
-       create-my-trustee-link-to me
-       ]
-    ask my-out-my-trustees-links [
+  let my-priest-agent one-of my-priest(my-church)
+
+  if my-priest-agent != nobody [
+    if not my-trustee-link-neighbor? my-priest-agent [
+      create-my-trustee-link-to my-priest-agent
+    ]
+
+    ask out-my-trustee-link-to my-priest-agent [
       set trust-value 1
       set color violet
     ]
@@ -194,12 +209,15 @@ end
 to setup-roles-trust
 ;priests already established 
 ;;establish mistrust to HCW
-ask healthcare-workers[
+ask healthcare-workers [
   let hcw self
-    ask in-my-trustee-link-neighbors[
+  ask people with [self != hcw] [
+    if not any? my-out-my-trustees-links with [end2 = hcw] [
+      create-my-trustee-link-to hcw
+    ]
     ask out-my-trustee-link-to hcw [
-    set trust-value -1
-    set color orange
+      set trust-value -1
+      set color orange
     ]
   ]
 ]
@@ -230,27 +248,58 @@ end
 
 to setup-person-to-person-trust
 ;now we select links to the kin to increase trust towards
-;individual agent gives trust from kin
-ask people [
-  let me self
-  ask my-kin-link-neighbors [
-    if (in-my-trustee-link-from me != nobody) [
-    ask in-my-trustee-link-from me [
-      set trust-value 1
-      set color blue
+;individual agent gives trust from kin network
+  ask people [
+    let me self
+    ask my-kin-link-neighbors [
+      let kin self
+      ask me [
+        if not any? my-out-my-trustees-links with [end2 = kin] [
+          create-my-trustee-link-to kin
+        ]
+        ask out-my-trustee-link-to kin [
+          set trust-value 1
+          set color blue
+        ]
       ]
     ]
   ]
-]
 
-;and a few strangers to actively mistrust
+
+
+;add a few strangers (not kin, not friends) to actively mistrust
 ask people [
-  ask up-to-n-of 5 my-out-my-trustees-links with [trust-value = 0][
-      set trust-value -1
-      set color red
-    ]
+  let kin my-kin-link-neighbors
+  let friends my-friends-link-neighbors
 
+  let stranger-trust-links my-out-my-trustees-links with [
+    trust-value = 0 and
+    not member? end2 kin and
+    not member? end2 friends
+  ]
+
+  ask up-to-n-of 5 stranger-trust-links [
+    set trust-value -1
+    set color red
+  ]
 ]
+
+  ; Ensure every priest is trusted (not great solution but will work for now)
+  ask people with [not priest?] [
+    let me self
+    ask people with [priest?] [
+      let priest-agent self
+      ask me [
+        if not any? my-out-my-trustees-links with [end2 = priest-agent] [
+          create-my-trustee-link-to priest-agent
+        ]
+        ask out-my-trustee-link-to priest-agent [
+          set trust-value 1
+          set color violet
+        ]
+      ]
+    ]
+  ]
 
 end
 
