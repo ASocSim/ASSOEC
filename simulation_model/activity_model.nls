@@ -69,6 +69,7 @@ to update-resources-based-on-current-activity [c-a]
 ;;this could be adapted to decreasing food rations to be bought, but for now it will do      
       let expense amount-of-rations-I-buy-when-going-to-stores-or-markets * price-of-rations
       set my-current-income my-current-income - expense
+      if my-current-income <= 0 [set my-current-income 0]
 
       ;if(not member? my-home male-only-homes)
         depleat-household-capital expense

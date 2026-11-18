@@ -49,7 +49,7 @@ to setup-social-network-ebola
   if information-mill?[
   setup-baseline-trust-network
   setup-roles-trust ;; (this updates initial trust in roles)
-  setup-person-to-person-trust
+  ;setup-person-to-person-trust
   ]
 end
 
@@ -134,7 +134,7 @@ end
 ;;TRUSTEES
 ;;people
 to-report possible-trustees
-  report up-to-n-of 10 other people with [not my-trustee-link-neighbor? myself ]
+  report up-to-n-of 1 other people with [not my-trustee-link-neighbor? myself]
   ;up-to-n-of 10 magic number to reduce comp time when building
 end
 
@@ -146,28 +146,33 @@ end
 
 
 to setup-baseline-trust-network
-;establish trust towards PRIESTS
+;establish trust towards PRIESTS and immediately set it to +1
 
 ask people with [priest? = false][
   let me self
-    ask one-of my-priest(my-church) [
+    ask my-priest(my-church) [
      if not my-trustee-link-neighbor? me [
        create-my-trustee-link-to me
        ]
     ask my-out-my-trustees-links [
       set trust-value 1
-      set color green
+      set color violet
     ]
   ]
 ]
 
-;firstly we create a trust link between all agents
+;REMEMBER PRIESTS ARE PEOPLE TOO
+;firstly we create a trust link between all remaining agents
 ask people [
   let me self
     ask possible-trustees [
      if not my-trustee-link-neighbor? me [
        create-my-trustee-link-to me]
-    ]   
+       ask my-out-my-trustees-links [
+      set trust-value 0
+      set color grey
+    ]
+    ]
 ]
 
 ;create trust links from all agents to all radio (channels)
@@ -176,19 +181,13 @@ ask people [
   ask possible-radio-trustees [
     if not my-trustee-link-neighbor? me [
       create-my-trustee-link-from me
-      set color white
     ]
   ]
 ]
 
-ask my-trustees-links
-  [ 
-    hide-link
-   ;and default it to 0
-    set trust-value 0
-  ]
 
 end
+
 
 ;then we make roles for priests, hcw, radios and government
 
