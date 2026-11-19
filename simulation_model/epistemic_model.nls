@@ -12,7 +12,6 @@
 ;;however, the effect depends on the listeners previous beliefs:
 ;;if someone is low on trust, listening to radio may cause further lowering of trust
 ;;if someone is ambivalent, they can be influenced either way (this should depend on who is there)
-;modeling this at civil societies only for now
 
 __includes ["epistemic-profiles.nls"]
 
@@ -27,12 +26,15 @@ globals
 
 
 to spread-information
+;disable if switch is off
+if not information-mill? [ stop ]
 
   if slice-of-the-day = "evening"[
     radio-dissemination
   ]
-  ;person-to-person
-  ;influence-congregation ;to rework
+  influence-congregation ;priests share at mass
+  send-message-person  ;person-to-person
+
 end
 
 
@@ -56,6 +58,33 @@ send-message speaker listener message source
 
 ]
 end
+
+to influence-congregation 
+;;people with priest? share their opinion to the current-gatherers of the gathering point of type church
+;as of now priests share their opinion on ALL topics
+    ask churches [
+      if count current-gatherers > count hired-workers [
+      let congregation current-gatherers
+
+      ask congregation with [priest?] [
+        let priest-agent self
+        let listeners congregation with [not priest?]
+        let messages (list
+          (list "hospital" epistemic-state-hospital)
+          (list "medicine" epistemic-state-medicine)
+          (list "ebola" epistemic-state-ebola)
+          (list "SDB" epistemic-state-SDB)
+        )
+
+        foreach messages [ message ->
+          send-message priest-agent listeners message priest-agent
+        ]
+      ]
+    ]
+  ]
+  
+end
+
 
 
 to send-message [speaker listener message source]
@@ -119,7 +148,6 @@ ask listener [
   let updated-belief max (list -1 (min (list 1
     (current-belief + message-value * influence)
   )))
-print "updating views"
   if topic = "hospital" [ set epistemic-state-hospital updated-belief ]
   if topic = "medicine" [ set epistemic-state-medicine updated-belief ]
   if topic = "ebola" [ set epistemic-state-ebola updated-belief ]
@@ -133,20 +161,57 @@ end
 
 to send-message-person
 ;message has content and source
-  ;people share their messages if they have acquired any content by a trusted source
+  ;people share their messages if their opinion has shifted significantly
   ;exceptions are radios, and healthcare workers (priests have asymmetric power, not modeled here but later)
-  
-  ask people [
-  ;let content epistemic-status
-  let source self
-  ;let current-message (list content source)
-  let my-location current-activity
+  ;an agent cannot tell another agent about the same belief twice within 12 ticks
+  let excluded-speakers (turtle-set healthcare-workers ) ; priests
 
-  ask my-trustees with [current-activity = my-location] [
-    ;overwrite only
-   ; set received-messages current-message
+  ask people with [not member? self excluded-speakers] [
+    let sender self
+    let location current-activity
+    let messages (list
+      (list 0 "hospital" epistemic-state-hospital last-shared-hospital)
+      (list 1 "medicine" epistemic-state-medicine last-shared-medicine)
+      (list 2 "ebola" epistemic-state-ebola last-shared-ebola)
+      (list 3 "SDB" epistemic-state-SDB last-shared-SDB)
+    )
 
-  ]
+    foreach messages [ message-data ->
+      let topic-index item 0 message-data
+      let topic item 1 message-data
+      let message-value item 2 message-data
+      let previous-value item 3 message-data
+
+      if abs (message-value - previous-value) >= 0.2 [
+        let listeners my-trustees with [
+          member? self people and current-activity = location
+        ]
+
+        set listeners listeners with [
+          out-my-trustee-link-to sender != nobody
+        ]
+
+        set listeners listeners with [
+          ticks - item topic-index
+            ([message-last-sent-ticks] of (out-my-trustee-link-to sender)) >= 12
+        ]
+
+        ask listeners [
+          send-message sender self (list topic message-value) sender
+          ask out-my-trustee-link-to sender [
+            set message-last-sent-ticks
+              replace-item topic-index message-last-sent-ticks ticks
+          ]
+        ]
+
+        if any? listeners [
+          if topic = "hospital" [ set last-shared-hospital message-value ]
+          if topic = "medicine" [ set last-shared-medicine message-value ]
+          if topic = "ebola" [ set last-shared-ebola message-value ]
+          if topic = "SDB" [ set last-shared-SDB message-value ]
+        ]
+      ]
+    ]
   ]
 
 end
@@ -162,14 +227,6 @@ to update-epistemic-status
 end
 
 
-
-to evaluate-messages-care
-  ;;here is when the agent with symptoms deliberates on their decision of care seeking
-  ;;this is done by evaluating the advice of the people they trust
-
-  ;needs trust links
-  ;if established link of trust wit healthcare workers before, believe them
-end
 
 to update-belief-hospitals
   ;here we make people trust thospitals more

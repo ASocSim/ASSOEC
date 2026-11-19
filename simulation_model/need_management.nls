@@ -229,7 +229,12 @@ to-report SUE-financial-survival [ad]
   
     let gp location-of ad
     let motive motive-of ad
-    let eating-costs price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets
+    let household-size count [gatherers] of my-home
+    if household-size = 0 [
+  error "Cannot calculate food costs for a household with zero residents"
+    ]
+  let eating-costs (price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets) / household-size
+
 
     ;get money from work, except work in the household
     if (motive = work-motive) [

@@ -173,12 +173,17 @@ if ( not is-observing-critical-symptoms?)
  
    if is-observing-critical-symptoms?
    [
+    
     ;empty list from other activities
     set activities [] 
     ;agent with critical symptoms is forced to seek treatment
     let money [amount-of-household-capital] of my-home
   ;;cost expressed in money units, but represents travel distance and general costs to go hospital
-  if money > hospital-stay-costs
+  let household-size count [gatherers] of my-home
+  if household-size = 0 [
+  error "Cannot check hospital affordability for a household with zero residents"
+]
+  if money > hospital-stay-costs / household-size
   [
 ;     if epistemic-state-hospital > 0.4 [
     if any? people with [[gathering-type] of my-work = "hospital"]

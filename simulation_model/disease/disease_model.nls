@@ -209,7 +209,7 @@ to update-within-agent-disease-status
 
   ask people with [other-disease?] [
     ;;here people know they have symptoms of SOMETHING, trigger advice seeking behaviour
-  evaluate-messages-care
+  ;evaluate-messages-care
    ; set infection-state other-disease
   ]
 

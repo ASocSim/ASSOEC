@@ -262,19 +262,23 @@ end
 ;; @note The adult-only household type is implemented but commented out of the
 ;; loop, so no adult homes are created.
 to create-all-households
+
   load-population-profile-based-on-current-preset-profile
 
   let #family-homes floor (#households * ratio-family-homes-to-displaced-homes)
   let #displaced-homes #households - #family-homes ;+ #retired-couple-homes + #multigenerational-homes
 
-;  repeat #adults-homes [create-household "adult"]
   repeat #family-homes [create-household "family"]
   repeat #displaced-homes [create-household "displaced"]
 
-  ask homes
-  [
-    set available-food-rations count gatherers * (random days-of-rations-bought + days-of-rations-bought)
+  ask homes [
+    ;starting houshold capiral is 2x workers wage
+    set available-food-rations
+      count gatherers * (random days-of-rations-bought + days-of-rations-bought)
+    set amount-of-household-capital count gatherers * workers-wages * 2
   ]
+
+
 end
 
 ;; Create one household of type `t` and the people in it.
@@ -402,6 +406,11 @@ to setup-person [current-home l-sex displacement-status]
     set epistemic-state-medicine 0
     set epistemic-state-ebola 0
     set epistemic-state-SDB 0
+
+    set last-shared-hospital epistemic-state-hospital
+    set last-shared-medicine epistemic-state-medicine
+    set last-shared-ebola epistemic-state-ebola
+    set last-shared-SDB epistemic-state-SDB
     
     ;;money handling
     set my-current-income 0

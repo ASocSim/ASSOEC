@@ -109,10 +109,15 @@ to earn-household-capital [earnings]
 end
 
 to depleat-household-capital [expense]
-ask my-home
-      [
-      set amount-of-household-capital amount-of-household-capital - expense
-      ]
+  let household-size count [gatherers] of my-home
+  if household-size = 0 [
+    error "Cannot divide a household expense among zero residents"
+  ]
+
+  ask my-home [
+    set amount-of-household-capital
+      amount-of-household-capital - (expense / household-size)
+  ]
 end
 
 

@@ -6,7 +6,7 @@ undirected-link-breed [my-friends-links my-friends-link]
 
 directed-link-breed [my-trustees-links my-trustee-link]
 
-my-trustees-links-own [trust-value]
+my-trustees-links-own [trust-value message-last-sent-ticks]
 
 
 breed [radios radio]
@@ -200,7 +200,6 @@ ask people [
   ]
 ]
 
-
 end
 
 
@@ -300,6 +299,11 @@ ask people [
       ]
     ]
   ]
+
+;default timestamp for avoiding echoes
+  ask my-trustees-links [
+  set message-last-sent-ticks (list -12 -12 -12 -12)
+]
 
 end
 

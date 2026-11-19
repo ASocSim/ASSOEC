@@ -53,6 +53,12 @@ people-own [
   epistemic-state-ebola               ;;< what this person believes about ebola
   epistemic-state-SDB                 ;;< what this person believes about SDBs
 
+ last-shared-hospital
+ last-shared-medicine
+ last-shared-ebola
+ last-shared-SDB 
+
+
 ;deprecated
   my-trust-in-hospital
   my-trust-in-institutions
