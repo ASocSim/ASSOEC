@@ -29,6 +29,7 @@ to spread-information
 ;disable if switch is off
 if not information-mill? [ stop ]
 
+
   if slice-of-the-day = "evening"[
     radio-dissemination
   ]
@@ -62,13 +63,13 @@ end
 to influence-congregation 
 ;;people with priest? share their opinion to the current-gatherers of the gathering point of type church
 ;as of now priests share their opinion on ALL topics
-    ask churches [
-      if count current-gatherers > count hired-workers [
-      let congregation current-gatherers
+ask churches[
+  let church self
+  let congregation current-gatherers with [my-church = church]
 
-      ask congregation with [priest?] [
-        let priest-agent self
-        let listeners congregation with [not priest?]
+  ask congregation with [priest? and my-work = church] [
+    let priest-agent self
+    let listeners congregation with [not priest?]
         let messages (list
           (list "hospital" epistemic-state-hospital)
           (list "medicine" epistemic-state-medicine)
@@ -80,9 +81,7 @@ to influence-congregation
           send-message priest-agent listeners message priest-agent
         ]
       ]
-    ]
-  ]
-  
+]
 end
 
 
@@ -228,11 +227,6 @@ end
 
 
 
-to update-belief-hospitals
-  ;here we make people trust thospitals more
-
-end
-
 
 to evaluate-messages-rites
 ;;here is when the agent with symptoms deliberates on their decision of which rites should be done for the deceased
@@ -256,7 +250,7 @@ end
 
 to-report unwilling-to-go-hospital
 ;threshold level at 85% to not go to hospital under any circumstance determined by needs or social influence
-  if epistemic-state-medicine <= -0.4[
+  if epistemic-state-hospital <= -0.4[
     report true
   ]
     report false

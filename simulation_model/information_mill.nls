@@ -1,0 +1,270 @@
+
+;This file handles all procedures for information mill and links to epistemic state changes and activity selections
+
+
+breed [governments government]
+
+directed-link-breed [my-trustees-links my-trustee-link]
+
+my-trustees-links-own [trust-value message-last-sent-ticks]
+
+
+breed [radios radio]
+radios-own [
+  broadcast-hospital
+  broadcast-medicine
+  broadcast-ebola
+  broadcast-SDB
+ ]
+
+
+;INFORMATION MILL SETUP
+to setup-information-mill
+  if information-mill?[
+  
+  create-governments 1 [ hide-turtle ]
+  setup-baseline-trust-network
+  setup-roles-trust ;; (this updates initial trust in roles)
+  setup-person-to-person-trust
+  ]
+
+end
+
+to setup-radios
+  create-radios n-radios
+
+ask radios[
+
+set xcor random 69
+set ycor 0
+
+  ifelse government-message-radios? [
+  set broadcast-hospital -1
+  set broadcast-medicine -1
+  set broadcast-ebola -1
+  set broadcast-SDB 1
+][
+     set broadcast-hospital random-float 2 - 1
+     set broadcast-medicine random-float 2 - 1
+     set broadcast-ebola random-float 2 - 1
+     set broadcast-SDB random-float 2 - 1
+  ]
+]
+end
+
+to setup-priests-beliefs
+ ask priests [
+ifelse government-message-priests? [
+  set epistemic-state-hospital -1
+  set epistemic-state-medicine -1
+  set epistemic-state-ebola -1
+  set epistemic-state-SDB 1
+][
+     set epistemic-state-hospital random-float 2 - 1
+     set epistemic-state-medicine random-float 2 - 1
+     set epistemic-state-ebola random-float 2 - 1
+     set epistemic-state-SDB random-float 2 - 1
+  ]
+]
+end
+
+
+
+;;TRUSTEES
+;;people
+to-report possible-trustees
+  report up-to-n-of 1 other people with [not my-trustee-link-neighbor? myself]
+  ;up-to-n-of 10 magic number to reduce comp time when building
+end
+
+;;radios that could be trusted, returns agentset
+to-report possible-radio-trustees
+  report radios with [not my-trustee-link-neighbor? myself ]
+end
+
+
+
+to setup-baseline-trust-network
+
+;setup mistrust to gvmnt
+let government-agent one-of governments
+ask people [
+  create-my-trustee-link-to government-agent [
+    set trust-value -1
+    set color orange
+  ]
+]
+
+;establish trust towards PRIESTS and immediately set it to +1
+ask people with [priest? = false] [
+  let me self
+  let my-priest-agent one-of my-priest(my-church)
+
+  if my-priest-agent != nobody [
+    if not my-trustee-link-neighbor? my-priest-agent [
+      create-my-trustee-link-to my-priest-agent
+    ]
+
+    ask out-my-trustee-link-to my-priest-agent [
+      set trust-value 1
+      set color violet
+    ]
+  ]
+]
+
+;REMEMBER PRIESTS ARE PEOPLE TOO
+;firstly we create a trust link between all remaining agents
+ask people [
+  let me self
+    ask possible-trustees [
+     if not my-trustee-link-neighbor? me [
+       create-my-trustee-link-to me]
+       ask my-out-my-trustees-links [
+      set trust-value 0
+      set color grey
+    ]
+    ]
+]
+
+;create trust links from all agents to all radio (channels)
+ask people [
+  let me self
+  ask possible-radio-trustees [
+    if not my-trustee-link-neighbor? me [
+      create-my-trustee-link-from me
+    ]
+  ]
+]
+
+end
+
+
+;then we make roles for priests, hcw, radios and government
+
+to setup-roles-trust
+;priests already established 
+;;establish mistrust to HCW
+ask healthcare-workers [
+  let hcw self
+  ask people with [self != hcw] [
+    if not any? my-out-my-trustees-links with [end2 = hcw] [
+      create-my-trustee-link-to hcw
+    ]
+    ask out-my-trustee-link-to hcw [
+      set trust-value -1
+      set color orange
+    ]
+  ]
+]
+
+;RADIO trust set
+;each agent trusts one of the radios and mistrusts others?
+
+ask radios [
+  let radio-channel self
+  ask in-my-trustee-link-neighbors [
+    ask out-my-trustee-link-to radio-channel [
+    set color violet
+    set trust-value -1
+    ]
+    ask one-of in-my-trustee-link-neighbors [
+    ask out-my-trustee-link-to radio-channel [
+      set color green
+      set trust-value 1
+    ]
+  ]
+]
+]
+;;establish mistrust to GOVERNMENT
+
+end
+
+
+
+to setup-person-to-person-trust
+;now we select links to the kin to increase trust towards
+;individual agent gives trust from kin network
+  ask people [
+    let me self
+    ask my-kin-link-neighbors [
+      let kin self
+      ask me [
+        if not any? my-out-my-trustees-links with [end2 = kin] [
+          create-my-trustee-link-to kin
+        ]
+        ask out-my-trustee-link-to kin [
+          set trust-value 1
+          set color blue
+        ]
+      ]
+    ]
+  ]
+
+
+
+;add a few strangers (not kin, not friends) to actively mistrust
+ask people [
+  let kin my-kin-link-neighbors
+  let friends my-friends-link-neighbors
+
+  let stranger-trust-links my-out-my-trustees-links with [
+    trust-value = 0 and
+    not member? end2 kin and
+    not member? end2 friends
+  ]
+
+  ask up-to-n-of 5 stranger-trust-links [
+    set trust-value -1
+    set color red
+  ]
+]
+
+;default timestamp for avoiding echoes
+  ask my-trustees-links [
+  set message-last-sent-ticks (list -12 -12 -12 -12)
+]
+
+end
+
+
+
+to update-trust-from-evidence
+;experience changes the belief in the agent
+
+  let patient self
+
+  set epistemic-state-hospital 1
+  set epistemic-state-ebola -0.9
+
+  if not information-mill? [ stop ]
+
+  let treating-hospital my-hospital
+  if treating-hospital = nobody [
+    error (word "Recovered hospital patient " who " has no assigned hospital")
+  ]
+
+  let hospital-staff [hired-workers] of treating-hospital
+  ask hospital-staff with [self != patient] [
+    let hcw self
+    ask patient [
+      let trust-link out-my-trustee-link-to hcw
+      if trust-link = nobody [
+        error (word "No trust link from recovered patient " who
+          " to healthcare worker " [who] of hcw)
+      ]
+      ask trust-link [
+        set trust-value 1
+      ]
+    ]
+  ]
+;and their kin network through information mill
+
+  let kin my-kin-link-neighbors
+  if any? kin [
+    send-message patient kin (list "hospital" 1) patient
+    send-message patient kin (list "ebola" -1) patient
+  ]
+end
+
+
+

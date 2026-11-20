@@ -177,6 +177,26 @@ to-report is-observing-critical-symptoms?
   error (sentence "not implemented for:" infection-status)
 end
 
+to-report is-observing-initial-symptoms?  
+  if infection-status = "hospitalised"
+  or infection-status = "non-hospitalised"
+  or infection-status = "infected-stage-2"
+  or infection-status = "just-contaminated"
+  or infection-status = "dead-infectious"
+  or infection-status = "safe-burial" ;Emil added
+  or infection-status = "unsafe-burial" ;Emil added
+  or infection-status = "h-to-immune"
+  or infection-status = "immune"
+  or infection-status = "healthy"
+  [report false]
+  
+  if infection-status = "infected-stage-1"
+  or infection-status = "infected-stage-1.5" 
+  [report true]
+  
+  error (sentence "not implemented for:" infection-status)
+end
+
 
 to-report is-infected?
   report is-infected-infection-status? infection-status
@@ -195,8 +215,15 @@ end
 
 to update-within-agent-disease-status
   ask people with [infection-state != susceptible-infection-status] [
+    let previous-status infection-status
     set-infection-status next-infection-state
     
+    if previous-status = hospitalised-to-immune-infection-status
+    and infection-status = immune-infection-status [
+      ;increase trust in hcw if they helped you recover
+    update-trust-from-evidence
+  ]
+
     if infection-status = safe-burial-to-removed-infection-status [
       set #safely-buried #safely-buried + 1
     ]
@@ -206,6 +233,8 @@ to update-within-agent-disease-status
     
     if infection-status = removed-infection-status [kill-person]
   ]
+
+
 
   ask people with [other-disease?] [
     ;;here people know they have symptoms of SOMETHING, trigger advice seeking behaviour

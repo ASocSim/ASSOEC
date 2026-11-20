@@ -159,6 +159,11 @@ if ( not is-observing-critical-symptoms?)
 ;;activities for moderately sick people (stage 1 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+if is-observing-initial-symptoms? [
+print "I am obs mild symptoms"
+
+]
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -174,8 +179,8 @@ if ( not is-observing-critical-symptoms?)
    if is-observing-critical-symptoms?
    [
     
-    ;empty list from other activities
-    set activities [] 
+    ;empty list from other activities except resting at home
+set activities (list (list my-home rest-motive))
     ;agent with critical symptoms is forced to seek treatment
     let money [amount-of-household-capital] of my-home
   ;;cost expressed in money units, but represents travel distance and general costs to go hospital
@@ -185,25 +190,25 @@ if ( not is-observing-critical-symptoms?)
 ]
   if money > hospital-stay-costs / household-size
   [
-;     if epistemic-state-hospital > 0.4 [
+     if epistemic-state-hospital > 0 [
     if any? people with [[gathering-type] of my-work = "hospital"]
      [set activities lput (list my-hospital treatment-motive) activities]
- ;    ]
+     ]
   ]
 
- ; if epistemic-state-medicine > 0.4 [
+  if epistemic-state-medicine > 0 [
   if any? people with [[gathering-type] of my-work = "traditional healer"][
     set activities lput (list my-traditional-healer treatment-motive) activities]
- ; ]
+  ]
   
   ;if no strong beliefs are held towards hospitals and trad remedies, try church
- ; if epistemic-state-hospital <= 0.4 and epistemic-state-medicine <= 0.4 [
+  if epistemic-state-hospital <= 0 and epistemic-state-medicine <= 0 [
     if any? people with [[gathering-type] of my-work = "church"][
 
-  ;set activities lput (list my-church treatment-motive) activities 
+  set activities lput (list my-church treatment-motive) activities 
   ]
   ]
-;] 
+] 
 
   let ret []
   foreach activities [ activity ->

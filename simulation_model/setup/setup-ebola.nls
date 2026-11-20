@@ -16,7 +16,7 @@
 ;; @see docs/WIP_ISSUES.md
 
 
-__includes ["scenarios.nls" "setup/household-configuration.nls"]
+__includes ["scenarios.nls" "setup/household-configuration.nls" "information_mill.nls"]
 
 
 globals[]
@@ -51,10 +51,11 @@ to setup-ebola
   setup-relation-to-gathering-points
   setup-worker-relation-to-gathering-point
 
+  setup-social-network-ebola
   setup-radios
+  setup-information-mill
 
   setup-person-values-and-needs
-  setup-social-network-ebola
   
    if with-infected? [
      set first-infected-people n-of (min list 10 count people) people
