@@ -3,74 +3,84 @@
 ;assuming people who do not go to the hospital will not survive
 
 
+;; Durations follow the WHO Ebola Response Team's West African estimates
+;; (NEJM 2014, "Ebola Virus Disease in West Africa - The First 9 Months"):
+;; incubation ~11 days, symptom onset to hospitalisation ~5 days, onset to death ~8 days,
+;; hospitalisation to death ~4 days, hospitalisation to discharge ~12 days.
+;;
+;; Timeline (days from infection, means):
+;;   0   just-contaminated (incubating, not contagious)    tau-incubation-ebo  ~11
+;;  11   infected-stage-1  (symptomatic, mobile, contagious) tau-sym-ebo       ~4.5
+;;  15.5 infected-stage-1.5, infected-stage-2               1 tick each
+;;  16   hospitalised      -> outcome after tau-h-to-death  ~4   (death, CFR)
+;;                         -> survivors stay tau-rec         ~8   more, then immune
+;;       non-hospitalised  -> death after tau-nh-to-death   ~2.5 (onset to death ~8)
+;;       dead-infectious   -> safe / unsafe burial          tau-bur 3, then removed
+;;
+;; A timed state is (list state ticks-left); it counts down one tick per tick and the
+;; transition out of it is applied when it reaches 0.
 to-report transition-ebo [s]
 
   ;static states
   if s = susceptible-infection-status [report stochastic-fsm-transition (list (list susceptible-infection-status 1))]
-  ;just exposed transition
-  if s = just-exposed-infection-status [report stochastic-fsm-transition (list (list exposed-to-stage-one-infection-status 1))]
-  
-  if s = exposed-to-stage-one-infection-status [report stochastic-fsm-transition (list (list stage-one-to-stage-two-infection-status 1))] 
-  
-  if s = stage-one-to-stage-two-infection-status [report stochastic-fsm-transition (list (list stage-two-infection-status 1))]
-  
- if s = immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
-  
+  if s = immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
+
+  ;safety net: a plain (untimed) exposure still gets a full incubation period
+  if s = just-exposed-infection-status [report stochastic-fsm-transition (list (list timed-state just-exposed-infection-status tau-incubation-ebo))]
+
   ;time management
   if is-timed-state? s and time-of-timed-state s > 0 [
-    report stochastic-fsm-transition (list 
+    report stochastic-fsm-transition (list
     (list timed-state state-of-timed-state s (time-of-timed-state s - 1)))
   ]
-  
+
+  ;from here on, timed states have run out, and untimed states last a single tick
+  let state ifelse-value is-timed-state? s [state-of-timed-state s] [s]
+
+  ;incubation over: symptoms start (stage 1, still mobile)
+  if state = just-exposed-infection-status [report stochastic-fsm-transition (list (list timed-state exposed-to-stage-one-infection-status tau-sym-ebo))]
+
+  if state = exposed-to-stage-one-infection-status [report stochastic-fsm-transition (list (list stage-one-to-stage-two-infection-status 1))]
+
+  if state = stage-one-to-stage-two-infection-status [report stochastic-fsm-transition (list (list stage-two-infection-status 1))]
+
   ;to go to the hospital or not to go
   ;;this procedure needs further connection with hospital and activity modules (Be and Emil look into this)
-  if s = stage-two-infection-status[
-    report stochastic-fsm-transition (list 
-      (list timed-state stage-two-to-hospitalised-infection-status tau-hosp p-hosp)
-      (list timed-state stage-two-to-non-hospitalised-infection-status tau-hosp)
-  )]
-  
-  ;hospital to recovery or death (CFR)
- if state-of-timed-state s = in-hospital-infection-status 
-  [
+  if state = stage-two-infection-status [
     report stochastic-fsm-transition (list
-    (list timed-state hospitalised-to-dead-infectious-infection-status tau-h-to-death p-mortality-in-hospital)
+      (list timed-state stage-two-to-hospitalised-infection-status tau-h-to-death p-hosp)
+      (list timed-state stage-two-to-non-hospitalised-infection-status tau-nh-to-death)
+  )]
+
+  ;hospital to death (CFR) or to the rest of the recovery stay
+  if state = in-hospital-infection-status [
+    report stochastic-fsm-transition (list
+    (list hospitalised-to-dead-infectious-infection-status p-mortality-in-hospital)
     (list timed-state hospitalised-to-immune-infection-status tau-rec)
-  )
-  ]
-  
+  )]
+
   ;to immunity
-     if s = in-hospital-infection-status or state-of-timed-state s = hospitalised-to-immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
-  
+  if state = hospitalised-to-immune-infection-status [report stochastic-fsm-transition (list (list immune-infection-status 1))]
 
-  ;death to burials
+  ;no hospital: death
+  if state = stage-two-to-non-hospitalised-infection-status
+  [report stochastic-fsm-transition (list (list non-hospitalised-to-dead-infectious-infection-status 1))]
 
+  ;death to burials (hospital and home deaths share the "dead-infectious" state)
   ;;This procedure needs to trigger a social network response to let agents connected to the deceased attend the burial after choosing the burial type
-
-  if ( state-of-timed-state s = non-hospitalised-to-dead-infectious-infection-status 
-  or s = non-hospitalised-to-dead-infectious-infection-status
-  or state-of-timed-state s = hospitalised-to-dead-infectious-infection-status )
+  if state = non-hospitalised-to-dead-infectious-infection-status
   [ report stochastic-fsm-transition (list
     (list timed-state dead-to-safe-burial-infection-status tau-bur p-safe-burial)
     (list timed-state dead-to-unsafe-burial-infection-status tau-bur)
   ) ]
 
-  
-  ;burials (Emil added)
-  if state-of-timed-state s = dead-to-safe-burial-infection-status
+  ;burials to removed (Emil added)
+  if state = dead-to-safe-burial-infection-status
   [report stochastic-fsm-transition (list (list safe-burial-to-removed-infection-status 1))]
 
-  if state-of-timed-state s = dead-to-unsafe-burial-infection-status
+  if state = dead-to-unsafe-burial-infection-status
   [report stochastic-fsm-transition (list (list unsafe-burial-to-removed-infection-status 1))]
-  
-  ;burials to removed
-  if state-of-timed-state s = unsafe-burial-to-removed-infection-status
-  [report stochastic-fsm-transition (list (list removed-infection-status 1))]
 
-  if state-of-timed-state s = stage-two-to-non-hospitalised-infection-status
-  [report stochastic-fsm-transition (list (list non-hospitalised-to-dead-infectious-infection-status 1))]
-  
-  
   error (sentence "unimplemented" s)
 end
 
@@ -86,7 +96,10 @@ end
 to-report p-hosp
   ;THIS DEPENDS ON TRUST IN HOSPITAL agent value
   ;is the agent likely to accept treatment at the hospital based on their experiences and knowledge of biomedicine?
-  report my-trust-in-hospital
+  ;two way split only depending on epi state hospital
+  if epistemic-state-hospital <= 0
+  [report 1]
+  report 0 
 end
 
 
@@ -98,45 +111,54 @@ end
 
 to-report p-safe-burial
 ;THIS DEPENDS ON TRUST IN institutions of the deceased's network
-  report my-networks-trust-in-institutions
+  report my-networks-belief-on-SDB
 end
 
-to-report my-networks-trust-in-institutions
+to-report my-networks-belief-on-SDB
 ;;simplified procedure for considering networks opinion on SDB
 ;;does not consider that close relatives have more impact on choice, as do people with higher social status (could connect to need!)
-   report mean [my-trust-in-institutions] of my-kin-link-neighbors
+   if ( mean [epistemic-state-SDB] of my-kin-link-neighbors >= 0 ) [
+    report 1
+   ]
+   report 0
 end
 
 
 ;;;;;;;TAU VALUES;;;;;;;;;;;;
+;; All in ticks. Means and variances are in days; see the timeline above transition-ebo.
 
-;time in stage 1
+;; A gamma-distributed duration, rounded to whole ticks and never shorter than one tick.
+to-report gamma-ticks [mean-days variance-days]
+  let d random-gamma (mean-days * mean-days / variance-days) (mean-days / variance-days)
+  report max (list 1 round (d * #ticks-per-day))
+end
+
+;incubation: infected but no symptoms and not contagious (WHO: mean 11.4 days, range ~2-21)
+to-report tau-incubation-ebo
+  report gamma-ticks 11 16
+end
+
+;time in stage 1 (symptomatic, still mobile): with the two single-tick steps after it,
+;onset to hospitalisation comes out at ~5 days
 to-report tau-sym-ebo
-  let mean-val ((5 + 7) / 2)
-  let variance-val 1
-  report round (random-gamma (mean-val * mean-val / variance-val) (1 / (variance-val / mean-val)))  * #ticks-per-day 
+  report gamma-ticks 4.5 1
 end
 
-
-to-report tau-hosp
-  report 1  * #ticks-per-day
-end
-
-;how log does it take for a person to die in hosp
+;how long it takes for a person to die in hosp (hospitalisation to death ~4 days);
+;the outcome (death or recovery) is decided at the end of this stay
 to-report tau-h-to-death
-  report 10 * #ticks-per-day
+  report gamma-ticks 4 2
 end
 
+;stage 2 without care until death, so that onset to death is ~8 days
 to-report tau-nh-to-death
-  let mean-val ((10 + 19) / 2)
-  let variance-val 3
-  report round (random-gamma (mean-val * mean-val / variance-val) (1 / (variance-val / mean-val)))  * #ticks-per-day 
+  report gamma-ticks 2.5 1
 end
 
-
-;it takes very long for a patient to recover
+;it takes very long for a patient to recover: the rest of the stay after tau-h-to-death,
+;so hospitalisation to discharge is ~12 days
 to-report tau-rec
-    report 12 * #ticks-per-day
+    report 8 * #ticks-per-day
 end
 
 

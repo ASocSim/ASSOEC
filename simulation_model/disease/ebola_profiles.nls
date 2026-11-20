@@ -1,3 +1,10 @@
+
+
+;OTHER DISEASE
+to-report other-disease
+  report "otherwise sick"
+end
+
 ;EBOLA ONLY
 
 ;SUSCEPTIBLE
@@ -60,7 +67,12 @@ to-report dead-to-safe-burial-infection-status
   report "safe-burial"
 end
 
-;;REMOVED
+to-report dead-other
+  report "deceased, other disease"
+end
+
+
+;;REMOVED state of agents
 
 to-report unsafe-burial-to-removed-infection-status
   report "removed"
@@ -73,16 +85,3 @@ end
 to-report removed-infection-status
   report "removed"
 end
-
-
-;to-report dead-infection-status
-;  report "dead"
-;end
-
-; to-report stage-one-to-hospitalised-infection-status
-;   report "hospitalised"
-; end
-
-; to-report stage-one-to-non-hospitalised-infection-status
-;   report "non-hospitalised"
-; end

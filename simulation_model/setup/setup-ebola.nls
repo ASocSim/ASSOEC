@@ -15,7 +15,8 @@
 ;; @see people_management.nls
 ;; @see docs/WIP_ISSUES.md
 
-__includes ["scenarios.nls" "setup/household-configuration.nls"]
+
+__includes ["scenarios.nls" "setup/household-configuration.nls" "information_mill.nls"]
 
 
 globals[]
@@ -28,9 +29,7 @@ globals[]
 ;;
 ;; @context observer
 ;; @side-effects clears the world and creates every turtle and link in it
-;; @note Nobody is infected at setup: the COVID block that seeded the first
-;; infections is commented out, so a run stays disease-free until something else
-;; introduces a case.
+
 to setup-ebola
   clear-all
   reset-ticks
@@ -44,13 +43,6 @@ to setup-ebola
   set day-of-the-week "monday"
   set current-day 0
   set #dead-people 0
-  ;set price-of-rations 1
-
-  
-  set was-social-distancing-enforced? false
-  set when-has-2%-infected-threshold-first-been-met? "never"
-  set when-has-5%-infected-threshold-first-been-met? "never"
-  set start-tick-of-global-quarantine "never"
 
   
   setup-gathering-points-as-turtle-sets
@@ -59,15 +51,22 @@ to setup-ebola
   setup-relation-to-gathering-points
   setup-worker-relation-to-gathering-point
 
-
-  setup-gathering-point-capacities
-  setup-person-values-and-needs
   setup-social-network-ebola
+  setup-radios
+  setup-information-mill
+
+  setup-person-values-and-needs
   
    if with-infected? [
-     set first-infected-people n-of (min list 3 count people) people
+     set first-infected-people n-of (min list 10 count people) people
      ask first-infected-people [contaminate nobody ("setup")]
      set #first-infected-people count first-infected-people
+    
+
+    ;;other diseases initial patients
+     ask n-of #other-disease-patients-at-start people with [infection-state = "healthy"] [
+      set other-disease? true
+      ]
    ]
 ;   setup-phasing-out
 
@@ -76,9 +75,6 @@ to setup-ebola
   ask gathering-links
    [hide-link]
 
-;   set is-lockdown-active? false
-;   set list-of-buses (list)
-;   set list-of-shared-cars (list)
   
 ;   if log-setup? [foreach sort gathering-points [[x]-> log-file-print [(word "description_gathering_poing(" who "," gathering-type ")")] of x]]
 
@@ -141,7 +137,7 @@ end
    set schools (turtle-set)
    set homes (turtle-set)
    set family-homes (turtle-set)
-   set male-only-homes (turtle-set)
+   set displaced-male-homes (turtle-set)
    set markets (turtle-set)
    set churches (turtle-set)
    set cemeteries (turtle-set)
@@ -251,16 +247,6 @@ end
 
 ; setup-economy
 
-  if migration?
-  [
-    create-gathering-points 1
-    [
-      set gathering-type "away"
-      set away-gathering-point self
-      set shape "airplane"
-    ]
-  ]
-
   ask gathering-points with [gathering-type = 0] [error (sentence "ill defined " self)]
 end
 
@@ -274,22 +260,26 @@ end
 ;;
 ;; @context observer
 ;; @side-effects creates home gathering points and the people who live in them
-;; @note The adult-only household type is implemented but commented out of the
-;; loop, so no adult homes are created.
+
 to create-all-households
+
   load-population-profile-based-on-current-preset-profile
 
-  let #family-homes floor (#households * ratio-family-homes)
+  let #family-homes floor (#households * ratio-family-homes-to-displaced-homes)
   let #displaced-homes #households - #family-homes ;+ #retired-couple-homes + #multigenerational-homes
 
-;  repeat #adults-homes [create-household "adult"]
   repeat #family-homes [create-household "family"]
   repeat #displaced-homes [create-household "displaced"]
 
-  ask homes
-  [
-    set available-food-rations count gatherers * (random days-of-rations-bought + days-of-rations-bought)
+  ask homes [
+    ;starting houshold capital is 2x workers wage
+    set available-food-rations
+      count gatherers * (random days-of-rations-bought + days-of-rations-bought)
+      ;capped at 5
+    set amount-of-household-capital max (list -5 (min (list 5 (count gatherers * workers-wages * 2))))
   ]
+
+
 end
 
 ;; Create one household of type `t` and the people in it.
@@ -310,7 +300,6 @@ to create-household [t]
   let current-home nobody
   create-gathering-points 1
   [
-    ;print self
     set current-home self
     set homes (turtle-set homes self)
     set gathering-type "home"
@@ -328,7 +317,7 @@ to create-household [t]
 
     if t = "displaced"
     [
-      set male-only-homes (turtle-set male-only-homes current-home)
+      set displaced-male-homes (turtle-set displaced-male-homes current-home)
     ]
 
   if t = "family"
@@ -336,7 +325,7 @@ to create-household [t]
     let men random 3 + 1
     let women random 3 + 1
 
-    setup-home current-home men women
+    setup-home current-home men women false
     
     stop
   ]
@@ -344,7 +333,7 @@ to create-household [t]
    if t = "displaced"
   [
     let men random 2 + 3
-    setup-home current-home men 0
+    setup-home current-home men 0 true
 
 
     stop
@@ -360,15 +349,15 @@ end
 ;; @param women         how many women to create
 ;; @context observer
 ;; @side-effects creates people
-to setup-home [current-home men women]
+to setup-home [current-home men women displacement-status]
   if men > 0
   [
-    repeat men [setup-person current-home male-sex] 
+    repeat men [setup-person current-home male-sex displacement-status] 
   ]
 
   if women > 0
   [
-    repeat women [setup-person current-home female-sex]
+    repeat women [setup-person current-home female-sex displacement-status]
   ]
 end
 
@@ -400,27 +389,37 @@ end
 ;; @param l-sex         `female-sex` or `male-sex`
 ;; @context observer
 ;; @side-effects creates one person and their gathering link to the home
-;; @note `age` is never set here, or anywhere else, so every age predicate in the
-;; model is false for everyone.
-to setup-person [current-home l-sex]
+to setup-person [current-home l-sex displacement-status]
   
   create-people 1 
   [
     set sex l-sex
+    set displaced? displacement-status
     set time-when-infected "never"
-    set has-been-tested-infected? false
-
+    set time-when-symptomatic "never"
+    set priest? false
     set am-I-mourning? false
-    set my-trust-in-hospital random-float 1
-    set my-trust-in-institutions random-float 1
+    set other-disease? false
+    set my-cemetery nobody
+
+    ;epistemic states A,B and C
+    ;template
+    set epistemic-state-hospital (random-float 1) - 0.5
+    set epistemic-state-medicine (random-float 1) - 0.5
+    set epistemic-state-ebola (random-float 1) - 0.5
+    set epistemic-state-SDB (random-float 1) - 0.5
+
+    set last-shared-hospital epistemic-state-hospital
+    set last-shared-medicine epistemic-state-medicine
+    set last-shared-ebola epistemic-state-ebola
+    set last-shared-SDB epistemic-state-SDB
     
     ;;money handling
     set my-current-income 0
-    set my-expected-income 45          ;;< income this person expects from working, used by `SUE-financial-survival`
+    set my-expected-income workers-wages          ;;< income this person expects from working, used by `SUE-financial-survival`
 
     set current-activity current-home
     set my-home current-home
-    set schedule (list "hello" "its a-meeee, maaaaario")
     
     if(sex = "female")
     [
@@ -428,33 +427,23 @@ to setup-person [current-home l-sex]
     ]
 
 
-    set has-been-tested-immune? false
 
     create-gathering-link-to current-home [set features (list "rest" "visits" "work" "care for the sick" "get treatment" "family belonging" "group belonging")]
     
-    set is-moving-outside-for-reaching-current-activity? false
 
     set is-currently-allocated-a-bed-in-hospital? false
 
 
- ;   set can-I-perform-solo-transportation? random-float 1  <  owning-solo-transportation-probability   ;; IS THIS RELEVANT IN EBOLA?
-
-    set current-person-I-depend-on nobody   ;;MOD FOR CARETAKING
     set color default-color
     set size 0.5
     set infection-state susceptible-infection-status
-    set epistemic-infection-status "healthy"
-    set last-day-observed-symptoms nobody ;should raise an error if used before being initialized
-    set stayed-out-queuing-for-bus? false
-    set is-activity-successful? true
 
-   ; set I-know-of-social-distancing? ifelse-value Aware-of-social-distancing-at-start-of-simulation? [true] [false]
-   ; set I-know-of-working-from-home? ifelse-value Aware-of-working-at-home-at-start-of-simulation? [true] [false]
+
+      set is-activity-successful? true
+
     set what-my-network-did-week-day []
     set what-my-network-did-weekend []
-    set did-my-network-socially-distance? false
     
-    set #days-I-should-remain-in-self-quarantining 0
     set  events-to-process (list)
   ]
 end
@@ -753,6 +742,8 @@ ask civil-societies
   [
     let hiring-church self
     set hired-workers (turtle-set people with [my-work = hiring-church])
+    ;; assign a priest to each church
+    ask one-of hired-workers [set priest? true]
   ]
 
   ask cemeteries
@@ -816,7 +807,6 @@ ask civil-societies
 
   ask people with [my-work = 0 ]
   [
-    ;print "I am unemployed, can I work in mine?"
     let mine one-of workplace-mines
     set my-work mine
   ]
@@ -837,33 +827,7 @@ ask civil-societies
   
 end
 
-;; Decide how many people each place can hold at once.
-;;
-;; Everywhere is uncapped by default. Markets, stores and churches are then capped
-;; at the size of their own attached population, which is the cap
-;; `perform-people-activities` enforces.
-;;
-;; @context observer
-;; @side-effects sets `capacity` on every gathering point
-;; @see disabled-capacity
-to setup-gathering-point-capacities
-  ask gathering-points [
-    set capacity disabled-capacity
-  ]
-  ask markets [
-    set capacity count gatherers
-  ]
-  ask stores [
-    set capacity count gatherers
-  ]
-  
-  ask churches [
-    set capacity count gatherers
-  ]
-;ask burial-rites [
- ;   set capacity count gatherers
-  ;]
-end
+
 
 ;; Scatter the gathering points across the view without overlapping them.
 ;;

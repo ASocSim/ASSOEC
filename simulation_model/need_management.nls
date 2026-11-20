@@ -21,12 +21,7 @@
 ;;   tank is topped up with
 ;;
 ;; Expectations are currently perfect: every `SUA` simply reports its `SUE`.
-;;
-;; @note The `SUE` reporters are mid-migration from COVID to Ebola and several of
-;; them test motive strings this model no longer produces. See docs/WIP_ISSUES.md
-;; before trusting one.
-;; @see need_definition.nls
-;; @see docs/WIP_ISSUES.md
+
 
 __includes ["need_definition.nls"]
 ;might need to be updated later on, as need satisfaction depends on the consequences of your action rather than on your intent
@@ -74,11 +69,7 @@ __includes ["need_definition.nls"]
 ;; @param current-activity-descriptor  the activity that was performed
 ;; @context person
 ;; @side-effects updates all eleven satisfaction levels
-;; @note Food and the two belonging needs are topped up from their `SDA`
-;; reporters, the other eight from `SDE`. That is the difference between "what it
-;; actually gave" and "what it was expected to give", and while expectations stay
-;; perfect the two agree.
-;; @see decay-satisfaction-level-ebo
+
 to update-needs-for-playing [current-activity-descriptor]
 
   decay-satisfaction-level-ebo
@@ -87,11 +78,11 @@ to update-needs-for-playing [current-activity-descriptor]
     
   set sleep-satisfaction-level clamp 0 1 (sleep-satisfaction-level + SDE-sleep current-activity-descriptor)
   set health-satisfaction-level clamp 0 1 (health-satisfaction-level + SDE-health current-activity-descriptor)
-  set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDA-food current-activity-descriptor)
+  set food-satisfaction-level clamp 0 1 (food-satisfaction-level + SDE-food current-activity-descriptor)
   set financial-survival-satisfaction-level clamp 0 1 (financial-survival-satisfaction-level + SDE-financial-survival current-activity-descriptor)
   
-  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDA-group-belonging current-activity-descriptor) 
-   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDA-family-belonging current-activity-descriptor)  
+  set group-belonging-satisfaction-level clamp 0 1 (group-belonging-satisfaction-level + SDE-group-belonging current-activity-descriptor) 
+   set family-belonging-satisfaction-level clamp 0 1 (family-belonging-satisfaction-level + SDE-family-belonging current-activity-descriptor)  
 
   set social-status-satisfaction-level clamp 0 1 (social-status-satisfaction-level + SDE-social-status current-activity-descriptor)  
   set autonomy-satisfaction-level clamp 0 1 (autonomy-satisfaction-level + SDE-autonomy current-activity-descriptor)
@@ -106,7 +97,7 @@ end
 ;;this procedure is a simple representation of need decay
 ;important features:
 ;--need decay should decrease over time when not taken care of
-;--special situations can lead to special decay (e.g. breaking an army-enforced lock in should hurt badly the satisfaction of safety needs)
+;--special situations can lead to special decay (e.g. when a person in one's network dies, the satisfaction level of family belonging and group belonging is lowered)
 ;[the previous point might call for the introduction of the person's context later on]
 
 to decay-satisfaction-level-ebo
@@ -120,27 +111,29 @@ to decay-satisfaction-level-ebo
   set food-satisfaction-level food-satisfaction-level * food-decay
   if food-satisfaction-level < 0 [set food-satisfaction-level 0]
   
-  let health-decay 0.8
+  let health-decay 0.7
   set health-satisfaction-level health-satisfaction-level * health-decay
   if health-satisfaction-level < 0 [set health-satisfaction-level 0]
   
-  set sleep-satisfaction-level sleep-satisfaction-level * 0.9 
+  set sleep-satisfaction-level sleep-satisfaction-level * 0.9
   if sleep-satisfaction-level < 0 [set sleep-satisfaction-level 0]
   
 
   ;BELONGING
   let group-belonging-decay 0.9
   set group-belonging-satisfaction-level group-belonging-satisfaction-level * group-belonging-decay
+    if am-I-mourning? [set group-belonging-satisfaction-level 0.6 * group-belonging-satisfaction-level]
+
   if group-belonging-satisfaction-level < 0 [set group-belonging-satisfaction-level 0]
-  if am-I-mourning? [set group-belonging-satisfaction-level 0.5 * group-belonging-satisfaction-level]
   
   let family-belonging-decay 0.8
   set family-belonging-satisfaction-level family-belonging-satisfaction-level * family-belonging-decay
+    if am-I-mourning? [set family-belonging-satisfaction-level 0.6 * family-belonging-satisfaction-level]
+
   if family-belonging-satisfaction-level < 0 [set family-belonging-satisfaction-level 0]
-  if am-I-mourning? [set family-belonging-satisfaction-level 0.5 * family-belonging-satisfaction-level]
   
   ;;SAFETY
-  let social-safety-decay 0.7
+  let social-safety-decay 0.5
    set social-safety-satisfaction-level social-safety-satisfaction-level * social-safety-decay
   if social-safety-satisfaction-level < 0 [set social-safety-satisfaction-level 0]
   
@@ -149,7 +142,7 @@ to decay-satisfaction-level-ebo
   if physical-safety-satisfaction-level < 0 [set physical-safety-satisfaction-level 0]
 
   ; SELF ESTEEM
-  let autonomy-decay 0.99
+  let autonomy-decay 0.9
   set autonomy-satisfaction-level autonomy-satisfaction-level * autonomy-decay
   if autonomy-satisfaction-level < 0 [set autonomy-satisfaction-level 0]
   
@@ -158,12 +151,10 @@ to decay-satisfaction-level-ebo
   if providing-satisfaction-level < 0 [set providing-satisfaction-level 0]
 
   let social-status-decay 0.8
-  ifelse is-currently-allocated-a-bed-in-hospital? and is-male? [
-    set social-status-satisfaction-level social-status-satisfaction-level * 2 * social-status-decay] ;double the decay, might move to activity selection phase
+  set social-status-satisfaction-level social-status-satisfaction-level * social-status-decay
+  if social-status-satisfaction-level < 0 [set social-status-satisfaction-level 0]
 
-    [set social-status-satisfaction-level social-status-satisfaction-level * social-status-decay]
 
-;exclusions for age and gender here
 end
 
 
@@ -187,36 +178,17 @@ to-report SUE-food [ad]
   let motive motive-of ad
   
   if motive = food-motive [
+
     let available-food-days [available-food-rations] of my-home
     ;if the household has sufficient food for 2 days, the action has no expected undiscouted satisfaction
     if available-food-days >= 2 [report 0 ]
-report max (list 0.5 (1 - (2 - available-food-days) / 2))
+
+    report max (list 0.5 (1 - (2 - available-food-days) / 2))
   ]
   report 0
 end
 
-;; Expected leisure satisfaction from an activity, before discounting.
-;;
-;; Relaxing is worth much more than resting at home.
-;;
-;; @param ad  the activity descriptor being considered
-;; @context person
-;; @return a gain in [0, 1]
-;; @note There is no leisure need among the eleven satisfaction levels and nothing
-;; calls this, so it is currently inert. The Ebola build also never offers a
-;; "relaxing" activity.
-to-report SUE-leisure [ad]
-  let gp location-of ad
-  let motive motive-of ad
 
-  if motive = leisure-motive [
-    report 0.6
-  ]
-  if gp = my-home and motive = rest-motive [
-    report 0.01
-  ]
-  report 0
-end
 
 
 ;; Expected sleep satisfaction from an activity, before discounting.
@@ -234,139 +206,97 @@ to-report SUE-sleep [ad]
   let motive motive-of ad 
   
   if motive = rest-motive and gp = my-home [
-  ;  if slice-of-the-day = "night" [
 
-  ;sleep quality decreases when sick
-;      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
-;    ]
-;    report ifelse-value has-internally-visible-symptoms? [ 0.025 ] [ 0.05 ]
- ; ]
- ; if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad [
-
-    if slice-of-the-day = "night" [report 0.7]
+    ifelse slice-of-the-day = "night"[
+    ;sleep quality decreases when sick
+    
+     ; if is-currently-being-treated-at-hospital? and is-get-healed-to-hospital-descriptor? ad
+      report ifelse-value has-internally-visible-symptoms? [ 0.6 ] [ 0.8 ]
+    ]
+    ;sleep in daytime
+    [report 0.01]
   ]
-  report 0
+report 0
+
 end
 
 
 
 
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo A reporter that writes: it sets `my-expected-income` on every person in
-;; the world on each call. See docs/WIP_ISSUES.md#sue-financial-survival.
+;;financial survival
+
 to-report SUE-financial-survival [ad]
   
     let gp location-of ad
     let motive motive-of ad
-    let eating-costs price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets
+    let household-size count [gatherers] of my-home
+    if household-size = 0 [
+  error "Cannot calculate food costs for a household with zero residents"
+    ]
+  let eating-costs (price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets) / household-size
 
-  
-    if motive = work-motive
-  [
-    ;print "me working at"
-    ;print my-work
-    ;print [gathering-type] of gp
-    ;print [gathering-type] of my-work
-      ;get money from work, except work in the household
-      ;print min list (my-expected-income / eating-costs) 1
-      ;print "minimum"
+
+    ;get money from work, except work in the household
+    if (motive = work-motive) [
+      if (not member? gp homes)[
        report min list (my-expected-income / eating-costs) 1
-      
-;     print max (list ((- my-expected-income) / eating-costs) 0)
-;     print "maxx"
-      ; report max (list ((- my-expected-income) / eating-costs) 0)
      ]
+    ]  
   
-  
-  
-    if motive = food-motive [
-;       let money-left-over my-amount-of-capital - eating-costs
-;     print my-amount-of-capital
-;     print money-left-over
-;       ; If we spend all our money, financial-survival will drop to 0
-;       if money-left-over < 0 [
 
-;         report (- financial-survival-satisfaction-level)
-;       ]
-;           print (- min (list (money-left-over / eating-costs) 1))
-;       report (- min (list (money-left-over / eating-costs) 1))
-;     ]
-    report -0.2 ]
+  ;; to get food we spend money, which hurts financial survival a little
+    if motive = food-motive [
+       let money-left-over [amount-of-household-capital] of my-home - eating-costs
+       ; If we spend all our money, financial-survival will drop to 0
+       ifelse money-left-over <= 0 [
+         report (- financial-survival-satisfaction-level)
+       ][
+      ;uncomment here if you want lifelike famine issues (buying food bankrupts people)
+       ;report (- min (list (money-left-over / eating-costs) 1))
+       report -0.2 
+       ]]
 
     if motive = leisure-motive [
       report -0.3
     ]
   report 0
   
-  ;add decrease in finances for children going to school
-  ; if (age = "young" and gp = "school") [decrease financial survival] 
+  ;add decrease in finances for kids going to school
+  ; if (gp = "school") [decrease financial survival] ;add check if person works there
 end
 
 
 ;health
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo Tests the motive "get treatmet". See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-health [ad]
-  let base 0.4
-  let belief-modifier 1
   let motive motive-of ad
   let gp location-of ad
   ;agent expects to get food from markets and stores 
-  if motive = food-motive [
-  report 0.5
-  ]
+  if motive = food-motive [ report 0.5 ]
 
   ;;;;;; this can be done better by considering when one person is too sick to decide for themselves
   ;;;;;;consider using my-networks-trust-in-hospital  !
 
-
   ;if agent getting treatment at home, decrease health
   if motive = treatment-motive and gp = my-home [
   ;this should depend on the agent belief
-    set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
     ;;;;;;;;;;;EPISTEMIC MODEL INFLUENCES HERE
-    report base * (1 - my-trust-in-hospital)
+    report -0.4
   ]
 
  if motive = treatment-motive and gp = my-traditional-healer [
-    set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
         ;;;;;;;;;;;EPISTEMIC MODEL INFLUENCES HERE
 
-    report base * (1 - my-trust-in-hospital)
+    report 0.2
   ]
  if motive = treatment-motive and gp = my-hospital [
-    set belief-modifier 0.5 ;magic number here, add epistemic and social network logic later
         ;;;;;;;;;;;EPISTEMIC MODEL INFLUENCES HERE
 
-    report base *  my-trust-in-hospital
+    report -0.5
   ]
   
-;   if is-believing-to-be-infected? or has-internally-visible-symptoms?
-;   [
-;     ifelse is-observing-critical-symptoms? [
-;       ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
-;       [set base .8]
-;       [set base 0]
-;     ] [
-;       ;if not observing critical symptoms
-;       ifelse is-get-healed-to-hospital-descriptor? ad and (is-currently-allocated-a-bed-in-hospital? or any-free-bed-in-hospital?)
-;       [set base .3]
-;       [ ifelse is-rest-at-home-descriptor? ad
-;         [ set base 0.3 ]
-;         [ set base -0.1 ]
-;       ]
-;     ]
-;  ]
 
-  report base
+
+  report 0
 end
 
 
@@ -374,13 +304,6 @@ end
 ;this could be tied to financial survival
 ;will decrease once treatment at hospital is working
 ;implement social status increase for leisure activity
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 ;; @todo Compares a gathering-type string against `my-work`, an agent. See
 ;; docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-social-status [ad]
@@ -394,11 +317,15 @@ to-report SUE-social-status [ad]
     if ([gathering-type] of gp = [gathering-type] of my-work ) and (motive = work-motive)
     [report 0.4]
   ]
-;   if age = "young" [
-;       if (gp = my-school ) and (motive = "learn")[
+;kids at school, unimplemented
+;       if (gp = my-school ) and (motive = learning-motive)[
 ;       report 0.9]
-;   ]
   
+;;leisure activity replenishes autonomy
+  if motive = leisure-motive and gp = my-leisure-point [
+    report 0.3
+  ]
+
   ;social status is expected to increase more for women attending religious gatherings
   if [gathering-type] of gp = "church" and motive = spiritual-motive [
     ifelse is-female? [report 0.8] [report 0.4]]
@@ -406,6 +333,10 @@ to-report SUE-social-status [ad]
   ;in the case of a male agent getting treatment at hospital, the expected social status decreases
   if is-male? and motive = treatment-motive and member? gp hospitals [report -0.6]
   
+  ;being engaged in community such as civil society bumps social status up
+  if motive = social-motive and [gathering-type] of gp = "civil society"
+  [report 0.6]
+  report 0
   
   report 0
   
@@ -414,213 +345,165 @@ end
 
 ;providing (for family)
 ;the getting treatment part can use some attention + might need more guard conditions as it might break e.g. locations where we are at work but not working for providing
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 to-report SUE-providing [ad]
   let gp location-of ad
   let motive motive-of ad
+
   ;female provide by getting food (more like cooking it but we think about this later)
   if is-female? [
   if ([gathering-type] of gp = "store" or [gathering-type] of gp = "market") and (motive = food-motive)[
       report 0.2]
   ]
-  
-   ;religious gathering attending is providing too
-    if [gathering-type] of gp = "church" and motive = spiritual-motive [
+
+  if is-male? [
+    if gp = my-work and motive = work-motive [ report 0.4]
+    ]
+
+  ;religious gathering attending is providing too
+  if [gathering-type] of gp = "church" and motive = spiritual-motive [
     ifelse is-female? [report 0.8] [report 0.4]]
   
-    ;in case of sickness, getting treatment at home and at hospital reduces the satisfaction of providing
-    ;this should also depend on social networks and beliefs
-    if motive = treatment-motive [ 
-    ;print "i am sick"
-    report -0.4 ]
+  ;in case of sickness, getting treatment at home and at hospital reduces the satisfaction of providing
+  ;this should also depend on social networks and beliefs
+    if motive = treatment-motive [ report -0.4 ]
   
-  if is-male? [
-    ifelse gp = my-work and motive = work-motive [report 0.4] [report -0.1]]
+
 
     report 0
 end
 
 
 ;autonomy
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 to-report SUE-autonomy [ad]
   let gp location-of ad
   let motive motive-of ad
-  
+
+;;leisure activity replenishes autonomy
+  if motive = leisure-motive and gp = my-leisure-point [
+    report 0.4
+  ]
+
   ;working increases autonomy
     if is-working-day-for-me? and (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") [
       ifelse motive = work-motive [
       ;currently, not working decreases autonomy
       if ( gp = my-work ) [report 0.9]][report -0.3]]
       
-  ;so does going to school
-;   if age = "young" [
-;       ifelse [gathering-type] of gp = "school"
-;       [ report  0.2 ]
-;       [ report -0.1 ]
-;     ]
-  
   ;for the funeral rites, a SDB damages autonomy, while a traditional rite increases it (expectedly)
-  if (motive = SDB-motive) [
-    ;ifelse (funeral-type = "SDB") [report -0.1][
-    report -0.5] 
-
-  if (motive = funeral-motive)
-    [report 0.5]
-  ;]
+  if (motive = SDB-motive) [report -0.5] 
+  if (motive = funeral-motive) [report 0.5]
   
   ;getting treatment also impacts autonomy
-  ;REFACTORING NEEDED, use switch?
-  if (motive = treatment-motive and gp = my-home) [
-  report 0.2]
-    if (motive = treatment-motive and gp = my-traditional-healer) [
-  report 0.2]
-  if (motive = treatment-motive and gp =  my-hospital) [
-  report -0.2]
- 
-    ; print "default autonomy"
-    report 0
+  ;EPISTEMIC STATE IMPCTS HERE
+  if (motive = treatment-motive and gp = my-home) [report 0.2]
+  if (motive = treatment-motive and gp = my-traditional-healer) [report 0.2]
+  if (motive = treatment-motive and gp =  my-hospital) [report -0.2]
+
+  ; going to school to learn should increase autonomy
+;       if ([gathering-type] of gp = "school" and motive = learning-motive)[ report  0.2 ]     ]
+
+  report 0
 
 end
 
 
 
 ;group belonging
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo Compares the gathering point `gp` against the string "home". See
-;; docs/WIP_ISSUES.md#the-sue-family.
+
 to-report SUE-group-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
   ;work and religion positively effects group belonging
-  if ( motive = spiritual-motive) [report 0.8]
-  if ( motive = work-motive ) [report 0.5]
+  if ( motive = spiritual-motive and gp = my-church) [report 0.8]
+  if ( motive = work-motive and gp = my-work) [report 0.5]
   
   if (motive = funeral-motive) [
     report 0.6]
   if (motive = SDB-motive) [
-    report 0.6]
+    report 0.5]
   
-  if is-female? and motive = care-motive [
-    ;this splits caring at home or at an hospital, eg bringing food to sick relatives
-    ;refactor needed
-    ifelse (member? gp homes) [report 0.5][report 0.3]]
-  
-  if (motive = visit-motive) [report 0.4]
+;;leisure activity replenishes group belonging slightly
+  if motive = leisure-motive and gp = my-leisure-point [
+    report 0.1
+  ]
 
+  if is-female? and motive = care-motive [
+    ;here it should split caring at home or at an hospital, eg bringing food to sick relatives
+    ;this place needs more rework, it does not do the thing it should (handling hospital visits)
+    if (gp = my-home) [report 0.5]
+    if (member? gp my-networks-homes) [ report 0.3]]
+  
+  ;the following works for both men and women
+  if (motive = visit-motive) [report 0.4]
     report 0
 end
 
 
 ;family belonging
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo Compares the gathering point `gp` against the strings "home" and
-;; "hospital". See docs/WIP_ISSUES.md#the-sue-family.
+
 to-report SUE-family-belonging [ad]
   let gp location-of ad
   let motive motive-of ad
   
-  ;refactor, females get family belonging by getting food and working at home
-    if (is-female? and motive = food-motive) [report 0.5]
+  ;females get family belonging by getting food and working at home
+    if (is-female? and motive = food-motive) [report 0.5] ;;not tied to location (any gp)
     if (is-female? and gp = my-home and motive = work-motive) [report 0.5]
   
   ;work and religion positively effects group belonging
-  if ( motive = spiritual-motive) [report 0.8]
-  if (motive = funeral-motive) [
-    report 0.8]
-  if (motive = SDB-motive)
-  [
-    report 0.8
-    ]
+  if (motive = spiritual-motive and gp = my-church) [report 0.8]
+  if (motive = funeral-motive and member? gp cemeteries)  [report 0.8]
+  if (motive = SDB-motive and member? gp cemeteries)  [report -0.8]
   
   if is-female? [
    if motive = treatment-motive and gp = my-home [report -0.2]
    if motive = treatment-motive and gp = my-traditional-healer [report -0.2]
-    if motive = treatment-motive and gp = my-hospital [report -0.4]
+  if motive = treatment-motive and gp = my-hospital [report -0.4]
     
     if motive = care-motive [
-      if member? gp homes [report 0.8]
-      if member? gp hospitals [report 0.3] ;this can also depend on social network and beliefs
+      if member? gp homes [ report 0.8]
+      if member? gp hospitals [ print "care at hospital" report 0.3] ;THIS CAN NOT HAPPEN AS WE DO NOT GIVE THEM THIS OPTION
   ]]
-  ;visits have a big effect on family belonging, especially if someone is sick(not modeled now)
+  ;visits have a big effect on family belonging, especially if someone is sick(already modeled via caring)
   if motive = visit-motive [report 0.9]
-  
-    ;  print "default family belonging"
-  report 0
+    report 0
 end
 
 
 ;physical safety
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
-;; @todo The hospital and school lines sit after a complete `ifelse`, so they are
-;; unreachable. See docs/WIP_ISSUES.md#the-sue-family.
 to-report SUE-physical-safety [ad]
   
   let gp location-of ad
   let motive motive-of ad
   
   ;working in the mine decreases physical safety
+  ;so does working in hospital (this can be made synamic later)
   if motive = work-motive [
-    ifelse [gathering-type] of gp = "workplace-mine" 
-    [report -0.1]
-    [report 0.1]
-  ;add logic for hospital and schools (girls are in danger when going to school)
-    if member? gp hospitals and motive = work-motive [report -0.2]
-   ; if is-girl and motive "school" [report -0.4]
+    if [gathering-type] of gp = "workplace-mine" [ report -0.3]
+  ;add logic for healthcare workkers at hospital 
+    if member? gp hospitals [report -0.2]
   ]
-  if gp = my-home or member? gp my-networks-homes
+  ;if we are visiting relatives
+  if motive = visit-motive
+  and gp = my-home or member? gp my-networks-homes
   [report 0.2]
-    ;  print "default phys safety"
-  report 0
+
+  ;if we are going to civil society meeting
+  if gp = my-civil-society and motive = social-motive
+  [ report 0.6]
+
   ; Traditional funerals are considered less safe
-  if gp = funeral-cemetery[
-    ifelse attending_sdb?[
-      report -0.2
-    ][
-      report -0.6
-    ]
+  if motive = funeral-motive and member? gp cemeteries [
+   ifelse ( attending_sdb? = true ) [report -0.2][report -0.6]
   ]
+  ;placeholder for schools (girls are in danger when going to school)
+     ; if is-girl? and motive = learning-motive [report -0.4]
+
+  report 0
+
 end
 
 
 ;social-safety
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @param ad  work in progress
-;; @context work in progress
-;; @return work in progress
 to-report SUE-social-safety [ad]
   let gp location-of ad
   let motive motive-of ad
@@ -633,9 +516,14 @@ to-report SUE-social-safety [ad]
   ;religious gatherings increase social safety, as do visits
   if ( motive = spiritual-motive) [ report 0.1]
   
-  if motive = visit-motive [report 0.3]
-      ;print "default social safety"
+  if motive = visit-motive or motive = leisure-motive [report 0.3]
     report 0
+
+  if motive = social-motive and [gathering-type] of gp = "civil society"
+  [report 0.4]
+
+  ;default
+  report 0
 end
 
 
@@ -933,7 +821,7 @@ end
 
 
 
-;; Print the per-need breakdown behind `global-prevalence-of` for one activity.
+;; Prints the per-need breakdown behind `global-prevalence-of` for one activity.
 ;;
 ;; @param ad  the activity descriptor to explain
 ;; @context person

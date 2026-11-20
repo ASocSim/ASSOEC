@@ -23,6 +23,7 @@
 
 ;#region Per-tick display
 
+
 ;; Refresh everything the view shows: how people look, and where they stand.
 ;;
 ;; @context observer
@@ -47,8 +48,13 @@ end
 ;; @side-effects hides or shows every social link
 to update-social-link-visibility
   ifelse show-social-links?
-  [ ask my-friends-links [show-link] ask dependable-adult-links [show-link] ask my-kin-links [show-link]]
-  [ ask my-friends-links [hide-link] ask dependable-adult-links [hide-link] ask my-kin-links [hide-link]]
+  [ ask my-friends-links [show-link] ask my-kin-links [show-link]]
+  [ ask my-friends-links [hide-link] ask my-kin-links [hide-link]]
+
+  ifelse show-trust-links?
+  [ ask my-trustees-links [show-link] ask my-trustees-links [show-link]]
+  [ ask my-trustees-links [hide-link] ask my-trustees-links [hide-link]]
+
 end
 
 ;; Colour this person by sex, lightened while they are still susceptible.
@@ -74,10 +80,6 @@ end
 to-report default-color
   if sex = "female" [report green]
   if sex = "male" [report red]
-   if age = "young" [report blue]
-;   if age = "student" [report orange]
-;   if age = "worker" [report blue]
-;   if age = "retired" [report red]
 end
 
 ;#endregion
@@ -487,7 +489,7 @@ to arrange-on-grid [gps x0 x1 y0 y1]
 
   let cell-size min (list column-spacing row-spacing)
   ask gps [
-    set size min (list place-marker-size (0.8 * cell-size))
+    set size min (list place-marker-size (0.7 * cell-size))
     set crowd-radius 0.45 * cell-size
   ]
 

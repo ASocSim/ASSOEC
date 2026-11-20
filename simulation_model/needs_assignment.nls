@@ -9,9 +9,6 @@ end
 
 
 ;; Fill every person's need tanks at the start of the run.
-;;
-;; Survival needs start high (0.8 to 1.0), esteem needs a little lower, belonging
-;; and physical safety lower still (0.5 to 1.0)
 ;; The spread is what makes people choose differently from one another on the
 ;; first ticks.
 ;;
@@ -31,14 +28,14 @@ to set-initial-need-satisfaction-levels-ebo
     ;SELF-ESTEEM:
     set social-status-satisfaction-level random-float 0.3 + 0.7
     set providing-satisfaction-level random-float 0.3 + 0.7
-    set autonomy-satisfaction-level random-float 0.3 + 0.6
+    set autonomy-satisfaction-level random-float 0.3 + 0.7
 
     ;BELONGING:
     set group-belonging-satisfaction-level random-float 0.5 + 0.5
     set family-belonging-satisfaction-level random-float 0.5 + 0.5
     
     ;SAFETY:
-    set physical-safety-satisfaction-level random-float 0.5 + 0.5
+    set physical-safety-satisfaction-level random-float 0.2 + 0.8
     set social-safety-satisfaction-level random-float 0.2 + 0.8
 
   ]

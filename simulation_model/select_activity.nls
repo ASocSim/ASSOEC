@@ -1,0 +1,223 @@
+
+
+
+;; @file decision/select_activity.nls
+;; @brief Which activities a person may choose from this tick, and committing to one.
+;;
+;; `my-available-activity-descriptors` builds the menu - the places this person
+;; could go and the reason they would go there - and `select-activity` records the
+;; choice that `my-preferred-available-activity-descriptor` makes from it.
+;;
+;; The menu is where the day's rhythm lives: resting at home is always on it,
+;; shopping appears on weekday mornings and afternoons, work on working days,
+;; religious gatherings around Sunday.
+
+;; @see people_decision.nls
+;; @see activity_model.nls
+
+to-report my-available-activity-descriptors
+
+      ;add resting at home for SLEEP need
+  let activities (list (list my-home rest-motive))
+
+  
+
+;; we check the infection status of the agent
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; activities for deceased people
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+if is-deceased? [
+;the only thing a deceased can do (for now) is to attend their burial
+set activities []
+  set activities (lput (activity-descriptor my-own-cemetery burial-motive) activities)
+
+  let ret []
+    foreach activities [ activity ->
+      set ret fput (lput false activity) ret
+  ]
+  report ret
+
+]
+
+;;IN HOSPITAL
+;;patients stay in hospital until they die or are discharged immune; checked before the
+;;healthy-people block so that a recovering patient does not leave for a funeral
+if infection-status = in-hospital-infection-status or infection-status = hospitalised-to-immune-infection-status [
+  report (list (list my-hospital treatment-motive false))
+]
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;; activities for healthy people
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+if ( not is-observing-critical-symptoms?)
+  [
+;;if someone dies,  agents have a strong incentive to go to the funeral
+;;this is driven by needs
+  if am-I-mourning? ;;and not enforce-SDB?
+  [
+
+    if attending_sdb? [ ;and epistemic-state-SDB >= 0.2
+    ;;this activity is available only if the decease has a SDB
+    set activities (lput (activity-descriptor funeral-cemetery SDB-motive) activities)
+    ]
+
+      ;; if I'm ok with unsafe burial
+      if not not-going-to-unsafe-burials [ ;and epistemic-state-SDB < 0.2
+        set activities (lput (activity-descriptor funeral-cemetery funeral-motive) activities)
+      ]
+
+  
+    let ret []
+    foreach activities [ activity ->
+      set ret fput (lput false activity) ret
+  ]
+  report ret
+    ]
+
+
+
+  ;get food
+  ;from store any day except sundays
+   if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week != "sunday") [
+    if my-store != nobody and any? [hired-workers] of my-store
+      and [amount-of-household-capital] of my-home >= price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets [
+  set activities lput (activity-descriptor my-store food-motive) activities
+]
+  ]
+  ;get food
+  ;from markets on saturday mornings and afternoon 
+  if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week = "saturday")
+    [
+      if my-market != nobody and any? [hired-workers] of my-market
+        and [amount-of-household-capital] of my-home >= price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets [
+  set activities lput (activity-descriptor my-market food-motive) activities
+]
+    ]
+  ;work motive
+  ;work during the week
+  if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
+  [
+      set activities (lput (activity-descriptor my-work work-motive) activities)
+  ]  
+
+
+;leisure
+  if slice-of-the-day = "evening" or not is-working-day-for-me?  
+  [
+    if my-leisure-point != nobody and any? [hired-workers] of my-leisure-point[
+    set activities lput (activity-descriptor my-leisure-point leisure-motive) activities
+    ]
+  ]
+
+;visits
+;go visit your relatives, sometimes the ones who already live with you
+   if slice-of-the-day = "evening" 
+   [
+    if any? my-relatives[
+    set activities lput (activity-descriptor [my-home] of one-of my-relatives visit-motive) activities ]
+
+    set activities (lput (activity-descriptor my-civil-society social-motive) activities)
+   ]
+
+  
+  ;care for the sick
+  ;if i have a sick relative, and I am female, I care for them (at home)
+  ;note that networks homes now coincides with relatives, this is a placeholder for when we have social networks
+  if (any? my-sick-relatives) and is-female?
+  [
+    set activities lput (activity-descriptor one-of my-networks-homes care-motive) activities
+  
+    if my-traditional-healer != nobody and any? [hired-workers] of my-traditional-healer [
+      set activities (lput (activity-descriptor my-traditional-healer spiritual-motive) activities)
+    ]
+  ]
+  ;TO DO logic here for hospital caring
+
+
+  ;attend religious gathering,
+  ;on sunday we can go to religious gathering if the priest is there
+  if (day-of-the-week = "sunday") 
+  [
+   if my-church != nobody and any? [hired-workers] of my-church
+  [set activities (lput (activity-descriptor my-church spiritual-motive) activities)]
+  ]
+
+]
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;activities for severely sick people (stage 2 and above)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;if they are very sick, their choices for activities are limited and the motive get-treatment shows strongest
+;;(patients already in hospital are handled at the top of this reporter)
+
+ ;enable one treatment motive at hospital and healher and church
+ ;note that non of these are mutually exclusive!
+ 
+   if is-observing-critical-symptoms?
+   [
+    
+    ;empty list from other activities except resting at home
+set activities (list (list my-home rest-motive))
+    ;agent with critical symptoms is forced to seek treatment
+    let money [amount-of-household-capital] of my-home
+  ;;cost expressed in money units, but represents travel distance and general costs to go hospital
+  let household-size count [gatherers] of my-home
+  if household-size = 0 [
+  error "Cannot check hospital affordability for a household with zero residents"
+]
+  if money > hospital-stay-costs / household-size
+  [
+     if epistemic-state-hospital < 0 [
+     if my-hospital != nobody and any? [hired-workers] of my-hospital [
+     set activities lput (list my-hospital treatment-motive) activities]
+     ]
+  ]
+
+  if epistemic-state-medicine > 0 [
+  if my-traditional-healer != nobody and any? [hired-workers] of my-traditional-healer [
+    set activities lput (list my-traditional-healer treatment-motive) activities]
+  ]
+  
+  ;if no strong beliefs are held towards hospitals and trad remedies, try church
+  if epistemic-state-hospital >= 0 and epistemic-state-medicine <= 0 [
+    if my-church != nobody and any? [hired-workers] of my-church [
+  set activities lput (list my-church treatment-motive) activities 
+  ]
+  ]
+] 
+
+  let ret []
+  foreach activities [ activity ->
+    set ret fput (lput false activity) ret
+  ]
+  report ret
+
+
+end
+
+
+
+
+;; Commit this person to their preferred activity for this tick.
+;;
+;; @context person
+;; @see my-preferred-available-activity-descriptor
+to select-activity
+  let c-a my-preferred-available-activity-descriptor
+
+  let loc location-of c-a
+  let motive motive-of c-a
+
+    update-resources-based-on-current-activity c-a
+
+  set current-activity loc
+  set current-motivation motive-of c-a
+  
+end
+

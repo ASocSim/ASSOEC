@@ -15,7 +15,7 @@ globals [
 
 
 to set-contaminated-disease-status
-  set-infection-status just-exposed-infection-status
+  set-infection-status timed-state just-exposed-infection-status tau-incubation-ebo
   set time-when-infected ticks
 end
 
@@ -47,7 +47,15 @@ to-report next-infection-state
   report next-state-ebo infection-state
 end
 
-
+to-report is-deceased?
+  ifelse infection-status = "dead-infectious"
+  or infection-status = "unsafe-burial"
+  or infection-status = "safe-burial"
+  or infection-status = "removed"
+  ;... missing any?
+  [report true]
+  [report false]
+end
 
 to set-infection-status [infection]
   if infection = hospitalised-to-immune-infection-status
@@ -63,7 +71,12 @@ to set-infection-status [infection]
     set #hospitalised #hospitalised + 1
   ]
   set #non-hospitalised #infected - #hospitalised
-  
+
+  ;symptom onset: the contagiousness profile counts from here
+  let new-status ifelse-value is-timed-state? infection [state-of-timed-state infection] [infection]
+  if new-status = exposed-to-stage-one-infection-status and infection-status != exposed-to-stage-one-infection-status
+  [ set time-when-symptomatic ticks ]
+
   set infection-state infection
 end
 
@@ -136,7 +149,6 @@ to-report is-infected-infection-status? [in]
   if in = "just-contaminated"
   or in = "susceptible"
   or in = "safe-burial" ;Emil added
-
   or in = "removed"
   or in = "healthy"
   [report false]
@@ -162,9 +174,27 @@ to-report is-observing-critical-symptoms?
   or infection-status = "healthy"
   [report false]
   
+  error (sentence "not implemented for:" infection-status)
+end
+
+to-report is-observing-initial-symptoms?  
+  if infection-status = "hospitalised"
+  or infection-status = "non-hospitalised"
+  or infection-status = "infected-stage-2"
+  or infection-status = "just-contaminated"
+  or infection-status = "dead-infectious"
+  or infection-status = "safe-burial" ;Emil added
+  or infection-status = "unsafe-burial" ;Emil added
+  or infection-status = "h-to-immune"
+  or infection-status = "immune"
+  or infection-status = "healthy"
+  [report false]
+  
+  if infection-status = "infected-stage-1"
+  or infection-status = "infected-stage-1.5" 
+  [report true]
   
   error (sentence "not implemented for:" infection-status)
-  error "not implemented"
 end
 
 
@@ -185,8 +215,20 @@ end
 
 to update-within-agent-disease-status
   ask people with [infection-state != susceptible-infection-status] [
+    let previous-status infection-status
     set-infection-status next-infection-state
     
+    if previous-status = hospitalised-to-immune-infection-status
+    and infection-status = immune-infection-status [
+      ;increase trust in hcw if they helped you recover
+    update-trust-from-evidence
+  ]
+  if previous-status = in-hospital-infection-status
+  and infection-status = hospitalised-to-dead-infectious-infection-status [
+    ;increase kin trust in hcw if patient dies
+  update-trust-from-hospital-death
+]
+
     if infection-status = safe-burial-to-removed-infection-status [
       set #safely-buried #safely-buried + 1
     ]
@@ -196,6 +238,16 @@ to update-within-agent-disease-status
     
     if infection-status = removed-infection-status [kill-person]
   ]
+
+
+
+  ask people with [other-disease?] [
+    ;;here people know they have symptoms of SOMETHING, trigger advice seeking behaviour
+  ;evaluate-messages-care
+   ; set infection-state other-disease
+  ]
+
+
 end
 
 
@@ -210,9 +262,7 @@ to kill-person
    if sex = "male" [ set #dead-males #dead-males + 1]
   
   if is-currently-allocated-a-bed-in-hospital? [ release-bed-in-hospital ]
-  
-  print "a patient died of ebola"
-  die
+    die
   
   end
 

@@ -269,7 +269,7 @@ end
 ;; @example
 ;; export-to-graphviz-util "link-neighbors"
 to export-to-graphviz-util [neighbour-function]
-  ask turtles [ ask run-result neighbour-function [print (word [who] of myself "->" who)]]
+  ask turtles [ ];ask run-result neighbour-function [print (word [who] of myself "->" who)]]
 end
 
 

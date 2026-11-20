@@ -33,6 +33,7 @@ to-report SDE-social [ad]
   report max social-needs
 end
 
+    
     ;;;;;;;;;;;;;;;;;;EBOLA SAFETY MODS;;;;;;;;;;;;;;;;;;
 ;;Safety for now is physical social safety, others can be added later
 ;;;;SOCIAL SAFETY is increased by attending religious gatherings(weekend) and visiting relatives (evenings)

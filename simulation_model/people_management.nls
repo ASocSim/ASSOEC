@@ -16,32 +16,23 @@ __includes [ "people_decision.nls"  "epistemic_model.nls" "social_networks.nls" 
 
 people-own [
 ;; @group Demographics
-  age                         ;;< age class, "young"/"student"/"worker"; never assigned in the Ebola build, so every age predicate is false
   sex                         ;;< "female" or "male", see people/classes.nls
+  displaced?                  ;;boolean for agent displaced status, not this applies only to men
+  priest?                     ;; true if this person a priest at a church
 
-;; @group Debugging
-  schedule                    ;;< running log of (place, motive, slice-of-day, day) entries appended by `select-activity`; inspection aid only
 ;; @group Disease model
   time-when-infected          ;;< tick at which this person was infected, or the string "never"
-  epistemic-infection-status  ;;< what this person believes about their own infection, as opposed to `infection-state`
-  last-day-observed-symptoms  ;;< day symptoms were last noticed; `nobody` until then, so that reading it too early raises an error
-  am-I-experiencing-fake-symptoms? ;;< true when the symptoms shown are from something other than the modelled disease
-  infection-state             ;;< the true disease state, independent of what the person believes
+  time-when-symptomatic       ;;< tick at which this person's symptoms started (entered stage 1), or the string "never"
+  other-disease?              ;;< true when the symptoms shown are from something other than the modelled ebola disease
+  infection-state             ;;< the true ebola state, independent of what the person believes
 
 ;; @group Intervention model
   is-currently-allocated-a-bed-in-hospital? ;;< true while this person occupies one of the hospital's beds
-  has-been-tested-infected?   ;;< true once a test has come back positive
-  last-test-tick              ;;< tick of the most recent test
-  has-been-tested-immune?     ;;< true once a test has shown immunity
-  I-know-of-social-distancing? ;;< true once this person has learned that social distancing is advised
-  I-know-of-working-from-home? ;;< true once this person has learned that working from home is possible
   
 ;; @group Decision-making model
   current-activity            ;;< the gathering point this person is at on this tick
   current-motivation          ;;< the motive string behind `current-activity`, see motives.nls
-  is-activity-successful?     ;;< false when the chosen place turned the person away, e.g. over capacity
-  did-my-network-socially-distance? ;;< true when more than half this person's network distanced last tick
-  did-my-network-quarantine?  ;;< true when more than half the network that was asked to quarantine complied
+  is-activity-successful?     ;;< false when the chosen place was not available
 
 ;; @group Network memory
   what-my-network-did-week-day ;;< the most common (place type, motive) among this person's network, one entry per weekday tick, oldest first
@@ -54,26 +45,23 @@ people-own [
   my-home                     ;;< the gathering point this person lives at
   my-work                     ;;< the gathering point this person is employed at; equal to `my-home` for unemployed women at setup
   my-cemetery                 ;;< the gathering point this person will be buried at if they die
-  current-person-I-depend-on  ;;< the person this one is currently following, or `nobody`
 
-;; @group Transport model (dormant)
-  my-means-of-transportation-I-currently-use ;;< COVID-era transport mode; the Ebola model does not move people by vehicle
-  can-I-perform-solo-transportation? ;;< COVID era: whether this person owns private transport
-  stayed-out-queuing-for-bus? ;;< COVID era: whether this person was left behind at a bus stop
-  #people-in-my-transport     ;;< COVID era: how many shared the vehicle, used for contagion
-  is-moving-outside-for-reaching-current-activity? ;;< true when this tick's activity is somewhere other than where the person already was
-
-;; @group Contact-tracing app (dormant)
-  list-of-people-met-per-day-as-recorded-by-the-tracking-app ;;< COVID era: contacts recorded by the tracing app
-  is-user-of-tracking-app?    ;;< COVID era: whether this person runs the tracing app
-  has-mobile-phone?           ;;< COVID era: whether this person owns a phone at all
-    
 
 ;; @group epistemic model
+  epistemic-state-hospital            ;;< what this person believes about hospitals
+  epistemic-state-medicine            ;;< what this person believes about traditional remedies
+  epistemic-state-ebola               ;;< what this person believes about ebola
+  epistemic-state-SDB                 ;;< what this person believes about SDBs
+
+ last-shared-hospital
+ last-shared-medicine
+ last-shared-ebola
+ last-shared-SDB 
+
+
+;deprecated
   my-trust-in-hospital
   my-trust-in-institutions
-  
-  ; Memory of the network's actions
 
   ;Need satisfaction levels (i.e. level of watertanks)
 ;; @group Need satisfaction levels
@@ -96,19 +84,11 @@ people-own [
   social-status-satisfaction-level ;;< satisfaction of the social-status need, in [0, 1]
   autonomy-satisfaction-level ;;< satisfaction of the autonomy need, in [0, 1]
   
-  
   ;SAFETY:
   physical-safety-satisfaction-level ;;< satisfaction of the physical-safety need, in [0, 1]
   social-safety-satisfaction-level ;;< satisfaction of the social-safety need, in [0, 1]
   
   
-
-;; @group Social contact
-  social-distance-profile     ;;< willingness to keep distance, in [0, 1]; only ever set by `set-social-distance-profile`, which is commented out
-  is-I-apply-social-distancing? ;;< whether this person is distancing on this tick
-  days-since-seen-relatives   ;;< ticks since more than half this person's relatives were in the same place
-  days-since-seen-colleagues  ;;< ticks since more than half this person's colleagues were in the same place
-  days-since-seen-friends     ;;< ticks since more than half this person's friends were in the same place
 
 
 ;; @group Money
@@ -126,32 +106,23 @@ people-own [
 
 ;; @group Other
   number-of-people-I-infected ;;< how many people this person has infected so far
-  #days-I-should-remain-in-self-quarantining ;;< remaining self-quarantine countdown; 0 when not quarantining
   events-to-process           ;;< queue of event strings raised this tick and drained by `update-people-mind`
 ]
 
 ;; Refresh what every person believes about their own infection.
 ;;
 ;; @context observer
-;; @side-effects updates `epistemic-infection-status` on every person
+;; @side-effects updates `epistemic-status` on every person
 ;; @see epistemic_model.nls
 to update-people-epistemic-status
   ask people [update-epistemic-status]
-end
-
-;; The event string queued when a person finds out they are infected.
-;;
-;; @return the string "just-learned-I-am-infected"
-;; @see update-people-mind
-to-report just-learned-I-am-infected-event
-  report "just-learned-I-am-infected"
 end
 
 
 
 ;; Advance everyone's beliefs and decisions by one tick.
 ;;
-;; Deaths first, then beliefs, then quarantine countdowns, and finally the event
+;; Deaths first, then beliefs, and finally the event
 ;; queue each person has accumulated: learning you are infected makes you react,
 ;; and makes everyone in your household react too. The queue is emptied afterwards.
 ;;
@@ -161,41 +132,39 @@ end
 ;; the per-person event loop, so beliefs are recomputed for the whole population
 ;; once per queued event.
 to update-people-mind
-  
- ; print (sentence "updating people mind for" count people "people")
-  update-alive-status
+  ask people [update-alive-status-other-disease]
   update-alive-status-ebola
-  
+  update-people-epistemic-status
 end
 
 
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @side-effects work in progress
-;; @todo Placeholder: kills one random person on roughly one tick in five,
-;; independently of infection, age or anything else. See
-;; docs/WIP_ISSUES.md#update-alive-status.
-to update-alive-status
+
+;; Kills one random person on roughly one tick in five,
+;; independently of infection, age or anything else.
+to update-alive-status-other-disease
   ;make people die by probability
-;;  if random 100 > 100 ;avoid other deaths for test
-;;  [ 
-   ; print "I have died of some other disease"    
-    ;;set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+  if random 100 > 99
+  [
+  let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
+    let deceased one-of people
+    set #people-killed-by-other-disease #people-killed-by-other-disease + 1
 
-;;    let deceased one-of people
+    ask deceased [
+     set infection-state dead-other
+      ask my-home [
+        adjust-household-capital (0 - cost-of-funeral)
+      ]
 
-;;    ask deceased
-;;    [ 
-;;      ask my-kin-link-neighbors [
-;;        set am-I-mourning? true
-;;      ]
-;;      ;die
-;;      ]    
-;;  ]
-  
+  ask my-kin-link-neighbors [
+    set am-I-mourning? true
+    set attending_sdb? true
+    set funeral-cemetery current_cemetery
+  ]
+
+      die
+      ]
+  ]
+
 end
 
 
@@ -206,10 +175,15 @@ let deceased_sdb people with [ infection-status = dead-to-safe-burial-infection-
 let deceased_not_sdb people with [infection-status = dead-to-unsafe-burial-infection-status]
 
 if any? deceased_sdb [
-  ;set funeral-cemetery one-of gathering-points with [gathering-type = "cemetery"]
+
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
-  ask deceased_sdb[
+  ask deceased_sdb with [my-cemetery = nobody][
     set my-cemetery current_cemetery
+;process costs of funeral for household
+ask my-home [
+ adjust-household-capital (0 - cost-of-funeral)
+]
+
     ask my-kin-link-neighbors 
     [
         set am-I-mourning? true
@@ -222,8 +196,14 @@ if any? deceased_sdb [
 
 if any? deceased_not_sdb [
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
-  ask deceased_not_sdb[
+  ask deceased_not_sdb with [my-cemetery = nobody][
     set my-cemetery current_cemetery
+;process costs of funeral for household
+    ask my-home [
+  set amount-of-household-capital
+    amount-of-household-capital - cost-of-funeral
+]
+
     ask my-kin-link-neighbors 
     [
         set am-I-mourning? true
@@ -255,13 +235,6 @@ end
 
 
 
-;; Everyone of the "young" age class.
-;;
-;; @return agentset of people
-;; @note Empty in the current build: nothing assigns `age`.
-to-report children
-  report people with [is-young?]
-end
 
 ;; True when this person is female.
 ;;
@@ -281,29 +254,15 @@ end
 
 
 
-;; True when this person is of the "young" age class.
-;;
-;; @context person
-;; @return true if `age` is `young-age`
-;; @note Never true in the current build: nothing assigns `age`.
-to-report is-young?
-  ;report age = young-age
-  report true
-end
 
 
 
 
-;; True when anyone in this person's household believes themselves to be infected.
-;;
-;; The test is about the household rather than the person, because this is what a
-;; person can reasonably suspect about themselves.
-;;
-;; @context person
-;; @return true if any housemate believes they are infected
-to-report might-I-be-contagious?
-  report any? ([gatherers] of my-home) with [is-believing-to-be-infected?]
-end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; RELATION TO GATHERING POINTS;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; The one place of kind `a-gathering-type` this person is attached to.
 ;;
@@ -349,6 +308,16 @@ to-report my-church
   report my-gathering-point-of-type "church"
 end
 
+;;returns an agentset with one priest inside
+to-report my-priest [current-church]
+  ifelse priest? = false [
+    report priests with [my-work = current-church]
+  ]
+  ;priests do not have a priest, they are the priest
+[report self]
+end
+
+
 ;; The store this person shops at.
 ;;
 ;; @context person
@@ -372,6 +341,10 @@ end
 ;; @return a gathering point, or `nobody` if none is linked
 to-report my-traditional-healer
   report my-gathering-point-of-type "traditional healer"
+end
+
+to-report my-own-cemetery
+  report my-gathering-point-of-type "cemetery"
 end
 
 ;; The civil society organisation this person is attached to.

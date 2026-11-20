@@ -1,102 +1,257 @@
-;this must be expanded and reworked, stigma is big influence - beliefs on ebola, trust in healthcare, also affects behaviour on funeral rites and likelihood of going to hospital, acknowledging disease
-;ethnographer please help with this
-;Fear-driven behavioral change coefficient; dual effect: reduces treatment-seeking AND increases clustering in home/funeral settings
-;how to model trust ; Trust (set of) parameter in ABM; higher mistrust = lower compliance with isolation/burial rules; community-led intervention = higher trust coefficient
+;this must be expanded and reworked
+;stigma is big influence - beliefs on ebola, trust in healthcare
+;affect behaviour on funeral rites and likelihood of acknowledging disease + going to hospital
 
-globals 
+;Fear-driven behavioral change coefficient; dual effect:
+;reduces treatment-seeking AND increases clustering in home/funeral settings
+;how to model trust ; Trust (set of) parameter in ABM
+;higher mistrust = lower compliance with isolation/burial imposed rules
+;community-led intervention = higher trust coefficient
+
+;;modelling radios as hubs - they spread information relative to institutional directives
+;;however, the effect depends on the listeners previous beliefs:
+;;if someone is low on trust, listening to radio may cause further lowering of trust
+;;if someone is ambivalent, they can be influenced either way (this should depend on who is there)
+
+__includes ["epistemic-profiles.nls"]
+
+
+globals
 [
-  #tests-performed
-;daily-risk-believe-experiencing-fake-symptoms
+  ;globals prep, not used
+  ;#ebola-business-believers
+  ;#ratio-willing-to-trust-hospital
+  ;#ratio-willing-to-trust-institutional-advice
 ]
 
+
+to spread-information
+;disable if switch is off
+if not information-mill? [ stop ]
+
+
+  if slice-of-the-day = "evening"[
+    radio-dissemination
+  ]
+  influence-congregation ;priests share at mass
+  send-message-person  ;person-to-person
+
+end
+
+
+
+to radio-dissemination
+ask radios[
+;;the messages of radio channels are set by the government
+;;they spread to a set of agents (one randomly chosen for now) every evening
+let speaker self
+let listener n-of n-radio-listeners people
+
+let message one-of (list
+  (list "hospital" broadcast-hospital)
+  (list "medicine" broadcast-medicine)
+  (list "ebola" broadcast-ebola)
+  (list "SDB" broadcast-SDB)
+)
+let source one-of governments
+
+send-message speaker listener message source
+
+]
+end
+
+to influence-congregation 
+;;people with priest? share their opinion to the current-gatherers of the gathering point of type church
+;as of now priests share their opinion on ALL topics
+ask churches[
+  let church self
+  let congregation current-gatherers with [my-church = church]
+
+  ask congregation with [priest? and my-work = church] [
+    let priest-agent self
+    let listeners congregation with [not priest?]
+        let messages (list
+          (list "hospital" epistemic-state-hospital)
+          (list "medicine" epistemic-state-medicine)
+          (list "ebola" epistemic-state-ebola)
+          (list "SDB" epistemic-state-SDB)
+        )
+
+        foreach messages [ message ->
+          send-message priest-agent listeners message priest-agent
+        ]
+      ]
+]
+end
+
+
+
+to send-message [speaker listener message source]
+;tell(a,b,x.a,c)
+;stands for tell(speaker, listener, message.belief-strength, source)
+;If Trust(b,a)=0 then b will update its belief on a with (x times 0.1) 
+;if Trust(b,c)>0 and  with (-x times 0.1) if Trust(b,c)<0 with a maximum of 1
+;If Trust(b,a)=1 then b will update its belief on a with (x times 0.4) 
+;if Trust(b,c)>0 and  with (x times 0.2) ;if Trust(b,c)<0 with a maximum of 1
+;If Trust(b,a)=-1 then b will update its belief on a with (-x times 0.2) 
+;if Trust(b,c)>0 and  with (-x times 0.4) ;if Trust(b,c)<0 with a minimum of -1
+
+ask listener [
+  let speaker-link out-my-trustee-link-to speaker
+  let source-link out-my-trustee-link-to source
+  ;edge case guard if there is no link between agents, default to 0
+  let speaker-trust 0
+  let source-trust 0
+
+  if speaker-link != nobody [
+    set speaker-trust [trust-value] of speaker-link
+  ]
+  if source-link != nobody [
+    set source-trust [trust-value] of source-link
+  ]
+
+  let influence 0
+
+  if source-trust > 0 [
+    ifelse speaker-trust = 0 [
+      set influence 0.1
+    ][
+      ifelse speaker-trust > 0
+        [ set influence 0.4 ]
+        [ set influence -0.2 ]
+    ]
+  ]
+
+  if source-trust < 0 [
+    ifelse speaker-trust = 0 [
+      set influence -0.1
+    ][
+      ifelse speaker-trust > 0
+        [ set influence 0.2 ]
+        [ set influence -0.4 ]
+    ]
+  ]
+
+  let topic item 0 message
+  let message-value item 1 message
+  let current-belief 0
+
+  if topic = "hospital" [ set current-belief epistemic-state-hospital ]
+  if topic = "medicine" [ set current-belief epistemic-state-medicine ]
+  if topic = "ebola" [ set current-belief epistemic-state-ebola ]
+  if topic = "SDB" [ set current-belief epistemic-state-SDB ]
+
+  if not member? topic ["hospital" "medicine" "ebola" "SDB"] [
+    error (word "Unknown message topic: " topic)
+  ]
+
+  let updated-belief max (list -1 (min (list 1
+    (current-belief + message-value * influence)
+  )))
+  if topic = "hospital" [ set epistemic-state-hospital updated-belief ]
+  if topic = "medicine" [ set epistemic-state-medicine updated-belief ]
+  if topic = "ebola" [ set epistemic-state-ebola updated-belief ]
+  if topic = "SDB" [ set epistemic-state-SDB updated-belief ]
+]
+
+end
+
+
+
+
+to send-message-person
+;message has content and source
+  ;people share their messages if their opinion has shifted significantly
+  ;exceptions are radios, and healthcare workers (priests have asymmetric power, not modeled here but later)
+  ;an agent cannot tell another agent about the same belief twice within 12 ticks
+  let excluded-speakers (turtle-set healthcare-workers ) ; priests
+
+  ask people with [not member? self excluded-speakers] [
+    let sender self
+    let location current-activity
+    let messages (list
+      (list 0 "hospital" epistemic-state-hospital last-shared-hospital)
+      (list 1 "medicine" epistemic-state-medicine last-shared-medicine)
+      (list 2 "ebola" epistemic-state-ebola last-shared-ebola)
+      (list 3 "SDB" epistemic-state-SDB last-shared-SDB)
+    )
+
+    foreach messages [ message-data ->
+      let topic-index item 0 message-data
+      let topic item 1 message-data
+      let message-value item 2 message-data
+      let previous-value item 3 message-data
+
+      if abs (message-value - previous-value) >= 0.2 [
+        let listeners my-trustees with [
+          member? self people and current-activity = location
+        ]
+
+        set listeners listeners with [
+          out-my-trustee-link-to sender != nobody
+        ]
+
+        set listeners listeners with [
+          ticks - item topic-index
+            ([message-last-sent-ticks] of (out-my-trustee-link-to sender)) >= 12
+        ]
+
+        ask listeners [
+          send-message sender self (list topic message-value) sender
+          ask out-my-trustee-link-to sender [
+            set message-last-sent-ticks
+              replace-item topic-index message-last-sent-ticks ticks
+          ]
+        ]
+
+        if any? listeners [
+          if topic = "hospital" [ set last-shared-hospital message-value ]
+          if topic = "medicine" [ set last-shared-medicine message-value ]
+          if topic = "ebola" [ set last-shared-ebola message-value ]
+          if topic = "SDB" [ set last-shared-SDB message-value ]
+        ]
+      ]
+    ]
+  ]
+
+end
+
+
+
+
 to update-epistemic-status
-;   set daily-risk-believe-experiencing-fake-symptoms 0.5
-;   set am-I-experiencing-fake-symptoms? random-float 1 < daily-risk-believe-experiencing-fake-symptoms
-  
-;   if infection-status = "dead" [
-;     set epistemic-infection-status "dead"
-;     stop
-;   ]
-  
-;    if epistemic-infection-status = "infected" and last-day-observed-symptoms < current-day - 3
-;     [
-;       set epistemic-infection-status had-symptoms-long-ago-infection-status
-;     ]
-  
-;   if has-internally-visible-symptoms? or am-I-experiencing-fake-symptoms?
-;   [
-;     ;;newly discovered to be infected
-;       let knew-was-infected epistemic-infection-status = "infected"
-;       set-believed-to-be-infected
-      
-;       if not knew-was-infected and is-user-of-tracking-app? [perform-test]
-      
-;       if not knew-was-infected and test-home-of-confirmed-people?
-;       [
-;         ; show "test"
-;         ask [gatherers] of my-home [perform-test]
-;       ]
-;       if not knew-was-infected and test-workplace-of-confirmed-people? and has-a-work?
-;       [
-;         ask my-colleagues [perform-test]
-;       ]
-    
-;   ]
+;keep track of people who die or survive via hospitals
+;update their networks beliefs
+;;if relative died at hospital, reduce trust
+;;stronger effect for housemates
 end
 
-to set-believed-to-be-infected 
-;   let knew-was-infected epistemic-infection-status = "infected"
-;   set epistemic-infection-status "infected"
-;   set last-day-observed-symptoms current-day
-;   if not knew-was-infected [
-;     set events-to-process lput just-learned-I-am-infected-event events-to-process 
-;   ]
+
+
+
+to evaluate-messages-rites
+;;here is when the agent with symptoms deliberates on their decision of which rites should be done for the deceased
+  ;;this is done by evaluating the advice of the people they trust
+
+
 end
 
-to-report is-believing-to-be-infected?
-  report epistemic-infection-status = "infected" 
-  
-end
 
-to perform-test
-;   ; Make sure we don't do more tests than available
-;   if #still-available-tests <= 0 [stop]
-  
-;   set #tests-performed #tests-performed + 1
-;   set #tests-done-today #tests-done-today + 1
-  
-;   if not is-infected? and is-believing-to-be-infected? [set epistemic-infection-status "immune"]
-;   if is-infected? [
-;     let knew-was-infected? has-been-tested-infected?
-;     set has-been-tested-infected? true
-;     set-believed-to-be-infected 
 
-;     if not knew-was-infected? and is-user-of-tracking-app? [
-;       report-to-tracking-app self tested-positive-tracking-app-notification
-;     ]
-;   ]
-end
+;;;;REPORTERS;;;;;;
 
-to-report is-believing-to-be-immune?
-  report  has-been-tested-immune? or has-had-symptoms-long-ago?
-end
-
-to-report has-had-symptoms-long-ago?
-  report epistemic-infection-status = had-symptoms-long-ago-infection-status
-end
-
-to-report had-symptoms-long-ago-infection-status
-  report "had-symptoms-long-ago"
-end
-
-to perform-immunity-test
-;     if is-immune? [
-;     set has-been-tested-immune? true 
-;  ]
-end
 
 to-report not-going-to-unsafe-burials
-  if my-trust-in-institutions >= 0.95[
+;;only people with near absolute trust in government institutions will choose not to attend a dear one funeral
+  if epistemic-state-SDB >= 0.98 and epistemic-state-ebola <= -0.4 [
+    report true
+  ]
+    report false
+end
+
+to-report unwilling-to-go-hospital
+;threshold level at 85% to not go to hospital under any circumstance determined by needs or social influence
+  if epistemic-state-hospital <= -0.4[
     report true
   ]
     report false
