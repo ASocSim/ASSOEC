@@ -260,8 +260,7 @@ end
 ;;
 ;; @context observer
 ;; @side-effects creates home gathering points and the people who live in them
-;; @note The adult-only household type is implemented but commented out of the
-;; loop, so no adult homes are created.
+
 to create-all-households
 
   load-population-profile-based-on-current-preset-profile
@@ -273,10 +272,11 @@ to create-all-households
   repeat #displaced-homes [create-household "displaced"]
 
   ask homes [
-    ;starting houshold capiral is 2x workers wage
+    ;starting houshold capital is 2x workers wage
     set available-food-rations
       count gatherers * (random days-of-rations-bought + days-of-rations-bought)
-    set amount-of-household-capital count gatherers * workers-wages * 2
+      ;capped at 5
+    set amount-of-household-capital max (list -5 (min (list 5 (count gatherers * workers-wages * 2))))
   ]
 
 

@@ -44,7 +44,6 @@ gathering-points-own [
   amount-of-household-capital           ;;< money the place holds, in currency units
   
   hired-workers               ;;< turtle-set of the people employed here, rebuilt by `setup-worker-relation-to-gathering-point`
-  stock-of-goods              ;;< goods available to sell; part of the dormant COVID economy
   
   vacancies                   ;;< jobs still unfilled, counted down during setup hiring
   cached-number-of-participants ;;< memoised result of `expected-number-of-other-participants`, 0 until first computed
@@ -105,22 +104,6 @@ to-report proximity-factor
   error (word gathering-type " not defined")
 end
 
-; ToDo: Update this!
-;; Whether the activity this place offers could be done from home instead.
-;;
-;; @context gathering-point
-;; @return false, always
-;; @todo Stub. The COVID version answered per gathering type - school, university,
-;; workplace and home were practicable at home, shops and hospitals were not - and
-;; that body is still here, commented out.
-to-report is-practicable-at-home?
-;   if gathering-type = "school" or gathering-type = "university" or gathering-type = "workplace" or gathering-type = "home"
-;   [report true]
-;   if gathering-type = "public-leisure" or gathering-type = "private-leisure" or gathering-type = "essential-shop" or gathering-type = "non-essential-shop" or gathering-type = "hospital" or gathering-type = "burial-rites"
-;   [report false]
-  
-  report false
-end
 
 
 
@@ -250,36 +233,11 @@ to-report expected-number-of-other-participants
   if cached-number-of-participants > 0 [report cached-number-of-participants]
   if is-hospital? [report random 5 + 2]
   
-  ;MOD FOR EBOLA - ESTIMATING N PEOPLE AT BURIAL RITES AROUND 30
- ; if is-at-burial?  [report random 30 + 2]
-  
   set cached-number-of-participants count in-gathering-link-neighbors
   report cached-number-of-participants
 end
 
-;; Whether people are allowed to come here at all.
-;;
-;; @context gathering-point
-;; @return true, always
-;; @todo Stub. The COVID version consulted lockdown and curfew state, and that body
-;; is still here commented out. There are no lockdowns in the Ebola model yet, so
-;; every place is open. Accessibility in this model should instead turn on
-;; affordability, distance and belief: you cannot go places while contagious, and
-;; you avoid places where someone contagious is.
-to-report is-accessible?
-  ;;THERE ARE NO LOCKDOWNS IN EBOLA FOR NOW SO ALL GPS ACCESSIBLE BY DEFAULT
-;   if is-hard-lockdown-active? [
-;     report is-open-during-lockdown?
-;   ]
-;   if is-workplace? and closed-workplaces? [report false]
-;   if is-school? and closed-schools? [report false]  
-;   if is-university? and closed-universities? [report false]
-;   if is-non-essential-shop? and closed-non-essential? [report false]
-;   if is-curfew-active? and (is-evening? or is-night?) [
-;     report is-open-during-curfew?
-;   ]
-  report true
-end
+
 
 
 
@@ -411,29 +369,6 @@ to-report is-family-present-in-current-gathering-point?
   report any? my-relatives with [current-activity = [current-activity] of myself]
 end
 
-;; Whether this home is isolating because someone in it is believed to be infected.
-;;
-;; @context gathering-point
-;; @return false, always
-;; @todo Stub. The body that tested the household is commented out, so household
-;; isolation never triggers and `is-officially-asked-to-quarantine?` loses one of
-;; its three routes.
-to-report home-in-isolation?
-;   if not is-home? or not is-infected-and-their-families-requested-to-stay-at-home? 
-;   [
-;     report false
-;   ]
-;   report any? gatherers with [is-believing-to-be-infected?]
-  report false
-end
-
-;; Every home currently isolating.
-;;
-;; @return agentset of gathering points, always empty while `home-in-isolation?` is a stub
-;; @see home-in-isolation?
-to-report homes-in-isolation
-  report homes with [home-in-isolation?]
-end
 
 ;; Everyone who lives in this person's home, including the person themselves.
 ;;

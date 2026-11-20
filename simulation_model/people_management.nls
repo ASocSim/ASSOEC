@@ -152,8 +152,7 @@ to update-alive-status-other-disease
     ask deceased [
      set infection-state dead-other
       ask my-home [
-        set amount-of-household-capital
-       amount-of-household-capital - cost-of-funeral
+        adjust-household-capital (0 - cost-of-funeral)
       ]
 
   ask my-kin-link-neighbors [
@@ -182,8 +181,7 @@ if any? deceased_sdb [
     set my-cemetery current_cemetery
 ;process costs of funeral for household
 ask my-home [
-  set amount-of-household-capital
-    amount-of-household-capital - cost-of-funeral
+ adjust-household-capital (0 - cost-of-funeral)
 ]
 
     ask my-kin-link-neighbors 

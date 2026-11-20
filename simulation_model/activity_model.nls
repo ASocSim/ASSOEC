@@ -96,27 +96,30 @@ if (motive = leisure-motive) [
 
 ]
 
-
 end
 
+
+to adjust-household-capital [change]
+  let household my-home
+  ask household [
+    set amount-of-household-capital
+      max (list -5 (min (list 5 (amount-of-household-capital + change))))
+  ]
+end
+
+
 to earn-household-capital [earnings]
-      ask my-home
-      [
-        set amount-of-household-capital amount-of-household-capital + earnings
-      ]
+  adjust-household-capital earnings
 end
 
 to depleat-household-capital [expense]
-  let household-size count [gatherers] of my-home
-  if household-size = 0 [
-    error "Cannot divide a household expense among zero residents"
+  if not any? [gatherers] of my-home [
+    error "Cannot charge an empty household"
   ]
 
-  ask my-home [
-    set amount-of-household-capital
-      amount-of-household-capital - (expense / household-size)
-  ]
+  adjust-household-capital (0 - expense)
 end
+
 
 
 

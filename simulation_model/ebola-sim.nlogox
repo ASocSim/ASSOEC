@@ -600,19 +600,20 @@ while [current-day <= end-day] [ go ]]]></button>
       <update></update>
       <pen interval="1.0" mode="0" display="family homes" color="-16449023" legend="true">
         <setup></setup>
-        <update>plot mean [amount-of-household-capital] of family-homes</update>
+        <update>plot mean [my-current-income] of people with [member? my-home family-homes]
+;plot mean [amount-of-household-capital] of family-homes</update>
       </pen>
       <pen interval="1.0" mode="0" display="displaced people" color="-5298144" legend="true">
         <setup></setup>
         <update>plot mean [my-current-income] of people with [member? my-home displaced-male-homes]</update>
       </pen>
     </plot>
-    <slider x="1934" step="0.5" y="1234" max="5" width="216" display="workers-wages" height="50" min="0" direction="Horizontal" default="1.0" variable="workers-wages"></slider>
+    <slider x="1934" step="0.5" y="1234" max="5" width="216" display="workers-wages" height="50" min="0" direction="Horizontal" default="2.0" variable="workers-wages"></slider>
     <slider x="1934" step="1" y="1344" max="5" width="216" display="days-of-rations-bought" height="50" min="0" direction="Horizontal" default="1.0" variable="days-of-rations-bought"></slider>
-    <slider x="1934" step="0.1" y="1290" max="5" width="216" display="price-of-rations" height="50" min="0.5" direction="Horizontal" default="1.4" variable="price-of-rations"></slider>
-    <slider x="1903" step="1" y="1413" max="10" width="250" display="cost-of-funeral" height="50" min="0" direction="Horizontal" default="2.0" variable="cost-of-funeral"></slider>
-    <slider x="1902" step="1" y="1477" max="10" width="250" display="cost-of-leisure" height="50" min="0" direction="Horizontal" default="1.0" variable="cost-of-leisure"></slider>
-    <slider x="1903" step="1" y="1537" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="2.0" variable="hospital-stay-costs"></slider>
+    <slider x="1934" step="0.1" y="1290" max="5" width="216" display="price-of-rations" height="50" min="0.5" direction="Horizontal" default="1.0" variable="price-of-rations"></slider>
+    <slider x="1903" step="1" y="1413" max="10" width="250" display="cost-of-funeral" height="50" min="0" direction="Horizontal" default="9.0" variable="cost-of-funeral"></slider>
+    <slider x="1902" step="1" y="1477" max="10" width="250" display="cost-of-leisure" height="50" min="0" direction="Horizontal" default="3.0" variable="cost-of-leisure"></slider>
+    <slider x="1903" step="1" y="1537" max="10" width="250" display="hospital-stay-costs" height="50" min="0" direction="Horizontal" default="6.0" variable="hospital-stay-costs"></slider>
     <note x="1189" y="258" backgroundDark="0" fontSize="16" width="150" markdown="false" height="35" textColorDark="-1" textColorLight="-16777216" backgroundLight="0">Interventions</note>
     <switch x="1188" y="300" height="40" on="false" variable="enforce-SDB?" width="110" display="enforce-SDB?"></switch>
     <switch x="1194" y="353" height="40" on="true" variable="government-message-priests?" width="201" display="government-message-priests?"></switch>

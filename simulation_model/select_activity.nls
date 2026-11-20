@@ -83,18 +83,19 @@ if ( not is-observing-critical-symptoms?)
   ;get food
   ;from store any day except sundays
    if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week != "sunday") [
-   if my-store != nobody and any? [hired-workers] of my-store [
-    set activities (lput (activity-descriptor my-store food-motive ) activities)
-   ]
+    if my-store != nobody and any? [hired-workers] of my-store
+      and [amount-of-household-capital] of my-home >= price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets [
+  set activities lput (activity-descriptor my-store food-motive) activities
+]
   ]
   ;get food
   ;from markets on saturday mornings and afternoon 
   if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week = "saturday")
     [
-      if my-market != nobody and any? [hired-workers] of my-market [
-
-      set activities (lput (activity-descriptor my-market food-motive) activities)
-    ]
+      if my-market != nobody and any? [hired-workers] of my-market
+        and [amount-of-household-capital] of my-home >= price-of-rations * amount-of-rations-I-buy-when-going-to-stores-or-markets [
+  set activities lput (activity-descriptor my-market food-motive) activities
+]
     ]
   ;work motive
   ;work during the week
