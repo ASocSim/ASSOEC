@@ -80,24 +80,22 @@ if ( not is-observing-critical-symptoms?)
 
 
 
-
-
-
   ;get food
   ;from store any day except sundays
-   if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week != "sunday")
-   and any? people with [[gathering-type] of my-work = "store"]
-    [
-      set activities (lput (activity-descriptor my-store food-motive ) activities)
-    ]
-
+   if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week != "sunday") [
+   if my-store != nobody and any? [hired-workers] of my-store [
+    set activities (lput (activity-descriptor my-store food-motive ) activities)
+   ]
+  ]
   ;get food
   ;from markets on saturday mornings and afternoon 
   if ( slice-of-the-day = "morning" or slice-of-the-day = "afternoon" and day-of-the-week = "saturday")
     [
+      if my-market != nobody and any? [hired-workers] of my-market [
+
       set activities (lput (activity-descriptor my-market food-motive) activities)
     ]
-
+    ]
   ;work motive
   ;work during the week
   if (slice-of-the-day = "morning" or slice-of-the-day = "afternoon") and is-working-day-for-me?
@@ -109,10 +107,8 @@ if ( not is-observing-critical-symptoms?)
 ;leisure
   if slice-of-the-day = "evening" or not is-working-day-for-me?  
   [
-    if my-leisure-point != nobody [
-     if any? people with [[gathering-type] of my-work = "leisure"][
+    if my-leisure-point != nobody and any? [hired-workers] of my-leisure-point[
     set activities lput (activity-descriptor my-leisure-point leisure-motive) activities
-     ]
     ]
   ]
 
@@ -133,23 +129,23 @@ if ( not is-observing-critical-symptoms?)
   if (any? my-sick-relatives) and is-female?
   [
     set activities lput (activity-descriptor one-of my-networks-homes care-motive) activities
-    if any? people with [[gathering-type] of my-work = "traditional healer"][
+  
+    if my-traditional-healer != nobody and any? [hired-workers] of my-traditional-healer [
       set activities (lput (activity-descriptor my-traditional-healer spiritual-motive) activities)
     ]
   ]
-  ;logic here for hospital caring
+  ;TO DO logic here for hospital caring
 
 
   ;attend religious gathering,
-  ;on sunday we can go to religious gathering 
+  ;on sunday we can go to religious gathering if the priest is there
   if (day-of-the-week = "sunday") 
   [
-  if any? people with [[gathering-type] of my-work = "church"]
-  [set activities (lput (activity-descriptor my-church spiritual-motive) activities)
-  ]]
+   if my-church != nobody and any? [hired-workers] of my-church
+  [set activities (lput (activity-descriptor my-church spiritual-motive) activities)]
+  ]
 
 ]
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -177,20 +173,19 @@ set activities (list (list my-home rest-motive))
   if money > hospital-stay-costs / household-size
   [
      if epistemic-state-hospital < 0 [
-    if any? people with [[gathering-type] of my-work = "hospital"]
-     [set activities lput (list my-hospital treatment-motive) activities]
+     if my-hospital != nobody and any? [hired-workers] of my-hospital [
+     set activities lput (list my-hospital treatment-motive) activities]
      ]
   ]
 
   if epistemic-state-medicine > 0 [
-  if any? people with [[gathering-type] of my-work = "traditional healer"][
+  if my-traditional-healer != nobody and any? [hired-workers] of my-traditional-healer [
     set activities lput (list my-traditional-healer treatment-motive) activities]
   ]
   
   ;if no strong beliefs are held towards hospitals and trad remedies, try church
   if epistemic-state-hospital >= 0 and epistemic-state-medicine <= 0 [
-    if any? people with [[gathering-type] of my-work = "church"][
-
+    if my-church != nobody and any? [hired-workers] of my-church [
   set activities lput (list my-church treatment-motive) activities 
   ]
   ]

@@ -138,15 +138,9 @@ to update-people-mind
 end
 
 
-;; Work in progress.
-;;
-;; work in progress
-;;
-;; @context work in progress
-;; @side-effects work in progress
-;; @todo Placeholder: kills one random person on roughly one tick in five,
-;; independently of infection, age or anything else. See
-;; docs/WIP_ISSUES.md#update-alive-status.
+
+;; Kills one random person on roughly one tick in five,
+;; independently of infection, age or anything else.
 to update-alive-status-other-disease
   ;make people die by probability
   if random 100 > 99
@@ -155,16 +149,19 @@ to update-alive-status-other-disease
     let deceased one-of people
     set #people-killed-by-other-disease #people-killed-by-other-disease + 1
 
-    ask deceased
-    [ 
-      set infection-state dead-other
+    ask deceased [
+     set infection-state dead-other
+      ask my-home [
+        set amount-of-household-capital
+       amount-of-household-capital - cost-of-funeral
+      ]
 
-      ask my-kin-link-neighbors 
-         [set am-I-mourning? true
-          set attending_sdb? true
-        set funeral-cemetery current_cemetery          
-          ]
-      
+  ask my-kin-link-neighbors [
+    set am-I-mourning? true
+    set attending_sdb? true
+    set funeral-cemetery current_cemetery
+  ]
+
       die
       ]
   ]
@@ -183,6 +180,12 @@ if any? deceased_sdb [
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
   ask deceased_sdb with [my-cemetery = nobody][
     set my-cemetery current_cemetery
+;process costs of funeral for household
+ask my-home [
+  set amount-of-household-capital
+    amount-of-household-capital - cost-of-funeral
+]
+
     ask my-kin-link-neighbors 
     [
         set am-I-mourning? true
@@ -197,6 +200,12 @@ if any? deceased_not_sdb [
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
   ask deceased_not_sdb with [my-cemetery = nobody][
     set my-cemetery current_cemetery
+;process costs of funeral for household
+    ask my-home [
+  set amount-of-household-capital
+    amount-of-household-capital - cost-of-funeral
+]
+
     ask my-kin-link-neighbors 
     [
         set am-I-mourning? true

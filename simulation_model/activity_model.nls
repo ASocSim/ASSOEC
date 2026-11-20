@@ -60,7 +60,7 @@ to update-resources-based-on-current-activity [c-a]
 
     ;  if(not member? my-home male-only-homes)
         earn-household-capital my-expected-income
-        set my-current-income 0
+ ;       set my-current-income 0
 ]
 
     if (motive = food-motive)
@@ -78,12 +78,8 @@ to update-resources-based-on-current-activity [c-a]
     ]
 ]
 
-;;placeholder costs of funeral rites
-;we assume that friends of the deceased displaced will pay for his funeral
-  if (motive = funeral-motive) [
- ;right now the costs are shared by anyone who goes to the funeral, this is to be fixed
-    depleat-household-capital cost-of-funeral
-  ]
+;; costs of funeral rites
+;we assume that cohabitants of the deceased displaced will pay for his funeral
 
 ;;placeholder costs of going to hospital (e.g. travel, we know ebola care should be free)
   if (motive = treatment-motive) [
