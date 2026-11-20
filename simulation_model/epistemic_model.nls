@@ -99,16 +99,17 @@ to send-message [speaker listener message source]
 ask listener [
   let speaker-link out-my-trustee-link-to speaker
   let source-link out-my-trustee-link-to source
+  ;edge case guard if there is no link between agents, default to 0
+  let speaker-trust 0
+  let source-trust 0
 
-  if speaker-link = nobody [
-    error "Listener has no trust link to radio speaker"
+  if speaker-link != nobody [
+    set speaker-trust [trust-value] of speaker-link
   ]
-  if source-link = nobody [
-    error "Listener has no trust link to message source"
+  if source-link != nobody [
+    set source-trust [trust-value] of source-link
   ]
 
-  let speaker-trust [trust-value] of speaker-link
-  let source-trust [trust-value] of source-link
   let influence 0
 
   if source-trust > 0 [

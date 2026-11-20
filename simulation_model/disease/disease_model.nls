@@ -223,6 +223,11 @@ to update-within-agent-disease-status
       ;increase trust in hcw if they helped you recover
     update-trust-from-evidence
   ]
+  if previous-status = in-hospital-infection-status
+  and infection-status = hospitalised-to-dead-infectious-infection-status [
+    ;increase kin trust in hcw if patient dies
+  update-trust-from-hospital-death
+]
 
     if infection-status = safe-burial-to-removed-infection-status [
       set #safely-buried #safely-buried + 1

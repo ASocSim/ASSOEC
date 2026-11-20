@@ -230,7 +230,7 @@ end
 
 to update-trust-from-evidence
 ;experience changes the belief in the agent
-
+;this case is for the recovery of a patient who went to the hospital
   let patient self
 
   set epistemic-state-hospital 1
@@ -266,5 +266,38 @@ to update-trust-from-evidence
   ]
 end
 
+to update-trust-from-hospital-death
+  let patient self
 
+  set epistemic-state-hospital -1
+  set epistemic-state-ebola 0.9
 
+  if not information-mill? [ stop ]
+
+  let treating-hospital my-hospital
+  if treating-hospital = nobody [
+    error (word "Hospital death for person " who " has no assigned hospital")
+  ]
+
+  let hospital-staff [hired-workers] of treating-hospital
+  ask hospital-staff with [self != patient] [
+    let hcw self
+    ask patient [
+      if not any? my-out-my-trustees-links with [end2 = hcw] [
+        create-my-trustee-link-to hcw [
+          set trust-value -1
+          set message-last-sent-ticks (list -12 -12 -12 -12)
+        ]
+      ]
+      ask out-my-trustee-link-to hcw [
+        set trust-value -1
+      ]
+    ]
+  ]
+
+  let kin my-kin-link-neighbors
+  if any? kin [
+    send-message patient kin (list "hospital" -1) patient
+    send-message patient kin (list "ebola" 0.9) patient
+  ]
+end

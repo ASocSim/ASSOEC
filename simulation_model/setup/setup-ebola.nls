@@ -403,10 +403,10 @@ to setup-person [current-home l-sex displacement-status]
 
     ;epistemic states A,B and C
     ;template
-    set epistemic-state-hospital 0
-    set epistemic-state-medicine 0
-    set epistemic-state-ebola 0
-    set epistemic-state-SDB 0
+    set epistemic-state-hospital (random-float 1) - 0.5
+    set epistemic-state-medicine (random-float 1) - 0.5
+    set epistemic-state-ebola (random-float 1) - 0.5
+    set epistemic-state-SDB (random-float 1) - 0.5
 
     set last-shared-hospital epistemic-state-hospital
     set last-shared-medicine epistemic-state-medicine
