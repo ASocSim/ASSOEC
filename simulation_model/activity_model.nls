@@ -40,10 +40,12 @@ to execute-activity-effect
   ]
 
   if ( not is-activity-successful? )
-  [
-    stop
-  ]
+  [stop]
 
+  ;make mourning process end after funeral is held
+  if current-motivation = funeral-motive or current-motivation = SDB-motive
+  [set am-I-mourning? false]
+  
   update-belief-based-on-current-activity
 
 end

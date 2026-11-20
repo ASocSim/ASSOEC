@@ -43,8 +43,7 @@ to go
  ; apply-active-measures
   update-metrics
 
-;make mourning process more verosimile, now all mourners stop mourning the day of the funeral
- ask people with [am-I-mourning?] [set am-I-mourning? false]
+
 ; Tick goes at the end of the go procedure for better plot updating
   tick
 end

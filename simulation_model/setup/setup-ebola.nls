@@ -400,6 +400,7 @@ to setup-person [current-home l-sex displacement-status]
     set priest? false
     set am-I-mourning? false
     set other-disease? false
+    set my-cemetery nobody
 
     ;epistemic states A,B and C
     ;template

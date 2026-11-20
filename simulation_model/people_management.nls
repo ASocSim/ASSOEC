@@ -181,7 +181,7 @@ let deceased_not_sdb people with [infection-status = dead-to-unsafe-burial-infec
 if any? deceased_sdb [
 
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
-  ask deceased_sdb[
+  ask deceased_sdb with [my-cemetery = nobody][
     set my-cemetery current_cemetery
     ask my-kin-link-neighbors 
     [
@@ -195,7 +195,7 @@ if any? deceased_sdb [
 
 if any? deceased_not_sdb [
   let current_cemetery one-of gathering-points with [gathering-type = "cemetery"]
-  ask deceased_not_sdb[
+  ask deceased_not_sdb with [my-cemetery = nobody][
     set my-cemetery current_cemetery
     ask my-kin-link-neighbors 
     [
